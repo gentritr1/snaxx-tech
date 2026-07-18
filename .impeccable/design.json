@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-18T00:00:00+02:00",
+  "title": "Design System: Snaxx Tech",
+  "extensions": {
+    "colorMeta": {
+      "ink": { "role": "neutral", "displayName": "Studio Ink", "canonical": "#131313" },
+      "canvas": { "role": "neutral", "displayName": "Clean Canvas", "canonical": "#FFFFFF" },
+      "electric-blue": { "role": "primary", "displayName": "Electric Blue", "canonical": "#0082F3" },
+      "rowflare-orange": { "role": "secondary", "displayName": "Rowflare Orange", "canonical": "#FF7A29" },
+      "fjale-gold": { "role": "tertiary", "displayName": "FJALË Gold", "canonical": "#D08700" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Studio Display", "purpose": "Hero naming and rare signature moments." },
+      "body": { "displayName": "Body", "purpose": "Interface, support, and legal copy." },
+      "label": { "displayName": "Maker Label", "purpose": "Short metadata and navigation cues." }
+    },
+    "shadows": [
+      { "name": "navigation-lift", "value": "0 1px 2px rgb(0 0 0 / 0.05)", "purpose": "Separates the navigation after scrolling." }
+    ],
+    "motion": [
+      { "name": "ease-out-quart", "value": "cubic-bezier(0.165, 0.840, 0.440, 1)", "purpose": "Primary reveals and responsive state changes." },
+      { "name": "ease-out-cubic", "value": "cubic-bezier(0.215, 0.610, 0.355, 1)", "purpose": "Image and overlay transitions." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The high-contrast studio action used for primary navigation and legal cross-links.",
+      "html": "<button class=\"ds-button-primary\">Open project <span aria-hidden=\"true\">↗</span></button>",
+      "css": ".ds-button-primary { display:inline-flex; align-items:center; gap:8px; border:0; border-radius:8px; padding:12px 20px; background:var(--exvia-black, #131313); color:#fff; font:500 14px/1.25 Geist,Arial,sans-serif; transition:background-color 220ms cubic-bezier(.165,.84,.44,1),transform 220ms cubic-bezier(.165,.84,.44,1); } .ds-button-primary:hover { background:#1D1D1D; transform:translateY(-1px); } .ds-button-primary:focus-visible { outline:3px solid #4D65FF; outline-offset:3px; } .ds-button-primary:active { transform:translateY(0); }"
+    },
+    {
+      "name": "App Chip",
+      "kind": "chip",
+      "refersTo": "chip-app",
+      "description": "An app-specific context marker used on legal documents.",
+      "html": "<span class=\"ds-app-chip\"><span class=\"ds-app-dot\" aria-hidden=\"true\"></span>ARROWS</span>",
+      "css": ".ds-app-chip { display:inline-flex; align-items:center; gap:8px; border:1px solid #EFEFF2; border-radius:9999px; padding:6px 12px; background:#fff; color:#1D1D1D; font:500 12px/1.5 GeistMono,monospace; letter-spacing:.1em; } .ds-app-dot { width:8px; height:8px; border-radius:50%; background:#0082F3; }"
+    },
+    {
+      "name": "Sticky Navigation",
+      "kind": "nav",
+      "description": "A compact studio bar that becomes a readable white layer over content.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\">Snaxx Tech</a><a href=\"#main\">Back to home</a></nav>",
+      "css": ".ds-nav { display:flex; align-items:center; justify-content:space-between; min-height:64px; padding:0 24px; border-bottom:1px solid #EFEFF2; background:rgba(255,255,255,.92); color:#131313; font-family:Geist,Arial,sans-serif; } .ds-nav a { color:inherit; text-decoration:none; padding:12px 0; } .ds-nav a:hover { color:#0082F3; } .ds-nav a:focus-visible { outline:3px solid #4D65FF; outline-offset:3px; border-radius:4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Kinetic Playroom",
+    "overview": "A dark cinematic studio atmosphere, real product imagery, and crisp product accents create a memorable independent-maker voice without compromising release-ready clarity.",
+    "keyCharacteristics": ["Cinematic dark-to-light pacing", "Real product imagery", "Product-bound accents", "Purposeful accessible motion"],
+    "rules": [
+      { "name": "The Product Signal Rule", "body": "Use a product accent to identify its product, not as interchangeable decoration.", "section": "colors" },
+      { "name": "The Readable Document Rule", "body": "Legal and support copy uses generous body leading and a 65–75ch measure.", "section": "typography" },
+      { "name": "The Flat-at-Rest Rule", "body": "Surfaces remain flat until hierarchy or interaction requires separation.", "section": "elevation" }
+    ],
+    "dos": ["Use real product assets.", "Keep product accents attached to their product.", "Preserve keyboard focus and reduced-motion behavior."],
+    "donts": ["Don't use stiff corporate seriousness.", "Don't use generic agency-template card grids.", "Don't use childish gimmicks or motion overload."]
+  }
+}

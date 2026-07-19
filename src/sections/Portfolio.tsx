@@ -215,6 +215,12 @@ export function Portfolio() {
               </span>
             </a>
           )}
+
+          {portfolioConfig.projects[3] && (
+            <div className="lg:col-span-3">
+              <ProjectCard project={portfolioConfig.projects[3]} index={3} isVisible={visibleItems[3]} wide />
+            </div>
+          )}
         </div>
       </div>
     </section>

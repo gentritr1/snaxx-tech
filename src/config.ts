@@ -141,7 +141,7 @@ export const servicesConfig: ServicesConfig = {
       title: "Support That Answers",
       description:
         "Real humans, real replies. We keep maintaining our apps long after launch and listen to the people who use them.",
-      image: "/images/about-2.jpg",
+      image: "/images/support-card.jpg",
     },
   ],
 };
@@ -218,6 +218,14 @@ export const portfolioConfig: PortfolioConfig = {
       href: "https://xn--fjal-opa.com",
       accent: "#D08700",
       hasEmbeddedPromoFooter: true,
+    },
+    {
+      title: "What's Next",
+      category: "Something small and surprising is taking shape in the lab.",
+      status: "In the lab",
+      year: "Soon",
+      image: "/images/lab-next.jpg",
+      accent: "#131313",
     },
   ],
   cta: {

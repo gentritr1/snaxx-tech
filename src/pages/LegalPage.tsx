@@ -47,7 +47,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
 
   if (!app) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
+      <div className="page-enter min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
         <p className="text-xs font-geist-mono uppercase tracking-widest text-exvia-black/60">404</p>
         <h1 className="mt-4 text-3xl lg:text-5xl font-semibold text-exvia-black">
           We couldn't find that page.
@@ -58,7 +58,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
         </p>
         <Link
           to="/"
-          className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-lg bg-exvia-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-exvia-black/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
+          className="pressable mt-8 inline-flex min-h-11 items-center gap-2 rounded-lg bg-exvia-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-exvia-black/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
         >
           Back to Snaxx Tech
         </Link>
@@ -69,8 +69,9 @@ export default function LegalPage({ kind }: LegalPageProps) {
   const sections = kind === 'privacy' ? app.privacy : app.terms;
 
   return (
-    <LegalLayout app={app} kind={kind}>
-      <div className="grid min-w-0 grid-cols-1 gap-12 lg:grid-cols-12">
+    <div className="page-enter">
+      <LegalLayout app={app} kind={kind}>
+        <div className="grid min-w-0 grid-cols-1 gap-12 lg:grid-cols-12">
         {/* Table of contents */}
         <aside className="hidden lg:block lg:col-span-3" aria-label={`${docTitle} contents`}>
           <div className="sticky top-28">
@@ -189,6 +190,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
           </div>
         </article>
       </div>
-    </LegalLayout>
+      </LegalLayout>
+    </div>
   );
 }

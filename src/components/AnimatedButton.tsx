@@ -27,7 +27,7 @@ export function AnimatedButton({
 
   const baseStyles = cn(
     'relative overflow-hidden font-geist-mono inline-flex items-center justify-center gap-2',
-    'transition-all duration-300 ease-out-quad',
+    'transition-colors duration-300 ease-out-quad',
     {
       'bg-exvia-black text-white hover:bg-exvia-base-black': variant === 'primary',
       'bg-white text-exvia-black border border-exvia-border hover:border-exvia-black': variant === 'secondary',

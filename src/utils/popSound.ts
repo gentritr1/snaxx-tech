@@ -30,9 +30,10 @@ function getBus(): { ctx: AudioContext; master: GainNode } | null {
   }
 }
 
-function pop(bus: { ctx: AudioContext; master: GainNode }, when: number, startFreq: number, volume: number) {
+type Bus = { ctx: AudioContext; master: GainNode };
+
+function pop(bus: Bus, when: number, startFreq: number, volume: number, dur = 0.11) {
   const { ctx: ac, master: out } = bus;
-  const dur = 0.11;
 
   // body: sine dropping fast in pitch — the "pop"
   const osc = ac.createOscillator();
@@ -68,13 +69,29 @@ function pop(bus: { ctx: AudioContext; master: GainNode }, when: number, startFr
 }
 
 /** One main pop plus a few staggered mini pops — a tiny confetti-cannon volley. */
-export function playBurstPop() {
+export function playBurstPop(mega = false) {
   const bus = getBus();
   if (!bus) return;
   const t0 = bus.ctx.currentTime + 0.01;
+  if (mega) {
+    // deeper, fatter main pop + a longer popcorn tail for the mega burst
+    pop(bus, t0, 330 + Math.random() * 60, 0.3, 0.16);
+    const extra = 6 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < extra; i++) {
+      pop(bus, t0 + 0.06 + i * (0.045 + Math.random() * 0.04), 380 + Math.random() * 560, 0.12);
+    }
+    return;
+  }
   pop(bus, t0, 520 + Math.random() * 80, 0.22);
   const extra = 3 + Math.floor(Math.random() * 2);
   for (let i = 0; i < extra; i++) {
     pop(bus, t0 + 0.05 + i * (0.05 + Math.random() * 0.04), 420 + Math.random() * 480, 0.1);
   }
+}
+
+/** A single soft pop — used by party mode's automatic mini-bursts. */
+export function playMiniPop() {
+  const bus = getBus();
+  if (!bus) return;
+  pop(bus, bus.ctx.currentTime + 0.01, 640 + Math.random() * 320, 0.07);
 }

@@ -12,7 +12,7 @@ export default function NotFound() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-neutral-900 flex flex-col items-center justify-center px-6 text-center overflow-hidden">
+    <div className="page-enter relative min-h-screen bg-neutral-900 flex flex-col items-center justify-center px-6 text-center overflow-hidden">
       {/* Faint crosshair backdrop, echoing the hero */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.06]">
         <div className="w-[1px] h-full bg-white" />
@@ -34,7 +34,7 @@ export default function NotFound() {
 
         <Link
           to="/"
-          className="group mt-10 inline-flex items-center gap-2 px-6 py-3 bg-white text-exvia-black text-sm font-geist-mono rounded-full hover:bg-white/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 focus-visible:ring-white"
+          className="group pressable mt-10 inline-flex items-center gap-2 px-6 py-3 bg-white text-exvia-black text-sm font-geist-mono rounded-full hover:bg-white/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 focus-visible:ring-white"
         >
           <span>Back to Snaxx Tech</span>
           <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

@@ -27,7 +27,7 @@ function ServiceRow({ service, index, isVisible }: { service: ServiceItem; index
   return (
     <article
       className={cn(
-        'service-row group grid gap-6 border-t border-exvia-border py-8 transition-all duration-700 ease-out-quart md:grid-cols-[3.5rem_minmax(0,1fr)_12rem] md:items-center lg:grid-cols-[4rem_minmax(0,1fr)_16rem] lg:py-9',
+        'service-row group grid gap-6 border-t border-exvia-border py-8 transition-[opacity,transform] duration-700 ease-out-quart md:grid-cols-[3.5rem_minmax(0,1fr)_12rem] md:items-center lg:grid-cols-[4rem_minmax(0,1fr)_16rem] lg:py-9',
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0',
       )}
       style={{ '--service-accent': accent, transitionDelay: `${index * 80}ms` } as React.CSSProperties}
@@ -47,7 +47,7 @@ function ServiceRow({ service, index, isVisible }: { service: ServiceItem; index
             src={service.image}
             alt=""
             loading="lazy"
-            className="h-full w-full object-cover transition-all duration-500 ease-out-quart md:scale-105 md:opacity-55 md:saturate-50 md:group-hover:scale-100 md:group-hover:opacity-100 md:group-hover:saturate-100"
+            className="h-full w-full object-cover transition-[opacity,transform,filter] duration-500 ease-out-quart md:scale-105 md:opacity-55 md:saturate-50 md:group-hover:scale-100 md:group-hover:opacity-100 md:group-hover:saturate-100"
           />
         </div>
         <span className="absolute inset-x-0 bottom-0 h-1" style={{ backgroundColor: accent }} aria-hidden="true" />
@@ -68,7 +68,7 @@ export function Services() {
         <div ref={headerRef} className="mb-14 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <h2
             className={cn(
-              'type-h2 max-w-3xl font-semibold text-exvia-black transition-all duration-700 ease-out-quart',
+              'type-h2 max-w-3xl font-semibold text-exvia-black transition-[opacity,transform] duration-700 ease-out-quart',
               headerVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0',
             )}
           >
@@ -76,7 +76,7 @@ export function Services() {
           </h2>
           <p
             className={cn(
-              'max-w-sm text-base leading-relaxed text-exvia-black/65 transition-all duration-700 ease-out-quart',
+              'max-w-sm text-base leading-relaxed text-exvia-black/65 transition-[opacity,transform] duration-700 ease-out-quart',
               headerVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0',
             )}
             style={{ transitionDelay: '90ms' }}

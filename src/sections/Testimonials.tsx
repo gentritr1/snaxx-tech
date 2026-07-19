@@ -44,7 +44,7 @@ export function Testimonials() {
           {testimonialsConfig.label && (
             <div
               className={cn(
-                'transition-all duration-800 ease-out-quart',
+                'transition-[opacity,transform] duration-800 ease-out-quart',
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               )}
             >
@@ -57,7 +57,7 @@ export function Testimonials() {
           {testimonialsConfig.heading && (
             <h2
               className={cn(
-                'type-h2 font-semibold text-exvia-black mt-4 transition-all duration-800 ease-out-quart',
+                'type-h2 font-semibold text-exvia-black mt-4 transition-[opacity,transform] duration-800 ease-out-quart',
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               )}
               style={{ transitionDelay: '100ms' }}
@@ -70,7 +70,7 @@ export function Testimonials() {
         {/* Testimonials Slider */}
         <div
           className={cn(
-            'relative transition-all duration-800 ease-out-quart',
+            'relative transition-[opacity,transform] duration-800 ease-out-quart',
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           )}
           style={{ transitionDelay: '200ms' }}
@@ -82,7 +82,7 @@ export function Testimonials() {
                 <div
                   key={index}
                   className={cn(
-                    'absolute inset-0 transition-all duration-1000 ease-out-cubic',
+                    'absolute inset-0 transition-[opacity,transform] duration-1000 ease-out-cubic',
                     index === activeIndex
                       ? 'opacity-100 translate-y-0'
                       : index < activeIndex
@@ -114,7 +114,7 @@ export function Testimonials() {
                   <Star
                     key={i}
                     className={cn(
-                      'w-5 h-5 transition-all duration-300',
+                      'w-5 h-5 transition-colors duration-300',
                       i < testimonials[activeIndex].rating
                         ? 'fill-exvia-black text-exvia-black'
                         : 'text-exvia-border'
@@ -130,7 +130,7 @@ export function Testimonials() {
                   <p
                     key={index}
                     className={cn(
-                      'text-xl lg:text-2xl text-exvia-black leading-relaxed absolute inset-0 transition-all duration-700 ease-out-quart',
+                      'text-xl lg:text-2xl text-exvia-black leading-relaxed absolute inset-0 transition-[opacity,transform] duration-700 ease-out-quart',
                       index === activeIndex
                         ? 'opacity-100 translate-y-0'
                         : 'opacity-0 translate-y-4 pointer-events-none'
@@ -148,7 +148,7 @@ export function Testimonials() {
                     <div
                       key={index}
                       className={cn(
-                        'absolute inset-0 transition-all duration-500 ease-out-quart',
+                        'absolute inset-0 transition-[opacity,transform] duration-500 ease-out-quart',
                         index === activeIndex
                           ? 'opacity-100 translate-y-0'
                           : 'opacity-0 translate-y-4 pointer-events-none'
@@ -174,7 +174,7 @@ export function Testimonials() {
                       key={index}
                       onClick={() => goToSlide(index)}
                       className={cn(
-                        'w-2 h-2 rounded-full transition-all duration-300',
+                        'w-2 h-2 rounded-full transition-[width,background-color] duration-300',
                         index === activeIndex
                           ? 'bg-exvia-black w-6'
                           : 'bg-exvia-border hover:bg-exvia-black/30'
@@ -188,14 +188,14 @@ export function Testimonials() {
                 <div className="flex gap-2">
                   <button
                     onClick={prevSlide}
-                    className="w-10 h-10 border border-exvia-border rounded-full flex items-center justify-center hover:border-exvia-black hover:bg-exvia-black hover:text-white transition-all duration-300"
+                    className="w-10 h-10 border border-exvia-border rounded-full flex items-center justify-center hover:border-exvia-black hover:bg-exvia-black hover:text-white transition-colors duration-300"
                     aria-label="Previous testimonial"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={nextSlide}
-                    className="w-10 h-10 border border-exvia-border rounded-full flex items-center justify-center hover:border-exvia-black hover:bg-exvia-black hover:text-white transition-all duration-300"
+                    className="w-10 h-10 border border-exvia-border rounded-full flex items-center justify-center hover:border-exvia-black hover:bg-exvia-black hover:text-white transition-colors duration-300"
                     aria-label="Next testimonial"
                   >
                     <ChevronRight className="w-4 h-4" />

@@ -225,6 +225,17 @@
   }
 }
 
+/* Soft one-shot entrance for lazy routes (legal pages & 404) */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  /* `backwards`, not `both`: a retained end-state transform would turn the
+     wrapper into a containing block for position:fixed children (skip link). */
+  animation: pageEnter 240ms var(--ease-out-quart) backwards;
+}
+
 @keyframes scaleIn {
   from {
     transform: scale(1.2) translate3d(42vw, 30vh, 0);
@@ -500,6 +511,14 @@
   50% { transform: translateY(7px); opacity: 1; }
 }
 
+/* Press feedback — subtle toy-like squash on pressables */
+.pressable {
+  transition: transform 160ms var(--ease-out-quart);
+}
+.pressable:active {
+  transform: scale(0.97);
+}
+
 /* Footer credit — heart pulse + coffee steam */
 .credit-heart {
   transform-origin: center;
@@ -611,6 +630,16 @@
   .credit-coffee,
   .notfound-arrow {
     animation: none;
+  }
+
+  .page-enter {
+    animation: pageEnter 200ms var(--ease-out-quart) backwards;
+    /* keep the fade, drop the movement */
+    animation-name: pageEnterFade;
+  }
+  @keyframes pageEnterFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 }
 

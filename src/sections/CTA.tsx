@@ -31,7 +31,7 @@ export function CTA() {
           {ctaConfig.tags.length > 0 && (
             <div
               className={cn(
-                'flex flex-wrap justify-center gap-3 mb-8 transition-all duration-800 ease-out-quart',
+                'flex flex-wrap justify-center gap-3 mb-8 transition-[opacity,transform] duration-800 ease-out-quart',
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               )}
             >
@@ -47,7 +47,7 @@ export function CTA() {
           {ctaConfig.heading && (
             <h2
               className={cn(
-                'text-3xl lg:text-5xl font-semibold text-white leading-tight transition-all duration-800 ease-out-quart',
+                'text-3xl lg:text-5xl font-semibold text-white leading-tight transition-[opacity,transform] duration-800 ease-out-quart',
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               )}
               style={{ transitionDelay: '100ms' }}
@@ -60,7 +60,7 @@ export function CTA() {
           {ctaConfig.description && (
             <p
               className={cn(
-                'mt-6 text-lg text-white/70 max-w-xl mx-auto transition-all duration-800 ease-out-quart',
+                'mt-6 text-lg text-white/70 max-w-xl mx-auto transition-[opacity,transform] duration-800 ease-out-quart',
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               )}
               style={{ transitionDelay: '200ms' }}
@@ -72,7 +72,7 @@ export function CTA() {
           {/* CTA Buttons */}
           <div
             className={cn(
-              'flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 transition-all duration-800 ease-out-quart',
+              'flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 transition-[opacity,transform] duration-800 ease-out-quart',
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
             )}
             style={{ transitionDelay: '300ms' }}
@@ -84,7 +84,7 @@ export function CTA() {
                   variant="primary"
                   size="lg"
                   showIcon
-                  className="bg-white text-exvia-black hover:bg-white/90"
+                  className="bg-white text-exvia-black hover:bg-white/90 pressable"
                 >
                   {ctaConfig.buttonText}
                 </AnimatedButton>

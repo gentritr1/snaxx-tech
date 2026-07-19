@@ -79,7 +79,7 @@ export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 to={`/${meta.sibling}/${app.slug}`}
-                className="group inline-flex min-h-11 items-center gap-2 rounded-lg bg-exvia-black px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-exvia-black/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
+                className="pressable group inline-flex min-h-11 items-center gap-2 rounded-lg bg-exvia-black px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-exvia-black/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
               >
                 <span>
                   {app.appName} {meta.siblingTitle}
@@ -89,7 +89,7 @@ export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
               {otherApp && (
                 <Link
                   to={`/${kind}/${otherApp.slug}`}
-                  className="group inline-flex min-h-11 items-center gap-2 rounded-lg border border-exvia-border bg-white px-4 py-2.5 text-sm font-medium text-exvia-black transition-colors hover:bg-exvia-subtle/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
+                  className="pressable group inline-flex min-h-11 items-center gap-2 rounded-lg border border-exvia-border bg-white px-4 py-2.5 text-sm font-medium text-exvia-black transition-colors hover:bg-exvia-subtle/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
                 >
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: otherApp.accent }} aria-hidden="true" />
                   <span>

@@ -28,7 +28,7 @@ export function About() {
             {aboutConfig.heading && (
               <h2
                 className={cn(
-                  'type-h2 max-w-xl font-semibold text-exvia-black transition-all duration-700 ease-out-quart',
+                  'type-h2 max-w-xl font-semibold text-exvia-black transition-[opacity,transform] duration-700 ease-out-quart',
                   sectionVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0',
                 )}
               >
@@ -40,7 +40,7 @@ export function About() {
             {aboutConfig.description && (
               <div
                 className={cn(
-                  'transition-all duration-700 ease-out-quart',
+                  'transition-[opacity,transform] duration-700 ease-out-quart',
                   sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                 )}
                 style={{ transitionDelay: '100ms' }}
@@ -55,7 +55,7 @@ export function About() {
             {aboutConfig.experienceValue && (
               <div
                 className={cn(
-                  'flex items-end gap-3 pt-4 transition-all duration-800 ease-out-quart',
+                  'flex items-end gap-3 pt-4 transition-[opacity,transform] duration-800 ease-out-quart',
                   sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                 )}
                 style={{ transitionDelay: '200ms' }}
@@ -75,7 +75,7 @@ export function About() {
             {aboutConfig.stats.length > 0 && (
               <div
                 className={cn(
-                  'grid grid-cols-1 gap-6 border-t border-exvia-border pt-8 transition-all duration-700 ease-out-quart sm:grid-cols-3 sm:gap-8',
+                  'grid grid-cols-1 gap-6 border-t border-exvia-border pt-8 transition-[opacity,transform] duration-700 ease-out-quart sm:grid-cols-3 sm:gap-8',
                   sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                 )}
                 style={{ transitionDelay: '300ms' }}
@@ -97,7 +97,7 @@ export function About() {
                 <div
                   key={index}
                   className={cn(
-                    'relative overflow-hidden rounded-xl transition-all duration-700 ease-out-quart',
+                    'relative overflow-hidden rounded-xl transition-[opacity,transform] duration-700 ease-out-quart',
                     index % 2 === 1 ? 'mt-8' : '',
                     visibleItems[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                   )}

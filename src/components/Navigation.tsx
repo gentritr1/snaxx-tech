@@ -62,7 +62,7 @@ export function Navigation() {
     <>
       <nav
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out-circ',
+          'fixed top-0 left-0 right-0 z-50 transition-[background-color,color,box-shadow] duration-500 ease-out-circ',
           isScrolled || isMenuOpen ? 'bg-white/95 backdrop-blur-md shadow-xs' : 'bg-transparent'
         )}
       >
@@ -72,7 +72,7 @@ export function Navigation() {
             {navigationConfig.logo && (
               <a href="#hero" className="flex min-h-11 items-center" aria-label="Snaxx Tech home">
                 <span className={cn(
-                  "text-2xl font-semibold tracking-tight transition-colors duration-500",
+                  "text-2xl font-semibold tracking-tight transition-colors duration-200",
                   isScrolled || isMenuOpen ? "text-exvia-black" : "text-white"
                 )}>
                   {navigationConfig.logo}
@@ -89,13 +89,13 @@ export function Navigation() {
                     href={link.href}
                     onClick={(e) => handleNavClick(e, link.href)}
                     className={cn(
-                      "text-base transition-colors duration-500 relative group",
+                      "text-base transition-colors duration-200 relative group",
                       isScrolled ? "text-exvia-black/80 hover:text-exvia-black" : "text-white/90 hover:text-white"
                     )}
                   >
                     {link.label}
                     <span className={cn(
-                      "absolute -bottom-1 left-0 w-0 h-px transition-all duration-300 group-hover:w-full",
+                      "absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100",
                       isScrolled ? "bg-exvia-black" : "bg-white"
                     )} />
                   </a>
@@ -111,6 +111,7 @@ export function Navigation() {
                     href={navigationConfig.contactHref || "#contact"}
                     variant={isScrolled ? "primary" : "outline-white"}
                     size="md"
+                    className="pressable"
                   >
                     {navigationConfig.contactLabel}
                   </AnimatedButton>
@@ -130,21 +131,21 @@ export function Navigation() {
               >
                 <span
                   className={cn(
-                    'h-0.5 w-7 transition-all duration-500 ease-out-quad origin-center',
+                    'h-0.5 w-7 transition-[opacity,transform] duration-300 ease-out-quad origin-center',
                     isScrolled || isMenuOpen ? 'bg-exvia-black' : 'bg-white',
                     isMenuOpen && 'translate-y-2 rotate-[-45deg]'
                   )}
                 />
                 <span
                   className={cn(
-                    'h-0.5 w-7 transition-all duration-300 ease-out-quad',
+                    'h-0.5 w-7 transition-[opacity,transform] duration-300 ease-out-quad',
                     isScrolled || isMenuOpen ? 'bg-exvia-black' : 'bg-white',
                     isMenuOpen && 'scale-0 opacity-0'
                   )}
                 />
                 <span
                   className={cn(
-                    'h-0.5 w-7 transition-all duration-500 ease-out-quad origin-center',
+                    'h-0.5 w-7 transition-[opacity,transform] duration-300 ease-out-quad origin-center',
                     isScrolled || isMenuOpen ? 'bg-exvia-black' : 'bg-white',
                     isMenuOpen && '-translate-y-2 rotate-[45deg]'
                   )}
@@ -160,7 +161,7 @@ export function Navigation() {
         <div
           id="mobile-navigation"
           className={cn(
-            'fixed inset-0 z-40 bg-white transition-all duration-500 ease-out-cubic lg:hidden',
+            'fixed inset-0 z-40 bg-white transition-[opacity,visibility] duration-500 ease-out-cubic lg:hidden',
             isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
           )}
         >
@@ -172,12 +173,12 @@ export function Navigation() {
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
                 className={cn(
-                  'text-3xl font-semibold text-exvia-black transition-all duration-500 ease-out-quart',
+                  'text-3xl font-semibold text-exvia-black transition-[opacity,transform] duration-400 ease-out-quart',
                   isMenuOpen
                     ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-8'
                 )}
-                style={{ transitionDelay: isMenuOpen ? `${index * 100}ms` : '0ms' }}
+                style={{ transitionDelay: isMenuOpen ? `${index * 60}ms` : '0ms' }}
               >
                 {link.label}
               </a>
@@ -188,10 +189,10 @@ export function Navigation() {
                 variant="primary"
                 size="lg"
                 className={cn(
-                  'mt-4 transition-all duration-500 ease-out-quart',
+                  'mt-4 pressable transition-[opacity,transform] duration-400 ease-out-quart',
                   isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 )}
-                style={{ transitionDelay: isMenuOpen ? '400ms' : '0ms' }}
+                style={{ transitionDelay: isMenuOpen ? '240ms' : '0ms' }}
                 onClick={() => {
                   setIsMenuOpen(false);
                   requestAnimationFrame(() => menuButtonRef.current?.focus({ preventScroll: true }));

@@ -38,7 +38,7 @@ export function Footer() {
           {/* Brand Column */}
           <div
             className={cn(
-              'lg:col-span-4 space-y-6 transition-all duration-800 ease-out-quart',
+              'lg:col-span-4 space-y-6 transition-[opacity,transform] duration-800 ease-out-quart',
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
             )}
           >
@@ -62,7 +62,7 @@ export function Footer() {
                     <a
                       key={social.label}
                       href={social.href}
-                      className="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center hover:bg-white hover:text-exvia-black transition-all duration-300"
+                      className="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center hover:bg-white hover:text-exvia-black transition-colors duration-300"
                       aria-label={social.label}
                     >
                       <Icon className="w-4 h-4" />
@@ -78,7 +78,7 @@ export function Footer() {
             <div
               key={column.title}
               className={cn(
-                'lg:col-span-2 transition-all duration-800 ease-out-quart',
+                'lg:col-span-2 transition-[opacity,transform] duration-800 ease-out-quart',
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               )}
               style={{ transitionDelay: `${(colIndex + 1) * 100}ms` }}
@@ -92,7 +92,7 @@ export function Footer() {
                   const linkClass =
                     'min-h-11 text-sm text-white/75 hover:text-white transition-colors inline-flex items-center gap-1 group';
                   const arrow = (
-                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-[opacity,transform] duration-200" />
                   );
                   return (
                     <li key={link.label}>
@@ -123,7 +123,7 @@ export function Footer() {
           {footerConfig.newsletterHeading && (
             <div
               className={cn(
-                'lg:col-span-2 transition-all duration-800 ease-out-quart',
+                'lg:col-span-2 transition-[opacity,transform] duration-800 ease-out-quart',
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               )}
               style={{ transitionDelay: '400ms' }}
@@ -159,7 +159,7 @@ export function Footer() {
         {(footerConfig.copyright || footerConfig.credit) && (
           <div
             className={cn(
-              'mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 transition-all duration-800 ease-out-quart',
+              'mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 transition-[opacity,transform] duration-800 ease-out-quart',
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
             )}
             style={{ transitionDelay: '500ms' }}

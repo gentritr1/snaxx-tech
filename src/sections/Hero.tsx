@@ -98,7 +98,7 @@ export function Hero() {
       {heroConfig.roles[0] && (
         <div
           className={cn(
-            'hidden lg:block absolute left-8 lg:left-16 top-1/2 -translate-y-1/2 z-30 pointer-events-none transition-all duration-[1200ms] ease-out-quart',
+            'hidden lg:block absolute left-8 lg:left-16 top-1/2 -translate-y-1/2 z-30 pointer-events-none transition-[opacity,transform] duration-[1200ms] ease-out-quart',
             isLoaded ? 'opacity-100' : 'opacity-0'
           )}
           style={{ transitionDelay: '800ms' }}
@@ -111,7 +111,7 @@ export function Hero() {
       {heroConfig.roles[1] && (
         <div
           className={cn(
-            'hidden lg:block absolute right-8 lg:right-16 top-1/2 -translate-y-1/2 z-30 pointer-events-none transition-all duration-[1200ms] ease-out-quart',
+            'hidden lg:block absolute right-8 lg:right-16 top-1/2 -translate-y-1/2 z-30 pointer-events-none transition-[opacity,transform] duration-[1200ms] ease-out-quart',
             isLoaded ? 'opacity-100' : 'opacity-0'
           )}
           style={{ transitionDelay: '900ms' }}
@@ -126,7 +126,7 @@ export function Hero() {
       <div className="relative z-30 flex flex-col items-center justify-end min-h-screen px-6 lg:px-12 pointer-events-none">
         <div
           className={cn(
-            'text-center transition-all duration-[1200ms] ease-out-quart pb-10 md:pb-14',
+            'text-center transition-[opacity,transform] duration-[1200ms] ease-out-quart pb-10 md:pb-14',
             isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           )}
           style={{ transitionDelay: '600ms' }}

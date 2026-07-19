@@ -98,7 +98,7 @@ function ProjectCard({ project, index, isVisible, wide = false }: ProjectCardPro
           {project.privacyHref && (
             <Link
               to={project.privacyHref}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-exvia-black/15 bg-white px-3.5 text-sm font-medium text-exvia-black transition-colors duration-200 hover:border-exvia-black/35"
+              className="pressable inline-flex min-h-11 items-center gap-2 rounded-lg border border-exvia-black/15 bg-white px-3.5 text-sm font-medium text-exvia-black transition-colors duration-200 hover:border-exvia-black/35"
             >
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
               Privacy
@@ -107,7 +107,7 @@ function ProjectCard({ project, index, isVisible, wide = false }: ProjectCardPro
           {project.termsHref && (
             <Link
               to={project.termsHref}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-exvia-black/15 bg-white px-3.5 text-sm font-medium text-exvia-black transition-colors duration-200 hover:border-exvia-black/35"
+              className="pressable inline-flex min-h-11 items-center gap-2 rounded-lg border border-exvia-black/15 bg-white px-3.5 text-sm font-medium text-exvia-black transition-colors duration-200 hover:border-exvia-black/35"
             >
               <FileText className="h-4 w-4" aria-hidden="true" />
               Terms
@@ -119,7 +119,7 @@ function ProjectCard({ project, index, isVisible, wide = false }: ProjectCardPro
   );
 
   const className = cn(
-    'group block rounded-xl transition-all duration-700 ease-out-quart',
+    'group block rounded-xl transition-[opacity,transform] duration-700 ease-out-quart',
     isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
     isExternal && 'cursor-pointer focus-visible:outline-none',
   );
@@ -159,7 +159,7 @@ export function Portfolio() {
         <div ref={headerRef} className="mb-14 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] lg:items-end lg:gap-16">
           <h2
             className={cn(
-              'type-h2 max-w-4xl font-semibold text-exvia-black transition-all duration-700 ease-out-quart',
+              'type-h2 max-w-4xl font-semibold text-exvia-black transition-[opacity,transform] duration-700 ease-out-quart',
               headerVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0',
             )}
           >
@@ -167,7 +167,7 @@ export function Portfolio() {
           </h2>
           <p
             className={cn(
-              'max-w-xl text-base leading-relaxed text-exvia-black/70 transition-all duration-700 ease-out-quart lg:justify-self-end',
+              'max-w-xl text-base leading-relaxed text-exvia-black/70 transition-[opacity,transform] duration-700 ease-out-quart lg:justify-self-end',
               headerVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0',
             )}
             style={{ transitionDelay: '100ms' }}
@@ -197,7 +197,7 @@ export function Portfolio() {
             <a
               href={portfolioConfig.cta.linkHref || '#contact'}
               className={cn(
-                'group relative flex min-h-[20rem] flex-col justify-between overflow-hidden rounded-xl bg-exvia-black p-8 text-white transition-all duration-700 ease-out-quart lg:min-h-0',
+                'group relative flex min-h-[20rem] flex-col justify-between overflow-hidden rounded-xl bg-exvia-black p-8 text-white transition-[opacity,transform] duration-700 ease-out-quart lg:min-h-0',
                 visibleItems[ctaIndex] ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
               )}
               style={{ transitionDelay: `${ctaIndex * 90}ms` }}

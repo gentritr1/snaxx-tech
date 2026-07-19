@@ -1,38 +1,94 @@
-import { useEffect, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Component, Suspense, lazy, useEffect, useState, type ReactNode } from 'react';
 import { ArrowDown, Sparkle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { heroConfig } from '@/config';
-import { HeroScene } from '@/components/HeroScene';
+
+// three.js / drei / fiber live behind this lazy boundary so they land in a
+// separate chunk — the main entry (and legal-page visitors) never pay for them.
+const HeroCanvas = lazy(() => import('@/components/HeroCanvas'));
+
+/** Cheap, synchronous WebGL feature-detect on a throwaway canvas. */
+function detectWebGL(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext('webgl2') || canvas.getContext('webgl'))
+    );
+  } catch {
+    return false;
+  }
+}
+
+/** Static dark backdrop shown while the 3D chunk loads or when it can't run. */
+function HeroBackdrop() {
+  return (
+    <div className="absolute inset-0 bg-[#131313] bg-[radial-gradient(ellipse_at_50%_40%,rgba(45,140,255,0.10),transparent_55%),radial-gradient(ellipse_at_70%_70%,rgba(255,122,41,0.08),transparent_55%)]" />
+  );
+}
+
+/**
+ * Isolates the 3D canvas: if the lazy chunk fails to load/evaluate, WebGL is
+ * lost, or the scene throws at runtime, we fall back to the static backdrop
+ * instead of unmounting the whole page. The wordmark/nav overlay is rendered
+ * outside this boundary and always stays visible.
+ */
+class CanvasBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
 
 export function Hero() {
-  if (!heroConfig.name && heroConfig.roles.length === 0) return null;
-
+  // Hooks must run unconditionally — keep them above any early return.
   const [isLoaded, setIsLoaded] = useState(false);
+  const [webglOk] = useState(detectWebGL);
+  const [reducedMotion, setReducedMotion] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 300);
     return () => clearTimeout(timer);
   }, []);
 
+  // Listen once for live changes to the reduced-motion preference.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  if (!heroConfig.name && heroConfig.roles.length === 0) return null;
+
   return (
     <section id="hero" className="relative w-full min-h-screen overflow-hidden bg-exvia-black">
-      {/* 3D playground */}
+      {/* 3D playground — decorative; screen readers get the wordmark below. */}
       <div
+        aria-hidden="true"
         className={cn(
           'absolute inset-0 transition-opacity duration-[1400ms]',
           isLoaded ? 'opacity-100' : 'opacity-0'
         )}
       >
-        <Canvas
-          dpr={[1, 2]}
-          camera={{ position: [0, 1.15, 8.6], fov: 45 }}
-          gl={{ antialias: true, alpha: false }}
-        >
-          <color attach="background" args={['#131313']} />
-          <fog attach="fog" args={['#131313', 12, 26]} />
-          <HeroScene />
-        </Canvas>
+        {webglOk ? (
+          <CanvasBoundary fallback={<HeroBackdrop />}>
+            <Suspense fallback={<HeroBackdrop />}>
+              <HeroCanvas reducedMotion={reducedMotion} />
+            </Suspense>
+          </CanvasBoundary>
+        ) : (
+          <HeroBackdrop />
+        )}
       </div>
 
       {/* soft vignette so the overlay text always pops */}
@@ -92,7 +148,7 @@ export function Hero() {
       {/* scroll cue */}
       <div
         className={cn(
-          'absolute bottom-8 right-8 lg:right-12 z-30 pointer-events-none flex items-center gap-2 transition-opacity duration-1000',
+          'absolute bottom-8 right-8 lg:right-12 z-30 pointer-events-none hidden sm:flex items-center gap-2 transition-opacity duration-1000',
           isLoaded ? 'opacity-100' : 'opacity-0'
         )}
         style={{ transitionDelay: '1400ms' }}

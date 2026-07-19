@@ -1,8 +1,11 @@
-import { useEffect, useRef } from 'react'
+import { Suspense, lazy, useEffect, useRef } from 'react'
 import { Routes, Route, useLocation } from 'react-router'
 import Home from './pages/Home'
-import LegalPage from './pages/LegalPage'
-import NotFound from './pages/NotFound'
+
+// Legal + 404 routes are reached directly from Google Play links; splitting
+// them keeps those visitors off the home page's heavier code path.
+const LegalPage = lazy(() => import('./pages/LegalPage'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -35,12 +38,14 @@ export default function App() {
   return (
     <>
       <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/privacy/:appSlug" element={<LegalPage kind="privacy" />} />
-        <Route path="/terms/:appSlug" element={<LegalPage kind="terms" />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/privacy/:appSlug" element={<LegalPage kind="privacy" />} />
+          <Route path="/terms/:appSlug" element={<LegalPage kind="terms" />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </>
   )
 }

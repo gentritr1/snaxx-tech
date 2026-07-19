@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, useCallback } from 'react';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import { Float, RoundedBox, Sparkles, Trail, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
+import { playBurstPop } from '../utils/popSound';
 
 const BLUE = '#2D8CFF';
 const ORANGE = '#FF7A29';
@@ -282,26 +283,36 @@ function HintRing({ dismissed, onGone }: { dismissed: boolean; onGone: () => voi
     for (const [mesh, phase] of rings) {
       const cycle = (t + phase) % 1;
       // shrink slightly while fading out so the ring feels "absorbed" by the box
-      mesh.scale.setScalar(Math.max((1.12 + cycle * 1.0) * (0.65 + 0.35 * fade.current), 0.001));
+      mesh.scale.setScalar(Math.max((1.12 + cycle * 1.15) * (0.65 + 0.35 * fade.current), 0.001));
       (mesh.material as THREE.MeshBasicMaterial).opacity =
-        Math.sin(cycle * Math.PI) * 0.5 * fade.current;
+        Math.sin(cycle * Math.PI) * 0.62 * fade.current;
     }
   });
 
+  // Two explicit rings (not a map over the ref objects) so ref values are
+  // never touched during render — they're only read/written inside useFrame.
   return (
     <group position={[0, 0.12, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-      {[ringA, ringB].map((ref, i) => (
-        <mesh key={i} ref={ref} raycast={() => null}>
-          <ringGeometry args={[0.96, 1, 64]} />
-          <meshBasicMaterial
-            color={YELLOW}
-            transparent
-            opacity={0}
-            side={THREE.DoubleSide}
-            depthWrite={false}
-          />
-        </mesh>
-      ))}
+      <mesh ref={ringA} raycast={() => null}>
+        <ringGeometry args={[0.96, 1, 64]} />
+        <meshBasicMaterial
+          color={YELLOW}
+          transparent
+          opacity={0}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh ref={ringB} raycast={() => null}>
+        <ringGeometry args={[0.96, 1, 64]} />
+        <meshBasicMaterial
+          color={YELLOW}
+          transparent
+          opacity={0}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
     </group>
   );
 }
@@ -387,7 +398,13 @@ function BurstParticle({
 /* ------------------------------------------------------------------ */
 /* Full scene                                                           */
 /* ------------------------------------------------------------------ */
-export function HeroScene() {
+export function HeroScene({ onInteract }: { onInteract?: () => void }) {
+  // Thin out the persistent sparkle field on small screens (measured once at
+  // mount — no resize churn). Halves the particle cost on phones.
+  const isSmall = useMemo(
+    () => typeof window !== 'undefined' && window.innerWidth < 640,
+    []
+  );
   const arrowGeo = useArrowGeometry();
   const orbGeo = useMemo(() => new THREE.SphereGeometry(0.16, 18, 18), []);
   const arrowMats = useMemo(
@@ -407,9 +424,25 @@ export function HeroScene() {
   );
 
   const [particles, setParticles] = useState<BurstParticleData[]>([]);
+  const [hintDismissed, setHintDismissed] = useState(false);
+  const [hintGone, setHintGone] = useState(() => {
+    try {
+      return window.localStorage.getItem('snaxx-toybox-hint') === 'done';
+    } catch {
+      return false;
+    }
+  });
   const handleBurst = useCallback(() => {
+    playBurstPop();
     setParticles((prev) => [...prev.slice(-36), ...spawnBurst()]);
-  }, []);
+    setHintDismissed(true);
+    onInteract?.();
+    try {
+      window.localStorage.setItem('snaxx-toybox-hint', 'done');
+    } catch {
+      /* storage unavailable — hint simply reappears next visit */
+    }
+  }, [onInteract]);
   const handleDead = useCallback((id: number) => {
     setParticles((prev) => prev.filter((p) => p.id !== id));
   }, []);
@@ -426,6 +459,7 @@ export function HeroScene() {
       <pointLight position={[0, 4, -4]} intensity={18} color="#FFFFFF" />
 
       <ToyBox onBurst={handleBurst} />
+      {!hintGone && <HintRing dismissed={hintDismissed} onGone={() => setHintGone(true)} />}
       <FlightPath />
 
       {/* confetti bursts */}
@@ -453,8 +487,8 @@ export function HeroScene() {
       <Squiggle />
 
       {/* magic dust */}
-      <Sparkles count={90} scale={[11, 6, 7]} size={2.4} speed={0.35} color="#9EC5FF" opacity={0.55} />
-      <Sparkles count={50} scale={[10, 5, 6]} size={2} speed={0.28} color="#FFB27A" opacity={0.45} />
+      <Sparkles count={isSmall ? 40 : 90} scale={[11, 6, 7]} size={2.4} speed={0.35} color="#9EC5FF" opacity={0.55} />
+      <Sparkles count={isSmall ? 22 : 50} scale={[10, 5, 6]} size={2} speed={0.28} color="#FFB27A" opacity={0.45} />
     </>
   );
 }

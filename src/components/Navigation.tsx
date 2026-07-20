@@ -70,7 +70,13 @@ export function Navigation() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             {navigationConfig.logo && (
-              <a href="#hero" className="flex min-h-11 items-center" aria-label="Snaxx Tech home">
+              <a href="#hero" className="flex min-h-11 items-center gap-2" aria-label="Snaxx Tech home">
+                <img
+                  src="/images/wordmark/letter-5.webp"
+                  alt=""
+                  draggable={false}
+                  className="h-6 w-auto select-none"
+                />
                 <span className={cn(
                   "text-2xl font-semibold tracking-tight transition-colors duration-200",
                   isScrolled || isMenuOpen ? "text-exvia-black" : "text-white"

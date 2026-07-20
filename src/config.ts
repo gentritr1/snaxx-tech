@@ -90,10 +90,10 @@ export const aboutConfig: AboutConfig = {
     { value: "100%", label: "Indie & independent" },
   ],
   images: [
-    { src: "/images/about-1.jpg", alt: "Arrows being played on a phone at night" },
-    { src: "/images/about-2.jpg", alt: "Hands holding a phone playing a glowing puzzle" },
-    { src: "/images/about-3.jpg", alt: "App wireframe sketches on dark paper" },
-    { src: "/images/about-4.jpg", alt: "Code on a laptop in a dark studio" },
+    { src: "/images/about-1.webp", alt: "Arrows being played on a phone at night" },
+    { src: "/images/about-2.webp", alt: "Hands holding a phone playing a glowing puzzle" },
+    { src: "/images/about-3.webp", alt: "App wireframe sketches on dark paper" },
+    { src: "/images/about-4.webp", alt: "Code on a laptop in a dark studio" },
   ],
 };
 
@@ -120,28 +120,28 @@ export const servicesConfig: ServicesConfig = {
       title: "Game Development",
       description:
         "We design and build tight, replayable arcade experiences like Arrows — simple to pick up, hard to put down.",
-      image: "/images/app-arrows.jpg",
+      image: "/images/app-arrows.webp",
     },
     {
       iconName: "Smartphone",
       title: "App Design & Engineering",
       description:
         "From first sketch to release, we craft fast, thoughtful apps like Rowflare that make everyday tasks feel effortless.",
-      image: "/images/app-rowflare.jpg",
+      image: "/images/app-rowflare.webp",
     },
     {
       iconName: "ShieldCheck",
       title: "Privacy-First by Default",
       description:
         "No accounts, no clutter. Your progress stays on your device, ads are clearly disclosed, and our policies are written in plain language you can actually read.",
-      image: "/images/cta-bg.jpg",
+      image: "/images/cta-bg.webp",
     },
     {
       iconName: "HeartHandshake",
       title: "Support That Answers",
       description:
         "Real humans, real replies. We keep maintaining our apps long after launch and listen to the people who use them.",
-      image: "/images/support-card.jpg",
+      image: "/images/support-card.webp",
     },
   ],
 };
@@ -191,7 +191,7 @@ export const portfolioConfig: PortfolioConfig = {
       status: "Coming to Android",
       action: "Release in progress",
       year: "2026",
-      image: "/images/app-arrows.jpg",
+      image: "/images/app-arrows.webp",
       featured: true,
       accent: "#0082F3",
       privacyHref: "/privacy/arrows",
@@ -203,7 +203,7 @@ export const portfolioConfig: PortfolioConfig = {
       status: "Coming to Android",
       action: "Release in progress",
       year: "2026",
-      image: "/images/app-rowflare.jpg",
+      image: "/images/app-rowflare.webp",
       accent: "#FF7A29",
       privacyHref: "/privacy/rowflare",
       termsHref: "/terms/rowflare",
@@ -214,7 +214,7 @@ export const portfolioConfig: PortfolioConfig = {
       status: "Live on the web",
       action: "Play FJALË online",
       year: "2026",
-      image: "/images/app-fjale.png",
+      image: "/images/app-fjale.webp",
       href: "https://xn--fjal-opa.com",
       accent: "#D08700",
       hasEmbeddedPromoFooter: true,
@@ -224,7 +224,7 @@ export const portfolioConfig: PortfolioConfig = {
       category: "Something small and surprising is taking shape in the lab.",
       status: "In the lab",
       year: "Soon",
-      image: "/images/lab-next.jpg",
+      image: "/images/lab-next.webp",
       accent: "#131313",
     },
   ],
@@ -278,7 +278,7 @@ export const ctaConfig: CTAConfig = {
   buttonText: "Email Us",
   buttonHref: "mailto:techsnaxx@gmail.com",
   email: "techsnaxx@gmail.com",
-  backgroundImage: "/images/cta-bg.jpg",
+  backgroundImage: "/images/cta-bg.webp",
 };
 
 // Footer section configuration

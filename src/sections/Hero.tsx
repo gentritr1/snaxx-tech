@@ -1,7 +1,8 @@
-import { Component, Suspense, lazy, useEffect, useState, type ReactNode } from 'react';
+import { Component, Suspense, lazy, useCallback, useEffect, useState, type ReactNode } from 'react';
 import { ArrowDown, Sparkle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { heroConfig } from '@/config';
+import { playMiniPop } from '@/utils/popSound';
 
 // three.js / drei / fiber live behind this lazy boundary so they land in a
 // separate chunk — the main entry (and legal-page visitors) never pay for them.
@@ -47,6 +48,29 @@ class CanvasBoundary extends Component<{ children: ReactNode; fallback: ReactNod
 export function Hero() {
   // Hooks must run unconditionally — keep them above any early return.
   const [isLoaded, setIsLoaded] = useState(false);
+  const [biteKey, setBiteKey] = useState(0);
+  const [biteStage, setBiteStage] = useState(0); // 0 = whole, 1 = first chomp, 2 = bitten
+
+  // Two-step chomp, JS-timed so the mask itself never needs to animate.
+  useEffect(() => {
+    const letterCount = heroConfig.name.length;
+    // First replay (biteKey > 0) chomps immediately; on load, wait for the
+    // slowest letter to land (600ms base + stagger + duration) plus a beat.
+    const startDelay = biteKey === 0 ? 600 + 110 * (letterCount - 1) + 450 + 500 : 0;
+    const t1 = setTimeout(() => setBiteStage(1), startDelay);
+    const t2 = setTimeout(() => setBiteStage(2), startDelay + 140);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [biteKey]);
+
+  // Replay the chomp on demand — click is a user gesture, so sound is allowed.
+  const replayBite = useCallback(() => {
+    setBiteStage(0); // heal for a blink, then the effect re-chomps
+    setBiteKey((k) => k + 1);
+    playMiniPop();
+  }, []);
   const [webglOk] = useState(detectWebGL);
   const [reducedMotion, setReducedMotion] = useState(
     () =>
@@ -139,8 +163,69 @@ export function Hero() {
             </span>
           </div>
 
-          <h1 className="text-[clamp(3rem,12vw,12rem)] font-black text-white tracking-[-0.04em] leading-[0.85]">
-            {heroConfig.name}
+          {/* Wordmark: letters land right-to-left, then the last X gets bitten
+              (SNAXX ≈ snacks). Click replays the chomp with a soft pop. */}
+          <h1
+            role="button"
+            tabIndex={0}
+            aria-label={`${heroConfig.name} — take a bite`}
+            onClick={replayBite}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                replayBite();
+              }
+            }}
+            className="text-[clamp(3rem,12vw,12rem)] font-black text-white tracking-[-0.04em] leading-[0.85] pointer-events-auto cursor-pointer select-none rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+          >
+            {heroConfig.name.split('').map((_, i, letters) => {
+              const style = { '--i': letters.length - 1 - i } as React.CSSProperties;
+              const glyph = (
+                <img
+                  src={`/images/wordmark/letter-${i + 1}.webp`}
+                  alt=""
+                  draggable={false}
+                  fetchPriority="high"
+                  className="snaxx-glyph"
+                />
+              );
+              if (i !== letters.length - 1) {
+                return (
+                  <span key={i} aria-hidden="true" className="snaxx-letter" style={style}>
+                    {glyph}
+                  </span>
+                );
+              }
+              return (
+                <span key={i} aria-hidden="true" className="snaxx-letter relative" style={style}>
+                  <span
+                    key={`bite-${biteKey}`}
+                    className={cn('snaxx-bitten', biteStage >= 1 && 'bite-wobble')}
+                  >
+                    {glyph}
+                  </span>
+                  {biteStage >= 2 && (
+                    <>
+                      <span
+                        key={`c1-${biteKey}`}
+                        className="snaxx-crumb"
+                        style={{ top: '4%', right: '-3%', '--cx': '1.4rem', '--cy': '-0.6rem' } as React.CSSProperties}
+                      />
+                      <span
+                        key={`c2-${biteKey}`}
+                        className="snaxx-crumb"
+                        style={{ top: '14%', right: '-5%', '--cx': '1.8rem', '--cy': '0.4rem' } as React.CSSProperties}
+                      />
+                      <span
+                        key={`c3-${biteKey}`}
+                        className="snaxx-crumb"
+                        style={{ top: '24%', right: '-1%', '--cx': '1rem', '--cy': '1rem' } as React.CSSProperties}
+                      />
+                    </>
+                  )}
+                </span>
+              );
+            })}
           </h1>
         </div>
       </div>

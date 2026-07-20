@@ -236,6 +236,79 @@
   animation: pageEnter 240ms var(--ease-out-quart) backwards;
 }
 
+/* SNAXX wordmark — 3D toy-letter sprites drop in right-to-left with a
+   squash-settle; the final X arrives pre-bitten (SNAXX ≈ snacks) and the
+   crumbs + wobble sell the chomp right after landing (and on click). */
+.snaxx-letter {
+  display: inline-block;
+  transform-origin: bottom center;
+  transition: transform 200ms var(--ease-out-quart);
+  animation: letterLand 450ms var(--ease-out-quart) backwards;
+  animation-delay: calc(600ms + var(--i, 0) * 110ms);
+}
+
+.snaxx-glyph {
+  display: block;
+  height: clamp(3.4rem, 13vw, 13rem);
+  width: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .snaxx-letter:hover {
+    transform: translateY(-0.35rem) scale(1.05);
+  }
+}
+
+@keyframes letterLand {
+  0% {
+    opacity: 0;
+    transform: translateY(-3rem);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(1.06, 0.88);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.snaxx-bitten {
+  display: inline-block;
+}
+
+/* the chomp beat: wobble + crumbs, triggered after landing and on click */
+.snaxx-bitten.bite-wobble {
+  animation: biteWobble 300ms var(--ease-out-quart) 1;
+}
+
+@keyframes biteWobble {
+  0%   { transform: rotate(0deg); }
+  35%  { transform: rotate(-1.5deg); }
+  70%  { transform: rotate(1.2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.snaxx-crumb {
+  position: absolute;
+  width: 0.05em;
+  height: 0.05em;
+  border-radius: 9999px;
+  background: #FFD166;
+  opacity: 0;
+  pointer-events: none;
+  animation: crumbPop 450ms var(--ease-out-quart) both;
+}
+
+@keyframes crumbPop {
+  0%   { opacity: 0; transform: translate(0, 0); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--cx, 0.15em), var(--cy, 0)); }
+}
+
 @keyframes scaleIn {
   from {
     transform: scale(1.2) translate3d(42vw, 30vh, 0);
@@ -636,6 +709,19 @@
     animation: pageEnter 200ms var(--ease-out-quart) backwards;
     /* keep the fade, drop the movement */
     animation-name: pageEnterFade;
+  }
+
+  /* Wordmark: letters simply appear; the bite is baked into the sprite. */
+  .snaxx-letter {
+    animation: none;
+    opacity: 1;
+  }
+  .snaxx-bitten {
+    animation: none;
+  }
+  .snaxx-crumb {
+    animation: none;
+    opacity: 0;
   }
   @keyframes pageEnterFade {
     from { opacity: 0; }

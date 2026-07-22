@@ -146,7 +146,7 @@ export function Navigation() {
                   className={cn(
                     'h-0.5 w-7 transition-[opacity,transform] duration-300 ease-out-quad',
                     isScrolled || isMenuOpen ? 'bg-exvia-black' : 'bg-white',
-                    isMenuOpen && 'scale-0 opacity-0'
+                    isMenuOpen && 'scale-90 opacity-0'
                   )}
                 />
                 <span

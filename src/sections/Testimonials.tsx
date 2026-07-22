@@ -7,15 +7,13 @@ import { testimonialsConfig } from '@/config';
 export function Testimonials() {
   const testimonials = testimonialsConfig.testimonials;
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.2 });
 
   const goToSlide = useCallback((index: number) => {
-    if (isAnimating || testimonials.length === 0) return;
-    setIsAnimating(true);
+    if (testimonials.length === 0) return;
     setActiveIndex(index);
-    setTimeout(() => setIsAnimating(false), 1000);
-  }, [isAnimating, testimonials.length]);
+  }, [testimonials.length]);
 
   const nextSlide = useCallback(() => {
     if (testimonials.length === 0) return;
@@ -27,12 +25,12 @@ export function Testimonials() {
     goToSlide((activeIndex - 1 + testimonials.length) % testimonials.length);
   }, [activeIndex, goToSlide, testimonials.length]);
 
-  // Auto-advance slides
+  // Auto-advance, paused while the user is hovering or focused inside the slider.
   useEffect(() => {
-    if (testimonials.length === 0) return;
+    if (testimonials.length === 0 || isPaused) return;
     const interval = setInterval(nextSlide, 6000);
     return () => clearInterval(interval);
-  }, [nextSlide, testimonials.length]);
+  }, [nextSlide, testimonials.length, isPaused]);
 
   if (testimonials.length === 0) return null;
 
@@ -74,6 +72,10 @@ export function Testimonials() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           )}
           style={{ transitionDelay: '200ms' }}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onFocusCapture={() => setIsPaused(true)}
+          onBlurCapture={() => setIsPaused(false)}
         >
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Image Side */}
@@ -174,7 +176,7 @@ export function Testimonials() {
                       key={index}
                       onClick={() => goToSlide(index)}
                       className={cn(
-                        'w-2 h-2 rounded-full transition-[width,background-color] duration-300',
+                        'w-2 h-2 rounded-full transition-[width,background-color] duration-300 pressable',
                         index === activeIndex
                           ? 'bg-exvia-black w-6'
                           : 'bg-exvia-border hover:bg-exvia-black/30'
@@ -188,14 +190,14 @@ export function Testimonials() {
                 <div className="flex gap-2">
                   <button
                     onClick={prevSlide}
-                    className="w-10 h-10 border border-exvia-border rounded-full flex items-center justify-center hover:border-exvia-black hover:bg-exvia-black hover:text-white transition-colors duration-300"
+                    className="w-10 h-10 border border-exvia-border rounded-full flex items-center justify-center hover:border-exvia-black hover:bg-exvia-black hover:text-white transition-colors duration-300 pressable"
                     aria-label="Previous testimonial"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={nextSlide}
-                    className="w-10 h-10 border border-exvia-border rounded-full flex items-center justify-center hover:border-exvia-black hover:bg-exvia-black hover:text-white transition-colors duration-300"
+                    className="w-10 h-10 border border-exvia-border rounded-full flex items-center justify-center hover:border-exvia-black hover:bg-exvia-black hover:text-white transition-colors duration-300 pressable"
                     aria-label="Next testimonial"
                   >
                     <ChevronRight className="w-4 h-4" />

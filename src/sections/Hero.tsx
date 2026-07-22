@@ -241,7 +241,7 @@ export function Hero() {
         <span className="text-[0.65rem] font-geist-mono uppercase tracking-[0.25em] text-white/45">
           scroll
         </span>
-        <ArrowDown className="w-3.5 h-3.5 text-white/45 animate-bounce" />
+        <ArrowDown className="w-3.5 h-3.5 text-white/45 scroll-cue" />
       </div>
     </section>
   );

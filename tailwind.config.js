@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
@@ -90,62 +93,11 @@ module.exports = {
           "0%,70%,100%": { opacity: "1" },
           "20%,50%": { opacity: "0" },
         },
-        "fade-in": {
-          from: { opacity: "0" },
-          to: { opacity: "1" },
-        },
-        "fade-up": {
-          from: { opacity: "0", transform: "translateY(20px)" },
-          to: { opacity: "1", transform: "translateY(0)" },
-        },
-        "slide-up": {
-          from: { opacity: "0", transform: "translateY(15%)" },
-          to: { opacity: "1", transform: "translateY(0)" },
-        },
-        "scale-in": {
-          from: { transform: "scale(1.2) translate3d(42vw, 30vh, 0)" },
-          to: { transform: "scale(1) translate3d(0, 0, 0)" },
-        },
-        "hero-reveal": {
-          "0%": { 
-            opacity: "0",
-            transform: "scale(1.1)",
-          },
-          "100%": { 
-            opacity: "1",
-            transform: "scale(1)",
-          },
-        },
-        "text-slide-out": {
-          from: { transform: "translateY(0)" },
-          to: { transform: "translateY(-150%)" },
-        },
-        "text-slide-in": {
-          from: { transform: "translateY(150%)" },
-          to: { transform: "translateY(0)" },
-        },
-        "slide-in-right": {
-          from: { transform: "translateX(100%)", opacity: "0" },
-          to: { transform: "translateX(0)", opacity: "1" },
-        },
-        "spin-slow": {
-          from: { transform: "rotate(0deg)" },
-          to: { transform: "rotate(360deg)" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "caret-blink": "caret-blink 1.25s ease-out infinite",
-        "fade-in": "fade-in 0.8s cubic-bezier(0.165, 0.840, 0.440, 1) forwards",
-        "fade-up": "fade-up 0.8s cubic-bezier(0.165, 0.840, 0.440, 1) forwards",
-        "slide-up": "slide-up 0.8s cubic-bezier(0.165, 0.840, 0.440, 1) forwards",
-        "scale-in": "scale-in 1.8s cubic-bezier(0.215, 0.610, 0.355, 1) forwards",
-        "hero-reveal": "hero-reveal 1.8s cubic-bezier(0.215, 0.610, 0.355, 1) forwards",
-        "text-slide-out": "text-slide-out 0.35s cubic-bezier(0.250, 0.460, 0.450, 0.940) forwards",
-        "text-slide-in": "text-slide-in 0.35s cubic-bezier(0.250, 0.460, 0.450, 0.940) forwards",
-        "slide-in-right": "slide-in-right 0.5s cubic-bezier(0.215, 0.610, 0.355, 1) forwards",
-        "spin-slow": "spin-slow 20s linear infinite",
       },
       transitionTimingFunction: {
         'out-quad': 'cubic-bezier(0.250, 0.460, 0.450, 0.940)',
@@ -153,6 +105,11 @@ module.exports = {
         'out-quart': 'cubic-bezier(0.165, 0.840, 0.440, 1)',
         'out-circ': 'cubic-bezier(0.075, 0.820, 0.165, 1)',
         'in-out-quad': 'cubic-bezier(0.455, 0.030, 0.515, 0.955)',
+      },
+      transitionDuration: {
+        '350': '350ms',
+        '400': '400ms',
+        '800': '800ms',
       },
     },
   },

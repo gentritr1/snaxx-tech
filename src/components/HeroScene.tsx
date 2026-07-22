@@ -102,6 +102,7 @@ function FlightPath() {
   const blueAnchor = useRef<THREE.Mesh>(null!);
   const orangeAnchor = useRef<THREE.Mesh>(null!);
   const tmp = useMemo(() => new THREE.Vector3(), []);
+  const lookTarget = useMemo(() => new THREE.Vector3(), []);
   const phase = useRef(2.5);
 
   useFrame((_, delta) => {
@@ -116,7 +117,7 @@ function FlightPath() {
 
     plane.current.position.set(x, y, z);
     tmp.set(-Math.sin(a), 0.14 * Math.cos(a * 2), Math.cos(a)).normalize();
-    plane.current.lookAt(tmp.clone().add(plane.current.position));
+    plane.current.lookAt(lookTarget.copy(tmp).add(plane.current.position));
     // bank into the turn; rocks its wings playfully while excited
     plane.current.rotateZ(-0.5 - Math.sin(t * 5.2) * 0.85 * Math.min(bus.excitement, 1));
 
@@ -448,18 +449,17 @@ function HintRing({ dismissed, onGone }: { dismissed: boolean; onGone: () => voi
       }
     }
     const t = clock.elapsedTime * 0.62;
-    const rings: Array<[THREE.Mesh, number]> = [
-      [ringA.current, 0],
-      [ringB.current, 0.5],
-    ];
-    for (const [mesh, phase] of rings) {
-      const cycle = (t + phase) % 1;
-      // shrink slightly while fading out so the ring feels "absorbed" by the box
-      mesh.scale.setScalar(Math.max((1.12 + cycle * 1.15) * (0.65 + 0.35 * fade.current), 0.001));
-      (mesh.material as THREE.MeshBasicMaterial).opacity =
-        Math.sin(cycle * Math.PI) * 0.62 * fade.current;
-    }
+    animateRing(ringA.current, t, 0);
+    animateRing(ringB.current, t, 0.5);
   });
+
+  function animateRing(mesh: THREE.Mesh, t: number, phase: number) {
+    const cycle = (t + phase) % 1;
+    // shrink slightly while fading out so the ring feels "absorbed" by the box
+    mesh.scale.setScalar(Math.max((1.12 + cycle * 1.15) * (0.65 + 0.35 * fade.current), 0.001));
+    (mesh.material as THREE.MeshBasicMaterial).opacity =
+      Math.sin(cycle * Math.PI) * 0.62 * fade.current;
+  }
 
   return (
     <group position={[0, 0.12, 0]} rotation={[-Math.PI / 2, 0, 0]}>

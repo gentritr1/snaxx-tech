@@ -55,7 +55,7 @@ export default function HeroCanvas({ reducedMotion }: { reducedMotion: boolean }
         dpr={[1, 2]}
         frameloop={frameloop}
         camera={{ position: [0, 1.15, 8.6], fov: 45 }}
-        gl={{ antialias: true, alpha: false }}
+        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       >
         <color attach="background" args={['#131313']} />
         <fog attach="fog" args={['#131313', 12, 26]} />

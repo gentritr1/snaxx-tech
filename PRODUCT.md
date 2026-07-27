@@ -6,7 +6,7 @@ brand
 
 ## Users
 
-Prospective players and users discovering Arrows, Rowflare, and FJALË, along with people evaluating the craft and reliability of Snaxx Tech as an independent studio. They may arrive from an app-store listing, a shared game link, or a search for support and need to understand the products quickly, trust the studio, and find release or legal information without friction.
+Prospective players and users discovering Arrows, Block Destroy, and FJALË, along with people evaluating the craft and reliability of Snaxx Tech as an independent studio. They may arrive from an app-store listing, a shared game link, or a search for support and need to understand the products quickly, trust the studio, and find release or legal information without friction.
 
 ## Product Purpose
 

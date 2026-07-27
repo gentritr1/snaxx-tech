@@ -41,6 +41,11 @@ export default function App() {
       <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Home />} />
+          {/* Canonical per-app document URLs, e.g. /block-destroy/privacy */}
+          <Route path="/:appSlug/privacy" element={<LegalPage kind="privacy" />} />
+          <Route path="/:appSlug/terms" element={<LegalPage kind="terms" />} />
+          <Route path="/:appSlug/support" element={<LegalPage kind="support" />} />
+          {/* Older published URLs — Play Console and AdMob may still point here */}
           <Route path="/privacy/:appSlug" element={<LegalPage kind="privacy" />} />
           <Route path="/terms/:appSlug" element={<LegalPage kind="terms" />} />
           <Route path="*" element={<NotFound />} />

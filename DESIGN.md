@@ -10,7 +10,7 @@ colors:
   electric-blue: "#0082F3"
   focus-blue: "#4D65FF"
   arrows-blue: "#0082F3"
-  rowflare-orange: "#FF7A29"
+  block-destroy-orange: "#FF7A29"
   fjale-gold: "#D08700"
 typography:
   display:
@@ -89,7 +89,7 @@ The system rejects stiff corporate seriousness, generic agency-template or repet
 
 ## Colors
 
-The palette is nearly monochrome at the studio level, allowing electric blue, Rowflare orange, and FJALË gold to announce product identity.
+The palette is nearly monochrome at the studio level, allowing electric blue, Block Destroy orange, and FJALË gold to announce product identity.
 
 ### Primary
 
@@ -99,7 +99,7 @@ The palette is nearly monochrome at the studio level, allowing electric blue, Ro
 ### Secondary
 
 - **Electric Blue:** The studio's technical spark and Arrows identifier.
-- **Rowflare Orange:** A warm product-specific accent for Rowflare.
+- **Block Destroy Orange:** A warm product-specific accent for Block Destroy.
 
 ### Tertiary
 
@@ -188,7 +188,7 @@ Legal pages use a sticky studio bar, a muted document header, app-specific chip,
 
 ### Do:
 
-- **Do** use real Arrows, Rowflare, and FJALË assets as the primary source of personality.
+- **Do** use real Arrows, Block Destroy, and FJALË assets as the primary source of personality.
 - **Do** keep product accents attached to their named product.
 - **Do** keep legal and support copy on Clean Canvas with a readable 65–75ch measure.
 - **Do** provide visible keyboard focus, 44px touch targets, and reduced-motion alternatives.

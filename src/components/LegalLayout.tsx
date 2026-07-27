@@ -1,8 +1,6 @@
 import { Link } from 'react-router';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
-import { legalApps, type AppLegal } from '@/legal/content';
-
-export type LegalKind = 'privacy' | 'terms';
+import { legalApps, KIND_TITLES, type AppLegal, type LegalKind } from '@/legal/content';
 
 interface LegalLayoutProps {
   app: AppLegal;
@@ -10,13 +8,16 @@ interface LegalLayoutProps {
   children: React.ReactNode;
 }
 
-const KIND_META: Record<LegalKind, { title: string; sibling: LegalKind; siblingTitle: string }> = {
-  privacy: { title: 'Privacy Policy', sibling: 'terms', siblingTitle: 'Terms of Service' },
-  terms: { title: 'Terms of Service', sibling: 'privacy', siblingTitle: 'Privacy Policy' },
-};
+// Documents this app actually publishes, in a stable order — support only
+// exists for apps that define it.
+function siblingKinds(app: AppLegal, kind: LegalKind): LegalKind[] {
+  const all: LegalKind[] = ['privacy', 'terms', 'support'];
+  return all.filter((k) => k !== kind && (k !== 'support' || Boolean(app.support)));
+}
 
 export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
-  const meta = KIND_META[kind];
+  const meta = { title: KIND_TITLES[kind] };
+  const siblings = siblingKinds(app, kind);
   const otherApp = Object.values(legalApps).find((a) => a.slug !== app.slug);
 
   return (
@@ -67,12 +68,14 @@ export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
               {meta.title}
             </h1>
 
-            <p className="mt-4 text-sm font-geist-mono leading-relaxed text-exvia-black/60">
-              Last updated: {app.lastUpdated ?? app.effectiveDate}
-              {app.lastUpdated && app.lastUpdated !== app.effectiveDate && (
-                <> · Effective: {app.effectiveDate}</>
-              )}
-            </p>
+            {kind !== 'support' && (
+              <p className="mt-4 text-sm font-geist-mono leading-relaxed text-exvia-black/60">
+                Last updated: {app.lastUpdated ?? app.effectiveDate}
+                {app.lastUpdated && app.lastUpdated !== app.effectiveDate && (
+                  <> · Effective: {app.effectiveDate}</>
+                )}
+              </p>
+            )}
 
             <p className="mt-4 text-sm text-exvia-black/60">
               Android · No Snaxx Tech account · Ad-supported
@@ -80,18 +83,25 @@ export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
 
             {/* Cross links */}
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link
-                to={`/${meta.sibling}/${app.slug}`}
-                className="pressable group inline-flex min-h-11 items-center gap-2 rounded-lg bg-exvia-black px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-exvia-black/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
-              >
-                <span>
-                  {app.appName} {meta.siblingTitle}
-                </span>
-                <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
-              </Link>
-              {otherApp && (
+              {siblings.map((siblingKind, i) => (
                 <Link
-                  to={`/${kind}/${otherApp.slug}`}
+                  key={siblingKind}
+                  to={`/${app.slug}/${siblingKind}`}
+                  className={
+                    i === 0
+                      ? 'pressable group inline-flex min-h-11 items-center gap-2 rounded-lg bg-exvia-black px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-exvia-black/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2'
+                      : 'pressable group inline-flex min-h-11 items-center gap-2 rounded-lg border border-exvia-border bg-white px-4 py-2.5 text-sm font-medium text-exvia-black transition-colors hover:bg-exvia-subtle/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2'
+                  }
+                >
+                  <span>
+                    {app.appName} {KIND_TITLES[siblingKind]}
+                  </span>
+                  <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                </Link>
+              ))}
+              {otherApp && kind !== 'support' && (
+                <Link
+                  to={`/${otherApp.slug}/${kind}`}
                   className="pressable group inline-flex min-h-11 items-center gap-2 rounded-lg border border-exvia-border bg-white px-4 py-2.5 text-sm font-medium text-exvia-black transition-colors hover:bg-exvia-subtle/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
                 >
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: otherApp.accent }} aria-hidden="true" />
@@ -120,17 +130,25 @@ export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
               {Object.values(legalApps).map((a) => (
                 <span key={a.slug} className="flex flex-wrap gap-x-4">
                   <Link
-                    to={`/privacy/${a.slug}`}
+                    to={`/${a.slug}/privacy`}
                     className="inline-flex min-h-11 items-center rounded-md text-xs text-exvia-black/60 hover:text-exvia-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
                   >
                     {a.appName} Privacy
                   </Link>
                   <Link
-                    to={`/terms/${a.slug}`}
+                    to={`/${a.slug}/terms`}
                     className="inline-flex min-h-11 items-center rounded-md text-xs text-exvia-black/60 hover:text-exvia-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
                   >
                     {a.appName} Terms
                   </Link>
+                  {a.support && (
+                    <Link
+                      to={`/${a.slug}/support`}
+                      className="inline-flex min-h-11 items-center rounded-md text-xs text-exvia-black/60 hover:text-exvia-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
+                    >
+                      {a.appName} Support
+                    </Link>
+                  )}
                 </span>
               ))}
             </nav>

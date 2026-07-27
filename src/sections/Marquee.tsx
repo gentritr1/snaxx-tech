@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 // Two identical sequences slide left by 50% for a seamless loop; CSS pauses
 // on hover and disables the animation under prefers-reduced-motion.
 
-const ITEMS = ['ARROWS', 'ROWFLARE', 'FJALË', 'MORE IN THE LAB', 'EST. 2026'];
+const ITEMS = ['ARROWS', 'BLOCK DESTROY', 'FJALË', 'MORE IN THE LAB', 'EST. 2026'];
 
 function Sequence() {
   return (
@@ -34,7 +34,7 @@ export function Marquee() {
         </div>
       </div>
       {/* Accessible, non-animated label for screen readers */}
-      <span className="sr-only">Snaxx Tech apps: Arrows, Rowflare, FJALË, and more in the lab. Established 2026.</span>
+      <span className="sr-only">Snaxx Tech apps: Arrows, Block Destroy, FJALË, and more in the lab. Established 2026.</span>
     </div>
   );
 }

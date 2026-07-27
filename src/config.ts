@@ -1,5 +1,5 @@
 // Site configuration — Snaxx Tech
-// Studio landing page showcasing Arrows (game) and Rowflare,
+// Studio landing page showcasing Arrows (game) and Block Destroy,
 // with links to per-app Privacy Policy and Terms of Service pages.
 
 export interface SiteConfig {
@@ -12,7 +12,7 @@ export const siteConfig: SiteConfig = {
   language: "en",
   title: "Snaxx Tech — Indie Apps & Games Studio",
   description:
-    "Snaxx Tech is an independent studio crafting playful apps and games, from Arrows and Rowflare coming to Android to the daily Albanian word game FJALË on the web.",
+    "Snaxx Tech is an independent studio crafting playful apps and games, from Arrows and Block Destroy coming to Android to the daily Albanian word game FJALË on the web.",
 };
 
 // Navigation configuration
@@ -52,7 +52,7 @@ export const heroConfig: HeroConfig = {
   name: "SNAXX",
   roles: ["Apps, games & useful little things", "Independent by design"],
   intro: "We turn small ideas into apps, games, and satisfying little moments.",
-  releaseNote: "Arrows + Rowflare · coming to Android",
+  releaseNote: "Arrows + Block Destroy · coming to Android",
   backgroundImage: "/images/hero-bg.jpg",
 };
 
@@ -81,7 +81,7 @@ export const aboutConfig: AboutConfig = {
   label: "The Studio",
   heading: "Small team. Big curiosity.",
   description:
-    "We make software with a pulse — from the precision arcade action of Arrows to the everyday flow of Rowflare and the daily Albanian word game FJALË. Every tap, swipe, and transition gets attention until it feels just right.",
+    "We make software with a pulse — from the precision arcade action of Arrows to the quiet focus of Block Destroy and the daily Albanian word game FJALË. Every tap, swipe, and transition gets attention until it feels just right.",
   experienceValue: "",
   experienceLabel: "",
   stats: [
@@ -126,8 +126,8 @@ export const servicesConfig: ServicesConfig = {
       iconName: "Smartphone",
       title: "App Design & Engineering",
       description:
-        "From first sketch to release, we craft fast, thoughtful apps like Rowflare that make everyday tasks feel effortless.",
-      image: "/images/app-rowflare.webp",
+        "From first sketch to release, we craft fast, thoughtful apps and games like Block Destroy that feel effortless in the hand.",
+      image: "/images/app-block-destroy.webp",
     },
     {
       iconName: "ShieldCheck",
@@ -198,15 +198,15 @@ export const portfolioConfig: PortfolioConfig = {
       termsHref: "/terms/arrows",
     },
     {
-      title: "Rowflare",
-      category: "A focused mobile utility",
+      title: "Block Destroy",
+      category: "An offline block puzzle",
       status: "Coming to Android",
       action: "Release in progress",
       year: "2026",
-      image: "/images/app-rowflare.webp",
+      image: "/images/app-block-destroy.webp",
       accent: "#FF7A29",
-      privacyHref: "/privacy/rowflare",
-      termsHref: "/terms/rowflare",
+      privacyHref: "/block-destroy/privacy",
+      termsHref: "/block-destroy/terms",
     },
     {
       title: "FJALË",
@@ -274,7 +274,7 @@ export const ctaConfig: CTAConfig = {
   tags: ["Android", "Web", "Independent studio"],
   heading: "Ideas, questions, bug reports — we read every one.",
   description:
-    "Whether it's support for Arrows, Rowflare, or FJALË, a press inquiry, or a wild idea for our next app — our inbox is always open.",
+    "Whether it's support for Arrows, Block Destroy, or FJALË, a press inquiry, or a wild idea for our next app — our inbox is always open.",
   buttonText: "Email Us",
   buttonHref: "mailto:techsnaxx@gmail.com",
   email: "techsnaxx@gmail.com",
@@ -309,13 +309,13 @@ export interface FooterConfig {
 export const footerConfig: FooterConfig = {
   logo: "Snaxx Tech",
   description:
-    "An independent studio crafting apps and games with care. Home of Arrows, Rowflare, and the daily Albanian word game FJALË.",
+    "An independent studio crafting apps and games with care. Home of Arrows, Block Destroy, and the daily Albanian word game FJALË.",
   columns: [
     {
       title: "Apps",
       links: [
         { label: "Arrows", href: "#portfolio" },
-        { label: "Rowflare", href: "#portfolio" },
+        { label: "Block Destroy", href: "#portfolio" },
         { label: "FJALË", href: "https://xn--fjal-opa.com" },
         { label: "What's Next", href: "#portfolio" },
       ],
@@ -333,8 +333,9 @@ export const footerConfig: FooterConfig = {
       links: [
         { label: "Arrows — Privacy", href: "/privacy/arrows" },
         { label: "Arrows — Terms", href: "/terms/arrows" },
-        { label: "Rowflare — Privacy", href: "/privacy/rowflare" },
-        { label: "Rowflare — Terms", href: "/terms/rowflare" },
+        { label: "Block Destroy — Privacy", href: "/block-destroy/privacy" },
+        { label: "Block Destroy — Terms", href: "/block-destroy/terms" },
+        { label: "Block Destroy — Support", href: "/block-destroy/support" },
       ],
     },
   ],

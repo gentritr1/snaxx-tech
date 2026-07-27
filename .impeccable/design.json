@@ -7,7 +7,7 @@
       "ink": { "role": "neutral", "displayName": "Studio Ink", "canonical": "#131313" },
       "canvas": { "role": "neutral", "displayName": "Clean Canvas", "canonical": "#FFFFFF" },
       "electric-blue": { "role": "primary", "displayName": "Electric Blue", "canonical": "#0082F3" },
-      "rowflare-orange": { "role": "secondary", "displayName": "Rowflare Orange", "canonical": "#FF7A29" },
+      "block-destroy-orange": { "role": "secondary", "displayName": "Block Destroy Orange", "canonical": "#FF7A29" },
       "fjale-gold": { "role": "tertiary", "displayName": "FJALË Gold", "canonical": "#D08700" }
     },
     "typographyMeta": {

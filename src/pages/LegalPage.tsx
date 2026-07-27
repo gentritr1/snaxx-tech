@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router';
 import { ArrowUpRight, Mail } from 'lucide-react';
-import { getAppLegal } from '@/legal/content';
-import { LegalLayout, type LegalKind } from '@/components/LegalLayout';
+import { getAppLegal, KIND_TITLES, type LegalKind } from '@/legal/content';
+import { LegalLayout } from '@/components/LegalLayout';
 
 interface LegalPageProps {
   kind: LegalKind;
@@ -10,9 +10,11 @@ interface LegalPageProps {
 
 export default function LegalPage({ kind }: LegalPageProps) {
   const { appSlug } = useParams<{ appSlug: string }>();
-  const app = getAppLegal(appSlug);
+  const found = getAppLegal(appSlug);
+  // An app without a support document has no support page.
+  const app = kind === 'support' && !found?.support ? undefined : found;
 
-  const docTitle = kind === 'privacy' ? 'Privacy Policy' : 'Terms of Service';
+  const docTitle = KIND_TITLES[kind];
 
   useEffect(() => {
     const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
@@ -26,7 +28,9 @@ export default function LegalPage({ kind }: LegalPageProps) {
 
     if (description) {
       description.content = app
-        ? `${docTitle} for ${app.appName}, an Android ${app.appKind} by Snaxx Tech.`
+        ? kind === 'support'
+          ? `Support and troubleshooting for ${app.appName}, an offline Android ${app.appKind} by Snaxx Tech.`
+          : `${docTitle} for ${app.appName}, an Android ${app.appKind} by Snaxx Tech.`
         : 'The requested Snaxx Tech page could not be found.';
     }
 
@@ -43,7 +47,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
       if (canonical && previousCanonical) canonical.href = previousCanonical;
       if (!canonical) canonicalLink.remove();
     };
-  }, [app, docTitle]);
+  }, [app, docTitle, kind]);
 
   if (!app) {
     return (
@@ -66,7 +70,16 @@ export default function LegalPage({ kind }: LegalPageProps) {
     );
   }
 
-  const sections = kind === 'privacy' ? app.privacy : app.terms;
+  const sections =
+    kind === 'privacy' ? app.privacy : kind === 'terms' ? app.terms : (app.support ?? []);
+
+  // Privacy questions and support requests go to different inboxes.
+  const cardEmail =
+    kind === 'privacy'
+      ? (app.privacyEmail ?? app.contactEmail)
+      : kind === 'support'
+        ? (app.supportEmail ?? app.contactEmail)
+        : app.contactEmail;
 
   return (
     <div className="page-enter">
@@ -173,19 +186,24 @@ export default function LegalPage({ kind }: LegalPageProps) {
                 aria-hidden="true"
               />
               <h3 className="text-lg font-semibold text-exvia-black">
-                Questions about this document?
+                {kind === 'support' ? 'Still stuck?' : 'Questions about this document?'}
               </h3>
             </div>
             <p className="mt-2 text-sm text-exvia-black/60 leading-relaxed">
-              We're a small studio and we read every message. Email us and we'll get back to you
-              within a few business days.
+              We're a small studio and we read every message. Email us and we'll get back to you{' '}
+              {kind === 'support'
+                ? (app.supportResponseTime ?? 'within a few business days')
+                : 'within a few business days'}
+              .
+              {kind === 'support' &&
+                " Please don't include passwords or payment details — we'll never ask for them."}
             </p>
             <a
-              href={`mailto:${app.contactEmail}`}
+              href={`mailto:${cardEmail}`}
               className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-exvia-black hover:text-exvia-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
             >
               <Mail className="w-4 h-4" aria-hidden="true" />
-              <span>{app.contactEmail}</span>
+              <span>{cardEmail}</span>
             </a>
           </div>
         </article>

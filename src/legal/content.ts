@@ -1,14 +1,25 @@
-// Legal content for Snaxx Tech apps.
-// Each app gets its own Privacy Policy and Terms of Service at:
-//   /privacy/<slug>  and  /terms/<slug>
+// Legal + support content for Snaxx Tech apps.
+// Each app is published at:
+//   /<slug>/privacy   /<slug>/terms   /<slug>/support   (canonical)
+//   /privacy/<slug>   /terms/<slug>                     (kept working)
 //
 // IMPORTANT: Review these documents before publishing. They describe the
 // data practices configured below — update them if an app adds analytics,
 // accounts, or any other data collection. Each app declares its own ad
 // provider in its LegalProfile (Arrows: Unity Ads / Unity LevelPlay
-// mediation; Blockrow: Google AdMob only); the advertising disclosures
+// mediation; Block Destroy: Google AdMob only); the advertising disclosures
 // below must stay consistent with the Play Console Data Safety form for
 // that app's release build.
+
+// The document kinds an app can publish. Lives here rather than in the layout
+// component so Fast Refresh keeps working (components-only exports there).
+export type LegalKind = "privacy" | "terms" | "support";
+
+export const KIND_TITLES: Record<LegalKind, string> = {
+  privacy: "Privacy Policy",
+  terms: "Terms of Service",
+  support: "Support",
+};
 
 export interface LegalSection {
   id: string;
@@ -29,13 +40,19 @@ export interface AppLegal {
   accent: string; // hex accent color for chips & highlights
   effectiveDate: string;
   lastUpdated?: string; // shown as "Last updated"; falls back to effectiveDate
-  contactEmail: string;
+  contactEmail: string; // general studio contact
+  privacyEmail?: string; // privacy-specific contact; falls back to contactEmail
+  supportEmail?: string; // support-specific contact; falls back to contactEmail
+  supportResponseTime?: string; // e.g. "within 2–3 business days"
   privacy: LegalSection[];
   terms: LegalSection[];
+  support?: LegalSection[];
 }
 
 const EFFECTIVE_DATE = "July 18, 2026";
 const CONTACT_EMAIL = "techsnaxx@gmail.com";
+const PRIVACY_EMAIL = "privacy@snaxxtech.com";
+const SUPPORT_RESPONSE_TIME = "within 2–3 business days";
 
 // Advertising provider for a given app's release build.
 //   "unity-levelplay" — Unity Ads served through Unity LevelPlay (ironSource) mediation
@@ -48,6 +65,16 @@ interface LegalProfile {
   supportsPlayGames: boolean;
   isGame: boolean;
   adProvider: AdProvider;
+  // Ads only ever start when the player taps a "Watch Ad" button to earn a
+  // reward — nothing is interstitial or forced. Android-only.
+  rewardedAdsOnly?: boolean;
+  // No account, no sign-in, no cloud save, and no Snaxx Tech backend that
+  // receives gameplay data.
+  noBackend?: boolean;
+  // Declared to Play as a general-audience title.
+  generalAudience?: boolean;
+  // Contact address used in the privacy document's contact section.
+  privacyEmail?: string;
 }
 
 // Sections are authored unnumbered so a profile can insert one (e.g. the
@@ -85,8 +112,14 @@ function buildPrivacy(
   }
 
   const introAdParagraph = isAdMob
-    ? `${appName} is supported by advertising. The App uses Google AdMob, which is its only advertising provider. Google processes certain device and ad-interaction information as described below; Snaxx Tech does not receive your advertising identifier or build a user profile from that data. Where applicable law requires it, the App asks for your advertising choice before requesting any ad and honors that choice.`
+    ? `${appName} is supported by advertising. The App uses Google AdMob, which is its only advertising provider. Google processes certain device and ad-interaction information as described below; Snaxx Tech does not receive your advertising identifier, does not build its own advertising profile of you, and does not sell your personal information. Where applicable law requires it, the App asks for your advertising choice before requesting any ad and honors that choice.`
     : `${appName} is supported by advertising. The App uses Unity LevelPlay to manage ads, including Unity Ads. Those services process certain device and ad-interaction information as described below; Snaxx Tech does not receive your advertising identifier or build a user profile from that data.`;
+
+  // Stated up front because it is the single most load-bearing fact about how
+  // this app shows ads: nothing is interstitial, nothing is forced.
+  const rewardedAdsParagraph = `Ads in ${appName} are optional and are never forced on you. An ad only ever starts after you tap "Watch Ad" to earn one extra helper use; if you never tap it, no ad is requested. Rewarded ads are available on Android only.`;
+
+  const noBackendParagraph = `${appName} has no account and no sign-in, no cloud save, and no Snaxx Tech server that receives your gameplay data. Everything the game saves stays on your device.`;
 
   const advertisingSection: LegalSection = isAdMob
     ? {
@@ -94,8 +127,10 @@ function buildPrivacy(
         title: "Advertising",
         paragraphs: [
           `${appName} is supported by ads served by Google AdMob. AdMob is the only advertising provider used by the App. Google's published Google Play Data Safety guidance for the Google Mobile Ads SDK states that it collects and may share device or other identifiers, approximate location, and app activity such as ad interactions, and collects diagnostics.`,
+          ...(profile.rewardedAdsOnly ? [rewardedAdsParagraph] : []),
           "Where applicable law requires it, the App asks for your advertising choice before requesting any ad and honors that choice. That request is made through Google's User Messaging Platform (UMP): in the regions where consent is required, the UMP consent form is shown and your choice is collected before any ad is requested.",
           "Which ads you then see depends on the choice you made, your region, and your device settings. You can manage advertising privacy in Android Settings as well; the exact path varies by Android version and device manufacturer.",
+          "Snaxx Tech does not sell your personal information and does not build its own advertising profile of you.",
           "The App's Google Play Data safety answers must describe the combined behavior of the App and Google AdMob, including any ad technology providers Google allows to serve ads. If that configuration changes, we will update this policy and the Play Console declaration.",
         ],
       }
@@ -186,6 +221,7 @@ function buildPrivacy(
       paragraphs: [
         `This Privacy Policy explains how Snaxx Tech ("we", "us", or "our") handles information when you use ${appName}, our ${appKind} for Android (the "App").`,
         `We built ${appName} to be simple: there is no Snaxx Tech account to create, and we do not ask you for your name, email address, or phone number inside the App. ${profile.localData} are stored locally on your device.`,
+        ...(profile.noBackend ? [noBackendParagraph] : []),
         introAdParagraph,
       ],
     },
@@ -211,6 +247,11 @@ function buildPrivacy(
         "Your precise location",
         "Your contacts, photos, or files",
         "Payment-card information (Google Play processes purchases, if the App offers them)",
+        ...(profile.noBackend
+          ? [
+              "Gameplay data on a server — there is no account, no sign-in, no cloud save, and no Snaxx Tech backend that receives how you play",
+            ]
+          : []),
       ],
     },
     {
@@ -226,7 +267,9 @@ function buildPrivacy(
       id: "children",
       title: "Children's Privacy",
       paragraphs: [
-        `${appName} is not directed at children under the age of 13 (or the equivalent minimum age in your jurisdiction), and we do not knowingly collect personal information from children.`,
+        profile.generalAudience
+          ? `${appName} is a general-audience app. It is not directed at children under the age of 13 (or the equivalent minimum age in your jurisdiction), and we do not knowingly collect personal information from children.`
+          : `${appName} is not directed at children under the age of 13 (or the equivalent minimum age in your jurisdiction), and we do not knowingly collect personal information from children.`,
         "If the App's declared target audience ever includes children, we will configure the App and its advertising services to comply with Google Play's Families requirements before making that version available.",
         "If you believe a child has provided us with personal information, contact us and we will delete it promptly.",
       ],
@@ -272,9 +315,14 @@ function buildPrivacy(
     {
       id: "contact",
       title: "Contact Us",
-      paragraphs: [
-        `If you have any questions about this Privacy Policy or about how ${appName} handles information, you can reach us at ${CONTACT_EMAIL}. We aim to respond within a few business days.`,
-      ],
+      paragraphs: profile.privacyEmail
+        ? [
+            `If you have any questions about this Privacy Policy or about how ${appName} handles information, you can reach Snaxx Tech at ${profile.privacyEmail}. We aim to respond within a few business days.`,
+            `For anything that is not a privacy question — bugs, feedback, or general support — email us at ${CONTACT_EMAIL}.`,
+          ]
+        : [
+            `If you have any questions about this Privacy Policy or about how ${appName} handles information, you can reach us at ${CONTACT_EMAIL}. We aim to respond within a few business days.`,
+          ],
     },
   ]);
 }
@@ -390,6 +438,46 @@ function buildTerms(appName: string, appKind: string, profile: LegalProfile): Le
   ];
 }
 
+function buildSupport(
+  appName: string,
+  appKind: string,
+  supportEmail: string,
+  responseTime: string,
+): LegalSection[] {
+  return numberSections([
+    {
+      id: "about",
+      title: `About ${appName}`,
+      paragraphs: [
+        `${appName} is an offline ${appKind} for Android.`,
+        "This page covers the questions we get most often. If none of it helps, email us — a real person reads it.",
+      ],
+    },
+    {
+      id: "troubleshooting",
+      title: "Troubleshooting",
+      paragraphs: ["The most common things players run into, and what to do about them:"],
+      list: [
+        "A shape won't move — dimmed shapes are the ones that do not fit anywhere on the current board. Try a different shape, or use Shuffle, Break, or Hint.",
+        "Prefer tapping to dragging — tap a shape in the tray, then tap a highlighted cell on the board to place it.",
+        "An ad didn't grant a helper — the helper is granted only when the ad reports completion. An ad that is skipped, closed early, or interrupted grants nothing. No score or board progress is ever removed when this happens.",
+        "Restore a run — go to the home screen and choose Resume. Starting a new run permanently replaces the current board, so use Resume if you want the old one back.",
+        "No sound — check the in-game speaker control, then check your device's media volume.",
+        "Reset local data — clear the app's storage in Android settings, or reinstall the app. This removes the active run and your local scores.",
+      ],
+    },
+    {
+      id: "contact",
+      title: "Contact Us",
+      paragraphs: [
+        `Email ${supportEmail} and we will get back to you ${responseTime}.`,
+        `It helps to include your device model, your Android version, and what you were doing when the problem happened.`,
+        "Please never send passwords or payment details. We will never ask you for them, and you do not need an account to play.",
+      ],
+    },
+  ]);
+}
+
 const ARROWS_PROFILE: LegalProfile = {
   localData: "Settings, game progress, high scores, and achievements where supported",
   supportsPlayGames: true,
@@ -397,11 +485,19 @@ const ARROWS_PROFILE: LegalProfile = {
   adProvider: "unity-levelplay",
 };
 
-const BLOCKROW_PROFILE: LegalProfile = {
-  localData: "Settings, preferences, and app progress",
+// Block Destroy — package name is com.blockrow.game for historical reasons
+// (the game shipped as Rowflare, then Blockrow, then Block Blaster). The
+// package name is deliberately left alone; only the display name changed.
+const BLOCK_DESTROY_PROFILE: LegalProfile = {
+  localData:
+    "Your active run, high score, best combo, sound preference, and tutorial status",
   supportsPlayGames: false,
-  isGame: false,
+  isGame: true,
   adProvider: "admob",
+  rewardedAdsOnly: true,
+  noBackend: true,
+  generalAudience: true,
+  privacyEmail: PRIVACY_EMAIL,
 };
 
 export const legalApps: Record<string, AppLegal> = {
@@ -415,22 +511,35 @@ export const legalApps: Record<string, AppLegal> = {
     privacy: buildPrivacy("Arrows", "arcade game", ARROWS_PROFILE),
     terms: buildTerms("Arrows", "arcade game", ARROWS_PROFILE),
   },
-  blockrow: {
-    slug: "blockrow",
-    appName: "Blockrow",
-    appKind: "mobile app",
+  "block-destroy": {
+    slug: "block-destroy",
+    appName: "Block Destroy",
+    appKind: "block puzzle game",
     accent: "#FF7A29",
     effectiveDate: EFFECTIVE_DATE,
     lastUpdated: "July 27, 2026",
     contactEmail: CONTACT_EMAIL,
-    privacy: buildPrivacy("Blockrow", "mobile app", BLOCKROW_PROFILE),
-    terms: buildTerms("Blockrow", "mobile app", BLOCKROW_PROFILE),
+    privacyEmail: PRIVACY_EMAIL,
+    supportEmail: CONTACT_EMAIL,
+    supportResponseTime: SUPPORT_RESPONSE_TIME,
+    privacy: buildPrivacy("Block Destroy", "block puzzle game", BLOCK_DESTROY_PROFILE),
+    terms: buildTerms("Block Destroy", "block puzzle game", BLOCK_DESTROY_PROFILE),
+    support: buildSupport(
+      "Block Destroy",
+      "block puzzle game",
+      CONTACT_EMAIL,
+      SUPPORT_RESPONSE_TIME,
+    ),
   },
 };
 
 // Slugs that used to be published and must keep resolving (renamed apps).
+// Play Console, AdMob, and any store listing may still point at these.
 const LEGACY_SLUGS: Record<string, string> = {
-  rowflare: "blockrow",
+  rowflare: "block-destroy",
+  blockrow: "block-destroy",
+  "block-blaster": "block-destroy",
+  blockblaster: "block-destroy",
 };
 
 export function getAppLegal(slug: string | undefined): AppLegal | undefined {

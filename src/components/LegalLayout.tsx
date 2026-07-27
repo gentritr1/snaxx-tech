@@ -68,7 +68,10 @@ export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
             </h1>
 
             <p className="mt-4 text-sm font-geist-mono leading-relaxed text-exvia-black/60">
-              Last updated: {app.effectiveDate}
+              Last updated: {app.lastUpdated ?? app.effectiveDate}
+              {app.lastUpdated && app.lastUpdated !== app.effectiveDate && (
+                <> · Effective: {app.effectiveDate}</>
+              )}
             </p>
 
             <p className="mt-4 text-sm text-exvia-black/60">

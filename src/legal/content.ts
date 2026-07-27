@@ -4,10 +4,11 @@
 //
 // IMPORTANT: Review these documents before publishing. They describe the
 // data practices configured below — update them if an app adds analytics,
-// accounts, or any other data collection. These apps are ad-supported via
-// Unity Ads / Unity LevelPlay (ironSource) mediation; the advertising
-// disclosures below must stay consistent with the Play Console Data Safety
-// form.
+// accounts, or any other data collection. Each app declares its own ad
+// provider in its LegalProfile (Arrows: Unity Ads / Unity LevelPlay
+// mediation; Blockrow: Google AdMob only); the advertising disclosures
+// below must stay consistent with the Play Console Data Safety form for
+// that app's release build.
 
 export interface LegalSection {
   id: string;
@@ -27,6 +28,7 @@ export interface AppLegal {
   appKind: string; // e.g. "arcade game" / "mobile app"
   accent: string; // hex accent color for chips & highlights
   effectiveDate: string;
+  lastUpdated?: string; // shown as "Last updated"; falls back to effectiveDate
   contactEmail: string;
   privacy: LegalSection[];
   terms: LegalSection[];
@@ -35,10 +37,23 @@ export interface AppLegal {
 const EFFECTIVE_DATE = "July 18, 2026";
 const CONTACT_EMAIL = "techsnaxx@gmail.com";
 
+// Advertising provider for a given app's release build.
+//   "unity-levelplay" — Unity Ads served through Unity LevelPlay (ironSource) mediation
+//   "admob"           — Google AdMob as the sole advertising provider, with consent
+//                       collected through Google's User Messaging Platform (UMP)
+type AdProvider = "unity-levelplay" | "admob";
+
 interface LegalProfile {
   localData: string;
   supportsPlayGames: boolean;
   isGame: boolean;
+  adProvider: AdProvider;
+}
+
+// Sections are authored unnumbered so a profile can insert one (e.g. the
+// AdMob-only "Your Privacy Choices") without hand-renumbering the rest.
+function numberSections(sections: LegalSection[]): LegalSection[] {
+  return sections.map((section, i) => ({ ...section, title: `${i + 1}. ${section.title}` }));
 }
 
 function buildPrivacy(
@@ -46,11 +61,20 @@ function buildPrivacy(
   appKind: string,
   profile: LegalProfile,
 ): LegalSection[] {
-  const informationList = [
-    `Local app data — ${profile.localData} are saved locally on your device and are not sent to Snaxx Tech.`,
-    "Advertising data — Unity LevelPlay and the ad networks enabled for the App may collect an Android advertising identifier or another device identifier, IP address and approximate location, device and operating-system information, and app activity such as ad views and clicks. They use this data for advertising, analytics, frequency capping, and fraud prevention, security, and compliance.",
-    "Diagnostics — Unity LevelPlay may collect diagnostics about the ad SDK and ad delivery. Google Play may also make crash or performance reports available to us according to your device and Google Play settings. We use reports available to us to diagnose problems and improve the App.",
-  ];
+  const isAdMob = profile.adProvider === "admob";
+
+  const informationList = isAdMob
+    ? [
+        `Local app data — ${profile.localData} are saved locally on your device and are not sent to Snaxx Tech.`,
+        "Advertising data — Google AdMob and the ad technology providers Google works with may collect an Android advertising identifier or another device identifier, IP address and approximate location, device and operating-system information, and app activity such as ad views and clicks. They use this data for advertising, analytics, frequency capping, and fraud prevention, security, and compliance.",
+        "Advertising choice — where consent is required, the choice you make in the consent form is recorded on your device by Google's User Messaging Platform so the App can apply it to later ad requests.",
+        "Diagnostics — the Google Mobile Ads SDK may collect diagnostics about the ad SDK and ad delivery. Google Play may also make crash or performance reports available to us according to your device and Google Play settings. We use reports available to us to diagnose problems and improve the App.",
+      ]
+    : [
+        `Local app data — ${profile.localData} are saved locally on your device and are not sent to Snaxx Tech.`,
+        "Advertising data — Unity LevelPlay and the ad networks enabled for the App may collect an Android advertising identifier or another device identifier, IP address and approximate location, device and operating-system information, and app activity such as ad views and clicks. They use this data for advertising, analytics, frequency capping, and fraud prevention, security, and compliance.",
+        "Diagnostics — Unity LevelPlay may collect diagnostics about the ad SDK and ad delivery. Google Play may also make crash or performance reports available to us according to your device and Google Play settings. We use reports available to us to diagnose problems and improve the App.",
+      ];
 
   if (profile.supportsPlayGames) {
     informationList.splice(
@@ -60,37 +84,125 @@ function buildPrivacy(
     );
   }
 
-  return [
+  const introAdParagraph = isAdMob
+    ? `${appName} is supported by advertising. The App uses Google AdMob, which is its only advertising provider. Google processes certain device and ad-interaction information as described below; Snaxx Tech does not receive your advertising identifier or build a user profile from that data. Where applicable law requires it, the App asks for your advertising choice before requesting any ad and honors that choice.`
+    : `${appName} is supported by advertising. The App uses Unity LevelPlay to manage ads, including Unity Ads. Those services process certain device and ad-interaction information as described below; Snaxx Tech does not receive your advertising identifier or build a user profile from that data.`;
+
+  const advertisingSection: LegalSection = isAdMob
+    ? {
+        id: "advertising",
+        title: "Advertising",
+        paragraphs: [
+          `${appName} is supported by ads served by Google AdMob. AdMob is the only advertising provider used by the App. Google's published Google Play Data Safety guidance for the Google Mobile Ads SDK states that it collects and may share device or other identifiers, approximate location, and app activity such as ad interactions, and collects diagnostics.`,
+          "Where applicable law requires it, the App asks for your advertising choice before requesting any ad and honors that choice. That request is made through Google's User Messaging Platform (UMP): in the regions where consent is required, the UMP consent form is shown and your choice is collected before any ad is requested.",
+          "Which ads you then see depends on the choice you made, your region, and your device settings. You can manage advertising privacy in Android Settings as well; the exact path varies by Android version and device manufacturer.",
+          "The App's Google Play Data safety answers must describe the combined behavior of the App and Google AdMob, including any ad technology providers Google allows to serve ads. If that configuration changes, we will update this policy and the Play Console declaration.",
+        ],
+      }
+    : {
+        id: "advertising",
+        title: "Advertising",
+        paragraphs: [
+          `${appName} is supported by ads managed through Unity LevelPlay. Unity's published Google Play Data Safety guidance states that its SDK collects and may share approximate location, ad interactions, and device or other identifiers, and collects diagnostics. These disclosures can vary when additional ad-network adapters are enabled.`,
+          "Depending on your region, consent choices, and device settings, ads may be personalized or contextual. You can manage advertising privacy in Android Settings; the exact path varies by Android version and device manufacturer.",
+          "The App's Google Play Data safety answers must describe the combined behavior of the App, Unity LevelPlay, and every ad-network adapter included in the release build. If that configuration changes, we will update this policy and the Play Console declaration.",
+        ],
+      };
+
+  const privacyChoicesSection: LegalSection = {
+    id: "privacy-choices",
+    title: "Your Privacy Choices",
+    paragraphs: [
+      "Where consent is required, Google's User Messaging Platform consent form is shown before any ad is requested, and the App applies the choice you make to every ad request after that.",
+      `You can review and change your consent at any time from "Ad Privacy Choices" in the App's Privacy & Support screen. Reopening it shows the same form, and any new choice takes effect from your next ad request.`,
+      "You can also reset or delete your Android advertising ID, or opt out of ad personalization, in Android Settings; the exact path varies by Android version and device manufacturer. To remove everything the App has saved on your device, clear the app's storage or uninstall the App.",
+    ],
+  };
+
+  const thirdPartySection: LegalSection = isAdMob
+    ? {
+        id: "third-party-services",
+        title: "Third-Party Services",
+        paragraphs: [
+          `${appName} works with the third parties below, whose own policies apply when their services are used:`,
+        ],
+        list: [
+          "Google AdMob (Google Mobile Ads SDK) — supplies all advertising in the App and processes the categories described in the Advertising section. AdMob is the only advertising provider used by the App.",
+          "Google's ad technology providers — where Google allows a third-party ad technology provider to serve an ad, it may process the same advertising categories under Google's policies and, where required, subject to the advertising choice you made.",
+          "Google Play — distributes the App, processes purchases where offered, and provides platform features under Google's Privacy Policy.",
+        ],
+        links: [
+          {
+            label: "Google privacy policy",
+            href: "https://policies.google.com/privacy",
+            description: "How Google handles information across its services, including AdMob and Google Play.",
+          },
+          {
+            label: "How Google uses information from sites or apps that use our services",
+            href: "https://policies.google.com/technologies/partner-sites",
+            description: "What Google collects and how it is used when an app uses Google services such as AdMob.",
+          },
+          {
+            label: "Google advertising technologies",
+            href: "https://policies.google.com/technologies/ads",
+            description: "How Google uses identifiers and cookies for advertising, and the controls available to you.",
+          },
+        ],
+      }
+    : {
+        id: "third-party-services",
+        title: "Third-Party Services",
+        paragraphs: [
+          `${appName} works with the third parties below, whose own policies apply when their services are used:`,
+        ],
+        list: [
+          "Unity Technologies (Unity LevelPlay and Unity Ads) — manages and supplies advertising and processes the categories described in the Advertising section.",
+          "Enabled mediated ad networks — if an additional network is included in the release build, it may supply an ad and process the same advertising categories under its own policy. Unity publishes the networks supported by LevelPlay.",
+          "Google Play and Google Play Games — distributes the App, processes purchases where offered, and provides optional platform features under Google's Privacy Policy.",
+        ],
+        links: [
+          {
+            label: "Unity game player and app user privacy policy",
+            href: "https://unity.com/legal/game-player-and-app-user-privacy-policy",
+            description: "How Unity handles information from apps that use Unity services.",
+          },
+          {
+            label: "Unity LevelPlay mediation networks",
+            href: "https://docs.unity.com/en-us/grow/levelplay/sdk/android/mediation-network-guides",
+            description: "Unity's current directory of ad networks supported by LevelPlay on Android.",
+          },
+          {
+            label: "Google privacy policy",
+            href: "https://policies.google.com/privacy",
+            description: "How Google handles information across Google Play and Play Games.",
+          },
+        ],
+      };
+
+  return numberSections([
     {
       id: "introduction",
-      title: "1. Introduction",
+      title: "Introduction",
       paragraphs: [
         `This Privacy Policy explains how Snaxx Tech ("we", "us", or "our") handles information when you use ${appName}, our ${appKind} for Android (the "App").`,
         `We built ${appName} to be simple: there is no Snaxx Tech account to create, and we do not ask you for your name, email address, or phone number inside the App. ${profile.localData} are stored locally on your device.`,
-        `${appName} is supported by advertising. The App uses Unity LevelPlay to manage ads, including Unity Ads. Those services process certain device and ad-interaction information as described below; Snaxx Tech does not receive your advertising identifier or build a user profile from that data.`,
+        introAdParagraph,
       ],
     },
     {
       id: "information-we-collect",
-      title: "2. Information We Collect",
+      title: "Information We Collect",
       paragraphs: [
         `${appName} does not require you to create an account and does not ask for your name, email address, phone number, or any other personal information.`,
         "The information involved while you use the App falls into the categories below:",
       ],
       list: informationList,
     },
-    {
-      id: "advertising",
-      title: "3. Advertising",
-      paragraphs: [
-        `${appName} is supported by ads managed through Unity LevelPlay. Unity's published Google Play Data Safety guidance states that its SDK collects and may share approximate location, ad interactions, and device or other identifiers, and collects diagnostics. These disclosures can vary when additional ad-network adapters are enabled.`,
-        "Depending on your region, consent choices, and device settings, ads may be personalized or contextual. You can manage advertising privacy in Android Settings; the exact path varies by Android version and device manufacturer.",
-        "The App's Google Play Data safety answers must describe the combined behavior of the App, Unity LevelPlay, and every ad-network adapter included in the release build. If that configuration changes, we will update this policy and the Play Console declaration.",
-      ],
-    },
+    advertisingSection,
+    ...(isAdMob ? [privacyChoicesSection] : []),
     {
       id: "data-we-do-not-collect",
-      title: "4. What We Do Not Collect",
+      title: "What We Do Not Collect",
       paragraphs: [
         `Snaxx Tech itself does not ask for or receive the following through the App. Advertising and Google Play services process the limited categories described elsewhere in this policy.`,
       ],
@@ -103,44 +215,16 @@ function buildPrivacy(
     },
     {
       id: "local-storage",
-      title: "5. Data Stored on Your Device",
+      title: "Data Stored on Your Device",
       paragraphs: [
         `${profile.localData} are stored on your device using the operating system's standard app storage. This local data is not transmitted to Snaxx Tech.`,
         "You can erase this data at any time by clearing the app's storage in your device settings or by uninstalling the App. (Uninstalling does not delete data already processed by our ad partner; see their policy for how to manage that.)",
       ],
     },
-    {
-      id: "third-party-services",
-      title: "6. Third-Party Services",
-      paragraphs: [
-        `${appName} works with the third parties below, whose own policies apply when their services are used:`,
-      ],
-      list: [
-        "Unity Technologies (Unity LevelPlay and Unity Ads) — manages and supplies advertising and processes the categories described in the Advertising section.",
-        "Enabled mediated ad networks — if an additional network is included in the release build, it may supply an ad and process the same advertising categories under its own policy. Unity publishes the networks supported by LevelPlay.",
-        "Google Play and Google Play Games — distributes the App, processes purchases where offered, and provides optional platform features under Google's Privacy Policy.",
-      ],
-      links: [
-        {
-          label: "Unity game player and app user privacy policy",
-          href: "https://unity.com/legal/game-player-and-app-user-privacy-policy",
-          description: "How Unity handles information from apps that use Unity services.",
-        },
-        {
-          label: "Unity LevelPlay mediation networks",
-          href: "https://docs.unity.com/en-us/grow/levelplay/sdk/android/mediation-network-guides",
-          description: "Unity's current directory of ad networks supported by LevelPlay on Android.",
-        },
-        {
-          label: "Google privacy policy",
-          href: "https://policies.google.com/privacy",
-          description: "How Google handles information across Google Play and Play Games.",
-        },
-      ],
-    },
+    thirdPartySection,
     {
       id: "children",
-      title: "7. Children's Privacy",
+      title: "Children's Privacy",
       paragraphs: [
         `${appName} is not directed at children under the age of 13 (or the equivalent minimum age in your jurisdiction), and we do not knowingly collect personal information from children.`,
         "If the App's declared target audience ever includes children, we will configure the App and its advertising services to comply with Google Play's Families requirements before making that version available.",
@@ -149,44 +233,50 @@ function buildPrivacy(
     },
     {
       id: "security",
-      title: "8. Data Security",
+      title: "Data Security",
       paragraphs: [
         "Your local app data is stored on your device, where it is protected by your device's own security (passcode, biometric lock, and OS-level protections). We recommend keeping your device up to date to benefit from the latest protections.",
-        "Unity states that information collected by the LevelPlay SDK is encrypted in transit. Unity and any other enabled ad provider protect information under their own security practices and policies.",
+        isAdMob
+          ? "Google states that information collected by the Google Mobile Ads SDK is encrypted in transit. Google protects the information it processes for advertising under its own security practices and policies."
+          : "Unity states that information collected by the LevelPlay SDK is encrypted in transit. Unity and any other enabled ad provider protect information under their own security practices and policies.",
       ],
     },
     {
       id: "retention",
-      title: "9. Data Retention & Deletion",
+      title: "Data Retention & Deletion",
       paragraphs: [
         "We do not keep your local app data on our servers — it stays on your device until you delete it or uninstall the App.",
-        "Information processed by Unity or another enabled ad provider is retained under that provider's policy, not ours. Unity's app-user privacy policy explains how to submit an access, deletion, or opt-out request where those rights apply.",
+        isAdMob
+          ? "Information processed by Google for advertising is retained under Google's policies, not ours. Google's privacy policy explains how to submit an access, deletion, or opt-out request where those rights apply, and you can change your advertising choice at any time as described above."
+          : "Information processed by Unity or another enabled ad provider is retained under that provider's policy, not ours. Unity's app-user privacy policy explains how to submit an access, deletion, or opt-out request where those rights apply.",
         "If you contact us by email for support, we keep that correspondence only as long as needed to help you, and you may ask us to delete it at any time.",
       ],
     },
     {
       id: "international",
-      title: "10. International Users",
+      title: "International Users",
       paragraphs: [
         `${appName} may be made available in multiple countries. App settings and progress stored only on your device are not transferred across borders by Snaxx Tech.`,
-        "Unity, enabled ad providers, and optional Google Play services may process information on servers in other countries under their own policies and transfer safeguards.",
+        isAdMob
+          ? "Google, its ad technology providers, and Google Play services may process information on servers in other countries under their own policies and transfer safeguards."
+          : "Unity, enabled ad providers, and optional Google Play services may process information on servers in other countries under their own policies and transfer safeguards.",
       ],
     },
     {
       id: "changes",
-      title: "11. Changes to This Policy",
+      title: "Changes to This Policy",
       paragraphs: [
         "We may update this Privacy Policy if the App gains features, changes its advertising configuration, or changes how it handles information. When we do, we will revise the last-updated date at the top of this page and provide any additional notice required by law.",
       ],
     },
     {
       id: "contact",
-      title: "12. Contact Us",
+      title: "Contact Us",
       paragraphs: [
         `If you have any questions about this Privacy Policy or about how ${appName} handles information, you can reach us at ${CONTACT_EMAIL}. We aim to respond within a few business days.`,
       ],
     },
-  ];
+  ]);
 }
 
 function buildTerms(appName: string, appKind: string, profile: LegalProfile): LegalSection[] {
@@ -230,7 +320,9 @@ function buildTerms(appName: string, appKind: string, profile: LegalProfile): Le
       id: "advertising",
       title: "4. Advertising",
       paragraphs: [
-        `${appName} is supported by advertisements managed through Unity LevelPlay, including Unity Ads. Ads are part of the App experience.`,
+        profile.adProvider === "admob"
+          ? `${appName} is supported by advertisements served by Google AdMob, its only advertising provider. Ads are part of the App experience.`
+          : `${appName} is supported by advertisements managed through Unity LevelPlay, including Unity Ads. Ads are part of the App experience.`,
         "Advertisements and any linked content, offers, or websites are the responsibility of the advertiser or advertising network, not Snaxx Tech. We do not endorse and are not responsible for third-party ad content or for anything you do in reliance on it. How advertising data is handled is described in our Privacy Policy.",
       ],
     },
@@ -302,12 +394,14 @@ const ARROWS_PROFILE: LegalProfile = {
   localData: "Settings, game progress, high scores, and achievements where supported",
   supportsPlayGames: true,
   isGame: true,
+  adProvider: "unity-levelplay",
 };
 
-const ROWFLARE_PROFILE: LegalProfile = {
+const BLOCKROW_PROFILE: LegalProfile = {
   localData: "Settings, preferences, and app progress",
   supportsPlayGames: false,
   isGame: false,
+  adProvider: "admob",
 };
 
 export const legalApps: Record<string, AppLegal> = {
@@ -321,19 +415,26 @@ export const legalApps: Record<string, AppLegal> = {
     privacy: buildPrivacy("Arrows", "arcade game", ARROWS_PROFILE),
     terms: buildTerms("Arrows", "arcade game", ARROWS_PROFILE),
   },
-  rowflare: {
-    slug: "rowflare",
-    appName: "Rowflare",
+  blockrow: {
+    slug: "blockrow",
+    appName: "Blockrow",
     appKind: "mobile app",
     accent: "#FF7A29",
     effectiveDate: EFFECTIVE_DATE,
+    lastUpdated: "July 27, 2026",
     contactEmail: CONTACT_EMAIL,
-    privacy: buildPrivacy("Rowflare", "mobile app", ROWFLARE_PROFILE),
-    terms: buildTerms("Rowflare", "mobile app", ROWFLARE_PROFILE),
+    privacy: buildPrivacy("Blockrow", "mobile app", BLOCKROW_PROFILE),
+    terms: buildTerms("Blockrow", "mobile app", BLOCKROW_PROFILE),
   },
+};
+
+// Slugs that used to be published and must keep resolving (renamed apps).
+const LEGACY_SLUGS: Record<string, string> = {
+  rowflare: "blockrow",
 };
 
 export function getAppLegal(slug: string | undefined): AppLegal | undefined {
   if (!slug) return undefined;
-  return legalApps[slug.toLowerCase()];
+  const key = slug.toLowerCase();
+  return legalApps[key] ?? legalApps[LEGACY_SLUGS[key]];
 }

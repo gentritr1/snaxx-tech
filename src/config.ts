@@ -12,7 +12,7 @@ export const siteConfig: SiteConfig = {
   language: "en",
   title: "Snaxx Tech — Indie Apps & Games Studio",
   description:
-    "Snaxx Tech is an independent studio crafting playful apps and games, from Arrows and Block Destroy coming to Android to the daily Albanian word game FJALË on the web.",
+    "Snaxx Tech is an independent studio crafting playful apps and games, from Arrows, Block Destroy, and Geo Guesser World 3D! coming to Android to the daily Albanian word game FJALË on the web.",
 };
 
 // Navigation configuration
@@ -52,7 +52,7 @@ export const heroConfig: HeroConfig = {
   name: "SNAXX",
   roles: ["Apps, games & useful little things", "Independent by design"],
   intro: "We turn small ideas into apps, games, and satisfying little moments.",
-  releaseNote: "Arrows + Block Destroy · coming to Android",
+  releaseNote: "Arrows, Block Destroy + Geo Guesser · coming to Android",
   backgroundImage: "/images/hero-bg.jpg",
 };
 
@@ -85,7 +85,7 @@ export const aboutConfig: AboutConfig = {
   experienceValue: "",
   experienceLabel: "",
   stats: [
-    { value: "3", label: "Products in our world" },
+    { value: "4", label: "Products in our world" },
     { value: "2", label: "Platforms — Android & web" },
     { value: "100%", label: "Indie & independent" },
   ],
@@ -183,7 +183,7 @@ export const portfolioConfig: PortfolioConfig = {
   label: "Our Apps",
   heading: "Meet the ideas that escaped the notes app.",
   description:
-    "Three different sparks, one shared obsession: make the next tap feel obvious, useful, or unexpectedly fun.",
+    "Four different sparks, one shared obsession: make the next tap feel obvious, useful, or unexpectedly fun.",
   projects: [
     {
       title: "Arrows",
@@ -218,6 +218,17 @@ export const portfolioConfig: PortfolioConfig = {
       href: "https://xn--fjal-opa.com",
       accent: "#D08700",
       hasEmbeddedPromoFooter: true,
+    },
+    {
+      title: "Geo Guesser World 3D!",
+      category: "Dropped anywhere on Earth — guess where",
+      status: "Coming to Android",
+      action: "Release in progress",
+      year: "2026",
+      image: "/images/app-geo-guesser.svg",
+      accent: "#14B8A6",
+      privacyHref: "/geo-guesser-world-3d/privacy",
+      termsHref: "/geo-guesser-world-3d/terms",
     },
     {
       title: "What's Next",
@@ -274,7 +285,7 @@ export const ctaConfig: CTAConfig = {
   tags: ["Android", "Web", "Independent studio"],
   heading: "Ideas, questions, bug reports — we read every one.",
   description:
-    "Whether it's support for Arrows, Block Destroy, or FJALË, a press inquiry, or a wild idea for our next app — our inbox is always open.",
+    "Whether it's support for Arrows, Block Destroy, Geo Guesser World 3D!, or FJALË, a press inquiry, or a wild idea for our next app — our inbox is always open.",
   buttonText: "Email Us",
   buttonHref: "mailto:techsnaxx@gmail.com",
   email: "techsnaxx@gmail.com",
@@ -309,7 +320,7 @@ export interface FooterConfig {
 export const footerConfig: FooterConfig = {
   logo: "Snaxx Tech",
   description:
-    "An independent studio crafting apps and games with care. Home of Arrows, Block Destroy, and the daily Albanian word game FJALË.",
+    "An independent studio crafting apps and games with care. Home of Arrows, Block Destroy, Geo Guesser World 3D!, and the daily Albanian word game FJALË.",
   columns: [
     {
       title: "Apps",
@@ -317,6 +328,7 @@ export const footerConfig: FooterConfig = {
         { label: "Arrows", href: "#portfolio" },
         { label: "Block Destroy", href: "#portfolio" },
         { label: "FJALË", href: "https://xn--fjal-opa.com" },
+        { label: "Geo Guesser World 3D!", href: "#portfolio" },
         { label: "What's Next", href: "#portfolio" },
       ],
     },
@@ -336,6 +348,8 @@ export const footerConfig: FooterConfig = {
         { label: "Block Destroy — Privacy", href: "/block-destroy/privacy" },
         { label: "Block Destroy — Terms", href: "/block-destroy/terms" },
         { label: "Block Destroy — Support", href: "/block-destroy/support" },
+        { label: "Geo Guesser — Privacy", href: "/geo-guesser-world-3d/privacy" },
+        { label: "Geo Guesser — Terms", href: "/geo-guesser-world-3d/terms" },
       ],
     },
   ],

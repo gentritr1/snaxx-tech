@@ -193,6 +193,10 @@ export function Portfolio() {
             </div>
           )}
 
+          {portfolioConfig.projects[3] && (
+            <ProjectCard project={portfolioConfig.projects[3]} index={3} isVisible={visibleItems[3]} />
+          )}
+
           {portfolioConfig.cta.heading && (
             <a
               href={portfolioConfig.cta.linkHref || '#contact'}
@@ -216,9 +220,9 @@ export function Portfolio() {
             </a>
           )}
 
-          {portfolioConfig.projects[3] && (
-            <div className="lg:col-span-3">
-              <ProjectCard project={portfolioConfig.projects[3]} index={3} isVisible={visibleItems[3]} wide />
+          {portfolioConfig.projects[4] && (
+            <div className="lg:col-span-2">
+              <ProjectCard project={portfolioConfig.projects[4]} index={4} isVisible={visibleItems[4]} wide />
             </div>
           )}
         </div>

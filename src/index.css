@@ -27,6 +27,15 @@
   font-display: swap;
 }
 
+/* Display serif for the Almanac theme — variable weight, latin subset */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('/fonts/cormorant-garamond-latin.woff2') format('woff2');
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     /* Exvia Design System Colors */
@@ -37,6 +46,17 @@
     --exvia-border: #EFEFF2;
     --exvia-blue: #0082F3;
     --exvia-focus: #4D65FF;
+
+    /* Almanac theme — sampled from the hero illustration */
+    --almanac-paper: #F4EBD7;
+    --almanac-paper-deep: #EADDC0;
+    --almanac-paper-card: #F8F1E1;
+    --almanac-ink: #3C2B19;
+    --almanac-ink-strong: #291B0D;
+    --almanac-ink-soft: #75603F;
+    --almanac-ink-faint: #C8B58F;
+    --almanac-blue: #4D7094;
+    --almanac-gold: #C9A86A;
     
     /* shadcn tokens mapped to Exvia */
     --background: 0 0% 100%;
@@ -83,9 +103,9 @@
   }
   
   body {
-    @apply bg-background text-foreground;
     font-family: 'Geist', Arial, sans-serif;
-    color: var(--exvia-black);
+    background: var(--almanac-paper);
+    color: var(--almanac-ink);
     overflow-x: hidden;
   }
 
@@ -100,7 +120,7 @@
   }
 
   :focus-visible {
-    outline: 3px solid var(--exvia-focus);
+    outline: 3px solid var(--almanac-blue);
     outline-offset: 3px;
   }
 }
@@ -110,11 +130,49 @@
   .font-geist {
     font-family: 'Geist', Arial, sans-serif;
   }
-  
+
   .font-geist-mono {
     font-family: 'GeistMono', 'Courier New', monospace;
   }
-  
+
+  /* Almanac display serif — engraved-title look matching the hero artwork */
+  .font-display {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  /* Section heading in the artwork's engraved-caps style */
+  .almanac-heading {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--almanac-ink-strong);
+  }
+}
+
+/* Paper grain — subtle print texture over any almanac surface. The SVG
+   noise tile costs no network request; multiply keeps ink lines crisp. */
+.paper-grain {
+  position: relative;
+}
+.paper-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Hand-drawn flight path divider — dashed line echoing the paper plane */
+.almanac-dashed {
+  border-style: dashed;
+  border-color: var(--almanac-ink-faint);
+}
+
+@layer utilities {
   .text-h1 {
     font-size: clamp(2.5rem, 10vw, 6rem);
     line-height: 1;
@@ -193,7 +251,7 @@
 .page-overlay {
   position: fixed;
   inset: 0;
-  background: var(--exvia-white);
+  background: var(--almanac-paper);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -431,8 +489,8 @@
 
 /* Selection styling */
 ::selection {
-  background: var(--exvia-black);
-  color: var(--exvia-white);
+  background: var(--almanac-ink-strong);
+  color: var(--almanac-paper);
 }
 
 /* Scrollbar styling */
@@ -441,16 +499,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--exvia-subtle);
+  background: var(--almanac-paper-deep);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--exvia-black);
+  background: var(--almanac-ink);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #333;
+  background: var(--almanac-ink-strong);
 }
 
 /* Mobile responsive typography */

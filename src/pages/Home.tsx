@@ -10,7 +10,7 @@ import { Footer } from '@/sections/Footer';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-almanac-paper">
       <a href="#main-content" className="skip-link">Skip to main content</a>
       {/* Navigation */}
       <Navigation />

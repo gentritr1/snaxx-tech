@@ -63,7 +63,7 @@ export function Navigation() {
       <nav
         className={cn(
           'fixed top-0 left-0 right-0 z-50 transition-[background-color,color,box-shadow] duration-500 ease-out-circ',
-          isScrolled || isMenuOpen ? 'bg-white/95 backdrop-blur-md shadow-xs' : 'bg-transparent'
+          isScrolled || isMenuOpen ? 'bg-almanac-paper/95 backdrop-blur-md shadow-xs' : 'bg-transparent'
         )}
       >
         <div className="w-full px-6 lg:px-12 py-4">
@@ -77,7 +77,7 @@ export function Navigation() {
                   draggable={false}
                   className="h-6 w-auto select-none"
                 />
-                <span className="text-2xl font-semibold tracking-tight text-exvia-black transition-colors duration-200">
+                <span className="text-2xl font-display font-semibold tracking-wide text-almanac-ink-strong transition-colors duration-200">
                   {navigationConfig.logo}
                 </span>
               </a>
@@ -91,10 +91,10 @@ export function Navigation() {
                     key={link.label}
                     href={link.href}
                     onClick={(e) => handleNavClick(e, link.href)}
-                    className="text-base transition-colors duration-200 relative group text-exvia-black/80 hover:text-exvia-black"
+                    className="text-base transition-colors duration-200 relative group text-almanac-ink/80 hover:text-almanac-ink-strong"
                   >
                     {link.label}
-                    <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100 bg-exvia-black" />
+                    <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100 bg-almanac-ink" />
                   </a>
                 ))}
               </div>
@@ -129,21 +129,21 @@ export function Navigation() {
                 <span
                   className={cn(
                     'h-0.5 w-7 transition-[opacity,transform] duration-300 ease-out-quad origin-center',
-                    'bg-exvia-black',
+                    'bg-almanac-ink',
                     isMenuOpen && 'translate-y-2 rotate-[-45deg]'
                   )}
                 />
                 <span
                   className={cn(
                     'h-0.5 w-7 transition-[opacity,transform] duration-300 ease-out-quad',
-                    'bg-exvia-black',
+                    'bg-almanac-ink',
                     isMenuOpen && 'scale-90 opacity-0'
                   )}
                 />
                 <span
                   className={cn(
                     'h-0.5 w-7 transition-[opacity,transform] duration-300 ease-out-quad origin-center',
-                    'bg-exvia-black',
+                    'bg-almanac-ink',
                     isMenuOpen && '-translate-y-2 rotate-[45deg]'
                   )}
                 />
@@ -158,7 +158,7 @@ export function Navigation() {
         <div
           id="mobile-navigation"
           className={cn(
-            'fixed inset-0 z-40 bg-white transition-[opacity,visibility] duration-500 ease-out-cubic lg:hidden',
+            'fixed inset-0 z-40 bg-almanac-paper transition-[opacity,visibility] duration-500 ease-out-cubic lg:hidden',
             isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
           )}
         >
@@ -170,7 +170,7 @@ export function Navigation() {
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
                 className={cn(
-                  'text-3xl font-semibold text-exvia-black transition-[opacity,transform] duration-400 ease-out-quart',
+                  'text-3xl font-display font-semibold text-almanac-ink-strong transition-[opacity,transform] duration-400 ease-out-quart',
                   isMenuOpen
                     ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-8'

@@ -50,10 +50,29 @@ module.exports = {
           blue: '#0082F3',
           focus: '#4D65FF',
         },
+        /* Almanac theme — sampled from the hero illustration.
+           Text-safe on paper: ink (11.4:1), ink-strong (14.1:1),
+           ink-soft (5.1:1), olive (5.7:1), blue (4.4:1 — large text/focus
+           only). rust and ink-mid are DECORATIVE ONLY (fail 4.5:1). */
+        almanac: {
+          paper: '#F4EBD7',
+          'paper-deep': '#EADDC0',
+          'paper-card': '#F8F1E1',
+          ink: '#3C2B19',
+          'ink-strong': '#291B0D',
+          'ink-soft': '#75603F',
+          'ink-mid': '#8C714F',
+          'ink-faint': '#C8B58F',
+          blue: '#4D7094',
+          rust: '#BD9161',
+          olive: '#6D5844',
+          gold: '#C9A86A',
+        },
       },
       fontFamily: {
         geist: ['Geist', 'Arial', 'sans-serif'],
         'geist-mono': ['GeistMono', 'Courier New', 'monospace'],
+        display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
       },
       fontSize: {
         'h1': ['clamp(3rem, 21vw, 21vw)', { lineHeight: '1', letterSpacing: '-0.04em' }],

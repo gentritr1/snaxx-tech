@@ -40,12 +40,26 @@ export const navigationConfig: NavigationConfig = {
 };
 
 // Hero section configuration
+export interface HeroClip {
+  src: string;
+  /** Relative pick probability. Rare "easter egg" clips get a low weight. */
+  weight: number;
+}
+
 export interface HeroConfig {
   name: string;
   roles: string[];
   intro: string;
   releaseNote: string;
-  backgroundImage: string;
+  /**
+   * Pool of ambient "Snaxx Almanac" clips (silent). Every clip starts and
+   * ends on the same canonical base frame, so the player can hard-cut
+   * between randomly chosen clips with no visible seam — the scene keeps
+   * living without ever obviously restarting.
+   */
+  clips: HeroClip[];
+  /** Canonical base frame — poster, reduced-motion, and error fallback. */
+  posterSrc: string;
 }
 
 export const heroConfig: HeroConfig = {
@@ -53,7 +67,13 @@ export const heroConfig: HeroConfig = {
   roles: ["Apps, games & useful little things", "Independent by design"],
   intro: "We turn small ideas into apps, games, and satisfying little moments.",
   releaseNote: "Arrows + Block Destroy · coming to Android",
-  backgroundImage: "/images/hero-bg.jpg",
+  clips: [
+    { src: "/videos/almanac-a.mp4", weight: 3 }, // calm: plane, smoke, water, flags, balloon
+    { src: "/videos/almanac-b.mp4", weight: 3 }, // arcade invader + windmill + windsock
+    { src: "/videos/almanac-c.mp4", weight: 3 }, // gliding birds + drifting balloon
+    { src: "/videos/almanac-d.mp4", weight: 1 }, // easter egg: shooting star + telescope
+  ],
+  posterSrc: "/images/hero-almanac-poster.jpg",
 };
 
 // About section configuration

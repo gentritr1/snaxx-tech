@@ -1,77 +1,42 @@
-import { Component, Suspense, lazy, useCallback, useEffect, useState, type ReactNode } from 'react';
-import { ArrowDown, Sparkle } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { heroConfig } from '@/config';
-import { playMiniPop } from '@/utils/popSound';
-
-// three.js / drei / fiber live behind this lazy boundary so they land in a
-// separate chunk — the main entry (and legal-page visitors) never pay for them.
-const HeroCanvas = lazy(() => import('@/components/HeroCanvas'));
-
-/** Cheap, synchronous WebGL feature-detect on a throwaway canvas. */
-function detectWebGL(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    const canvas = document.createElement('canvas');
-    return !!(
-      window.WebGLRenderingContext &&
-      (canvas.getContext('webgl2') || canvas.getContext('webgl'))
-    );
-  } catch {
-    return false;
-  }
-}
-
-/** Static dark backdrop shown while the 3D chunk loads or when it can't run. */
-function HeroBackdrop() {
-  return (
-    <div className="absolute inset-0 bg-[#131313] bg-[radial-gradient(ellipse_at_50%_40%,rgba(45,140,255,0.10),transparent_55%),radial-gradient(ellipse_at_70%_70%,rgba(255,122,41,0.08),transparent_55%)]" />
-  );
-}
+import { heroConfig, type HeroClip } from '@/config';
 
 /**
- * Isolates the 3D canvas: if the lazy chunk fails to load/evaluate, WebGL is
- * lost, or the scene throws at runtime, we fall back to the static backdrop
- * instead of unmounting the whole page. The wordmark/nav overlay is rendered
- * outside this boundary and always stays visible.
+ * Hero — "The Snaxx Almanac" living illustration.
+ *
+ * Plays an endless random chain of ambient clips. Every clip in the pool
+ * starts and ends on the same canonical base frame (enforced at build time
+ * with motion-interpolated bookends), so swapping videos on `ended` is a
+ * pixel-continuous hard cut: the scene keeps living — plane bobbing, smoke
+ * rising, sometimes a shooting star — without ever visibly restarting.
+ *
+ * Two stacked <video> elements alternate: while one plays, the other
+ * preloads the next randomly chosen clip. Reduced motion or any load error
+ * falls back to the identical still frame.
  */
-class CanvasBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
-  static getDerivedStateFromError() {
-    return { failed: true };
+
+/** Weighted random pick, avoiding an immediate repeat when possible. */
+function pickClip(clips: HeroClip[], avoidSrc: string | null): HeroClip {
+  const pool = clips.length > 1 && avoidSrc ? clips.filter((c) => c.src !== avoidSrc) : clips;
+  const total = pool.reduce((sum, c) => sum + c.weight, 0);
+  let roll = Math.random() * total;
+  for (const clip of pool) {
+    roll -= clip.weight;
+    if (roll <= 0) return clip;
   }
-  render() {
-    return this.state.failed ? this.props.fallback : this.props.children;
-  }
+  return pool[pool.length - 1];
 }
 
 export function Hero() {
-  // Hooks must run unconditionally — keep them above any early return.
+  const videoRefA = useRef<HTMLVideoElement>(null);
+  const videoRefB = useRef<HTMLVideoElement>(null);
+  /** Which element is currently front-and-playing: 0 = A, 1 = B. */
+  const [activeSlot, setActiveSlot] = useState(0);
+  const activeSlotRef = useRef(0);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [biteKey, setBiteKey] = useState(0);
-  const [biteStage, setBiteStage] = useState(0); // 0 = whole, 1 = first chomp, 2 = bitten
-
-  // Two-step chomp, JS-timed so the mask itself never needs to animate.
-  useEffect(() => {
-    const letterCount = heroConfig.name.length;
-    // First replay (biteKey > 0) chomps immediately; on load, wait for the
-    // slowest letter to land (600ms base + stagger + duration) plus a beat.
-    const startDelay = biteKey === 0 ? 600 + 110 * (letterCount - 1) + 450 + 500 : 0;
-    const t1 = setTimeout(() => setBiteStage(1), startDelay);
-    const t2 = setTimeout(() => setBiteStage(2), startDelay + 140);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [biteKey]);
-
-  // Replay the chomp on demand — click is a user gesture, so sound is allowed.
-  const replayBite = useCallback(() => {
-    setBiteStage(0); // heal for a blink, then the effect re-chomps
-    setBiteKey((k) => k + 1);
-    playMiniPop();
-  }, []);
-  const [webglOk] = useState(detectWebGL);
+  const [videoFailed, setVideoFailed] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(
     () =>
       typeof window !== 'undefined' &&
@@ -79,7 +44,7 @@ export function Hero() {
   );
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 300);
+    const timer = setTimeout(() => setIsLoaded(true), 200);
     return () => clearTimeout(timer);
   }, []);
 
@@ -92,156 +57,139 @@ export function Hero() {
     return () => mq.removeEventListener('change', onChange);
   }, []);
 
-  if (!heroConfig.name && heroConfig.roles.length === 0) return null;
+  const showVideo = !reducedMotion && !videoFailed;
+
+  /** Load the first clip into A and preload a different one into B. */
+  useEffect(() => {
+    if (!showVideo) return;
+    const a = videoRefA.current;
+    const b = videoRefB.current;
+    if (!a || !b || a.src) return; // already initialised
+    const first = pickClip(heroConfig.clips, null);
+    const next = pickClip(heroConfig.clips, first.src);
+    a.src = first.src;
+    b.src = next.src;
+    b.load();
+    a.play().catch(() => {
+      /* autoplay refused (battery saver etc.) — poster frame remains */
+    });
+  }, [showVideo]);
+
+  /**
+   * When the active clip ends, start the preloaded standby (its first frame
+   * is pixel-identical to the ended clip's last frame), reveal it, and turn
+   * the finished element into the preloader for the following pick.
+   */
+  const handleEnded = useCallback((endedSlot: 0 | 1) => {
+    if (endedSlot !== activeSlotRef.current) return;
+    const ended = endedSlot === 0 ? videoRefA.current : videoRefB.current;
+    const standby = endedSlot === 0 ? videoRefB.current : videoRefA.current;
+    if (!ended || !standby) return;
+    const nextSlot = endedSlot === 0 ? 1 : 0;
+    activeSlotRef.current = nextSlot;
+    setActiveSlot(nextSlot);
+    standby.play().catch(() => {
+      // Standby refused to start (rare) — revert the swap and replay the
+      // finished clip instead of freezing on a hidden, paused element.
+      activeSlotRef.current = endedSlot;
+      setActiveSlot(endedSlot);
+      ended.currentTime = 0;
+      ended.play().catch(() => {});
+    });
+    const upcoming = pickClip(heroConfig.clips, standby.currentSrc);
+    ended.src = upcoming.src;
+    ended.load();
+  }, []);
+
+  // Chrome pauses muted video-only media in background tabs and doesn't
+  // reliably resume on return — nudge the active clip back to life.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      const active = activeSlotRef.current === 0 ? videoRefA.current : videoRefB.current;
+      if (active && active.paused && active.src) {
+        active.play().catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
+
+  const videoClass = (slot: 0 | 1) =>
+    cn(
+      'absolute inset-0 h-full w-full object-cover',
+      activeSlot === slot ? 'opacity-100' : 'opacity-0'
+    );
 
   return (
-    <section id="hero" className="relative w-full min-h-screen overflow-hidden bg-exvia-black">
-      {/* 3D playground — decorative; screen readers get the wordmark below. */}
+    <section id="hero" className="relative w-full min-h-screen overflow-hidden bg-[#F2E9D6]">
+      <h1 className="sr-only">
+        The Snaxx Almanac — {heroConfig.roles[0] ?? 'apps, games & useful little things'} by Snaxx
+        Tech
+      </h1>
+
+      {/* The animated illustration is decorative; the sr-only heading above
+          and the sections below carry the real content. */}
       <div
         aria-hidden="true"
         className={cn(
-          'absolute inset-0 transition-opacity duration-[1400ms]',
+          'absolute inset-0 transition-opacity duration-1000',
           isLoaded ? 'opacity-100' : 'opacity-0'
         )}
       >
-        {webglOk ? (
-          <CanvasBoundary fallback={<HeroBackdrop />}>
-            <Suspense fallback={<HeroBackdrop />}>
-              <HeroCanvas reducedMotion={reducedMotion} />
-            </Suspense>
-          </CanvasBoundary>
+        {showVideo ? (
+          <>
+            {/* Poster underlay — identical to every clip's first frame, so
+                there is no flash while the first video buffers. */}
+            <img
+              className="absolute inset-0 h-full w-full object-cover"
+              src={heroConfig.posterSrc}
+              alt=""
+              draggable={false}
+            />
+            <video
+              ref={videoRefA}
+              className={videoClass(0)}
+              muted
+              playsInline
+              preload="auto"
+              disablePictureInPicture
+              onEnded={() => handleEnded(0)}
+              onError={() => setVideoFailed(true)}
+            />
+            <video
+              ref={videoRefB}
+              className={videoClass(1)}
+              muted
+              playsInline
+              preload="auto"
+              disablePictureInPicture
+              onEnded={() => handleEnded(1)}
+              onError={() => setVideoFailed(true)}
+            />
+          </>
         ) : (
-          <HeroBackdrop />
+          <img
+            className="absolute inset-0 h-full w-full object-cover"
+            src={heroConfig.posterSrc}
+            alt=""
+            draggable={false}
+          />
         )}
-      </div>
-
-      {/* soft vignette so the overlay text always pops */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(19,19,19,0.55)_100%)]" />
-
-      {/* Role labels on sides */}
-      {heroConfig.roles[0] && (
-        <div
-          className={cn(
-            'hidden lg:block absolute left-8 lg:left-16 top-1/2 -translate-y-1/2 z-30 pointer-events-none transition-[opacity,transform] duration-[1200ms] ease-out-quart',
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          )}
-          style={{ transitionDelay: '800ms' }}
-        >
-          <span className="text-xs font-geist-mono uppercase tracking-[0.3em] text-white/70">
-            {heroConfig.roles[0]}
-          </span>
-        </div>
-      )}
-      {heroConfig.roles[1] && (
-        <div
-          className={cn(
-            'hidden lg:block absolute right-8 lg:right-16 top-1/2 -translate-y-1/2 z-30 pointer-events-none transition-[opacity,transform] duration-[1200ms] ease-out-quart',
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          )}
-          style={{ transitionDelay: '900ms' }}
-        >
-          <span className="text-xs font-geist-mono uppercase tracking-[0.3em] text-white/70">
-            {heroConfig.roles[1]}
-          </span>
-        </div>
-      )}
-
-      {/* Bottom content */}
-      <div className="relative z-30 flex flex-col items-center justify-end min-h-screen px-6 lg:px-12 pointer-events-none">
-        <div
-          className={cn(
-            'text-center transition-[opacity,transform] duration-[1200ms] ease-out-quart pb-10 md:pb-14',
-            isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          )}
-          style={{ transitionDelay: '600ms' }}
-        >
-          {/* playful indie badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 border border-white/15 bg-white/5 backdrop-blur-sm rounded-full">
-            <Sparkle className="w-3.5 h-3.5 text-[#FFD166]" />
-            <span className="text-[0.7rem] font-geist-mono uppercase tracking-[0.25em] text-white/75">
-              Indie &amp; proud — we make the fun stuff
-            </span>
-          </div>
-
-          {/* Wordmark: letters land right-to-left, then the last X gets bitten
-              (SNAXX ≈ snacks). Click replays the chomp with a soft pop. */}
-          <h1
-            role="button"
-            tabIndex={0}
-            aria-label={`${heroConfig.name} — take a bite`}
-            onClick={replayBite}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                replayBite();
-              }
-            }}
-            className="text-[clamp(3rem,12vw,12rem)] font-black text-white tracking-[-0.04em] leading-[0.85] pointer-events-auto cursor-pointer select-none rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-          >
-            {heroConfig.name.split('').map((_, i, letters) => {
-              const style = { '--i': letters.length - 1 - i } as React.CSSProperties;
-              const glyph = (
-                <img
-                  src={`/images/wordmark/letter-${i + 1}.webp`}
-                  alt=""
-                  draggable={false}
-                  fetchPriority="high"
-                  className="snaxx-glyph"
-                />
-              );
-              if (i !== letters.length - 1) {
-                return (
-                  <span key={i} aria-hidden="true" className="snaxx-letter" style={style}>
-                    {glyph}
-                  </span>
-                );
-              }
-              return (
-                <span key={i} aria-hidden="true" className="snaxx-letter relative" style={style}>
-                  <span
-                    key={`bite-${biteKey}`}
-                    className={cn('snaxx-bitten', biteStage >= 1 && 'bite-wobble')}
-                  >
-                    {glyph}
-                  </span>
-                  {biteStage >= 2 && (
-                    <>
-                      <span
-                        key={`c1-${biteKey}`}
-                        className="snaxx-crumb"
-                        style={{ top: '4%', right: '-3%', '--cx': '1.4rem', '--cy': '-0.6rem' } as React.CSSProperties}
-                      />
-                      <span
-                        key={`c2-${biteKey}`}
-                        className="snaxx-crumb"
-                        style={{ top: '14%', right: '-5%', '--cx': '1.8rem', '--cy': '0.4rem' } as React.CSSProperties}
-                      />
-                      <span
-                        key={`c3-${biteKey}`}
-                        className="snaxx-crumb"
-                        style={{ top: '24%', right: '-1%', '--cx': '1rem', '--cy': '1rem' } as React.CSSProperties}
-                      />
-                    </>
-                  )}
-                </span>
-              );
-            })}
-          </h1>
-        </div>
       </div>
 
       {/* scroll cue */}
       <div
         className={cn(
-          'absolute bottom-8 right-8 lg:right-12 z-30 pointer-events-none hidden sm:flex items-center gap-2 transition-opacity duration-1000',
+          'absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-none hidden sm:flex items-center gap-2 transition-opacity duration-1000',
           isLoaded ? 'opacity-100' : 'opacity-0'
         )}
-        style={{ transitionDelay: '1400ms' }}
+        style={{ transitionDelay: '1200ms' }}
       >
-        <span className="text-[0.65rem] font-geist-mono uppercase tracking-[0.25em] text-white/45">
+        <span className="text-[0.65rem] font-geist-mono uppercase tracking-[0.25em] text-exvia-black/50">
           scroll
         </span>
-        <ArrowDown className="w-3.5 h-3.5 text-white/45 scroll-cue" />
+        <ArrowDown className="w-3.5 h-3.5 text-exvia-black/50 scroll-cue" />
       </div>
     </section>
   );

@@ -77,10 +77,7 @@ export function Navigation() {
                   draggable={false}
                   className="h-6 w-auto select-none"
                 />
-                <span className={cn(
-                  "text-2xl font-semibold tracking-tight transition-colors duration-200",
-                  isScrolled || isMenuOpen ? "text-exvia-black" : "text-white"
-                )}>
+                <span className="text-2xl font-semibold tracking-tight text-exvia-black transition-colors duration-200">
                   {navigationConfig.logo}
                 </span>
               </a>
@@ -94,16 +91,10 @@ export function Navigation() {
                     key={link.label}
                     href={link.href}
                     onClick={(e) => handleNavClick(e, link.href)}
-                    className={cn(
-                      "text-base transition-colors duration-200 relative group",
-                      isScrolled ? "text-exvia-black/80 hover:text-exvia-black" : "text-white/90 hover:text-white"
-                    )}
+                    className="text-base transition-colors duration-200 relative group text-exvia-black/80 hover:text-exvia-black"
                   >
                     {link.label}
-                    <span className={cn(
-                      "absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100",
-                      isScrolled ? "bg-exvia-black" : "bg-white"
-                    )} />
+                    <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100 bg-exvia-black" />
                   </a>
                 ))}
               </div>
@@ -115,7 +106,7 @@ export function Navigation() {
                 <div ref={magneticRef} className="inline-block will-change-transform">
                   <AnimatedButton
                     href={navigationConfig.contactHref || "#contact"}
-                    variant={isScrolled ? "primary" : "outline-white"}
+                    variant="primary"
                     size="md"
                     className="pressable"
                   >
@@ -138,21 +129,21 @@ export function Navigation() {
                 <span
                   className={cn(
                     'h-0.5 w-7 transition-[opacity,transform] duration-300 ease-out-quad origin-center',
-                    isScrolled || isMenuOpen ? 'bg-exvia-black' : 'bg-white',
+                    'bg-exvia-black',
                     isMenuOpen && 'translate-y-2 rotate-[-45deg]'
                   )}
                 />
                 <span
                   className={cn(
                     'h-0.5 w-7 transition-[opacity,transform] duration-300 ease-out-quad',
-                    isScrolled || isMenuOpen ? 'bg-exvia-black' : 'bg-white',
+                    'bg-exvia-black',
                     isMenuOpen && 'scale-90 opacity-0'
                   )}
                 />
                 <span
                   className={cn(
                     'h-0.5 w-7 transition-[opacity,transform] duration-300 ease-out-quad origin-center',
-                    isScrolled || isMenuOpen ? 'bg-exvia-black' : 'bg-white',
+                    'bg-exvia-black',
                     isMenuOpen && '-translate-y-2 rotate-[45deg]'
                   )}
                 />

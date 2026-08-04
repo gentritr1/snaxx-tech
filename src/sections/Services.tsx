@@ -53,7 +53,7 @@ function ServiceRow({ service, index, isVisible }: { service: ServiceItem; index
             src={service.image}
             alt=""
             loading="lazy"
-            className="h-full w-full object-cover transition-[opacity,transform,filter] duration-500 ease-out-quart md:scale-105 md:opacity-55 md:saturate-50 md:group-hover:scale-100 md:group-hover:opacity-100 md:group-hover:saturate-100"
+            className="h-full w-full object-cover transition-[opacity,transform,filter] duration-500 ease-out-quart md:scale-105 md:opacity-75 md:saturate-[0.8] md:group-hover:scale-100 md:group-hover:opacity-100 md:group-hover:saturate-100"
           />
         </div>
         <span className="absolute inset-x-0 bottom-0 h-1" style={{ backgroundColor: accent }} aria-hidden="true" />

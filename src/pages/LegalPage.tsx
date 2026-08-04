@@ -51,18 +51,18 @@ export default function LegalPage({ kind }: LegalPageProps) {
 
   if (!app) {
     return (
-      <div className="page-enter min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
-        <p className="text-xs font-geist-mono uppercase tracking-widest text-exvia-black/60">404</p>
-        <h1 className="mt-4 text-3xl lg:text-5xl font-semibold text-exvia-black">
+      <div className="page-enter min-h-screen bg-almanac-paper flex flex-col items-center justify-center px-6 text-center">
+        <p className="text-xs font-geist-mono uppercase tracking-widest text-almanac-ink-soft">404</p>
+        <h1 className="mt-4 font-display text-3xl lg:text-5xl font-semibold text-almanac-ink-strong">
           We couldn't find that page.
         </h1>
-        <p className="mt-4 text-exvia-black/60 max-w-md">
+        <p className="mt-4 text-almanac-ink-soft max-w-md">
           The legal document you're looking for doesn't exist. Try one of our apps' policy pages
           instead.
         </p>
         <Link
           to="/"
-          className="pressable mt-8 inline-flex min-h-11 items-center gap-2 rounded-lg bg-exvia-black px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-exvia-black/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
+          className="pressable mt-8 inline-flex min-h-11 items-center gap-2 rounded-lg bg-almanac-ink-strong px-5 py-3 text-sm font-medium text-almanac-paper transition-colors hover:bg-almanac-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-almanac-blue focus-visible:ring-offset-2"
         >
           Back to Snaxx Tech
         </Link>
@@ -88,15 +88,15 @@ export default function LegalPage({ kind }: LegalPageProps) {
         {/* Table of contents */}
         <aside className="hidden lg:block lg:col-span-3" aria-label={`${docTitle} contents`}>
           <div className="sticky top-28">
-            <p className="mb-4 text-xs font-geist-mono uppercase tracking-widest text-exvia-black/60">
+            <p className="mb-4 text-xs font-geist-mono uppercase tracking-widest text-almanac-ink-soft">
               On this page
             </p>
-            <nav className="space-y-1 border-l border-exvia-border">
+            <nav className="space-y-1 border-l border-almanac-ink-faint">
               {sections.map((section) => (
                 <a
                   key={section.id}
                   href={`#${section.id}`}
-                  className="block py-1.5 pl-4 -ml-px border-l-2 border-transparent text-sm text-exvia-black/60 hover:text-exvia-black hover:border-exvia-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
+                  className="block py-1.5 pl-4 -ml-px border-l-2 border-transparent text-sm text-almanac-ink-soft hover:text-almanac-ink-strong hover:border-almanac-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-almanac-blue focus-visible:ring-offset-2"
                 >
                   {section.title}
                 </a>
@@ -105,8 +105,8 @@ export default function LegalPage({ kind }: LegalPageProps) {
           </div>
         </aside>
 
-        <details className="min-w-0 rounded-xl border border-exvia-border bg-exvia-subtle/30 p-4 lg:hidden">
-          <summary className="cursor-pointer text-sm font-medium text-exvia-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2">
+        <details className="min-w-0 rounded-xl border border-almanac-ink-faint bg-almanac-paper-deep/40 p-4 lg:hidden">
+          <summary className="cursor-pointer text-sm font-medium text-almanac-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-almanac-blue focus-visible:ring-offset-2">
             On this page
           </summary>
           <nav className="mt-3 grid gap-1" aria-label={`${docTitle} contents`}>
@@ -114,7 +114,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
               <a
                 key={section.id}
                 href={`#${section.id}`}
-                className="flex min-h-11 items-center rounded-md px-2 text-sm text-exvia-black/70 hover:bg-white hover:text-exvia-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus"
+                className="flex min-h-11 items-center rounded-md px-2 text-sm text-almanac-ink hover:bg-almanac-paper-card hover:text-almanac-ink-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-almanac-blue"
               >
                 {section.title}
               </a>
@@ -126,18 +126,18 @@ export default function LegalPage({ kind }: LegalPageProps) {
         <article className="min-w-0 max-w-[70ch] break-words lg:col-span-8 lg:col-start-5">
           {sections.map((section) => (
             <section key={section.id} id={section.id} className="scroll-mt-28 mb-12 last:mb-0">
-              <h2 className="text-xl lg:text-2xl font-semibold text-exvia-black tracking-tight">
+              <h2 className="font-display text-xl lg:text-2xl font-semibold text-almanac-ink-strong tracking-tight">
                 {section.title}
               </h2>
               {section.paragraphs?.map((paragraph, i) => (
-                <p key={i} className="mt-4 text-base text-exvia-black/70 leading-relaxed">
+                <p key={i} className="mt-4 text-base text-almanac-ink leading-relaxed">
                   {paragraph}
                 </p>
               ))}
               {section.list && (
                 <ul className="mt-4 space-y-3">
                   {section.list.map((item, i) => (
-                    <li key={i} className="flex gap-3 text-base text-exvia-black/70 leading-relaxed">
+                    <li key={i} className="flex gap-3 text-base text-almanac-ink leading-relaxed">
                       <span
                         className="mt-[0.65rem] w-1.5 h-1.5 rounded-full flex-shrink-0"
                         style={{ backgroundColor: app.accent }}
@@ -149,18 +149,18 @@ export default function LegalPage({ kind }: LegalPageProps) {
                 </ul>
               )}
               {section.links && (
-                <div className="mt-5 divide-y divide-exvia-border border-y border-exvia-border">
+                <div className="mt-5 divide-y divide-almanac-ink-faint border-y border-almanac-ink-faint">
                   {section.links.map((link) => (
                     <a
                       key={link.href}
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex min-h-16 items-center justify-between gap-4 py-3 text-exvia-black hover:text-exvia-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
+                      className="group flex min-h-16 items-center justify-between gap-4 py-3 text-almanac-ink hover:text-almanac-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-almanac-blue focus-visible:ring-offset-2"
                     >
                       <span>
                         <span className="block text-sm font-medium">{link.label}</span>
-                        <span className="mt-0.5 block text-sm leading-relaxed text-exvia-black/60">
+                        <span className="mt-0.5 block text-sm leading-relaxed text-almanac-ink-soft">
                           {link.description}
                         </span>
                       </span>
@@ -177,7 +177,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
 
           {/* Contact card */}
           <div
-            className="mt-16 rounded-xl border border-exvia-border bg-exvia-subtle/30 p-6 lg:p-8"
+            className="mt-16 rounded-xl border border-almanac-ink-faint bg-almanac-paper-deep/40 p-6 lg:p-8"
           >
             <div className="flex items-center gap-3">
               <span
@@ -185,11 +185,11 @@ export default function LegalPage({ kind }: LegalPageProps) {
                 style={{ backgroundColor: app.accent }}
                 aria-hidden="true"
               />
-              <h3 className="text-lg font-semibold text-exvia-black">
+              <h3 className="font-display text-lg font-semibold text-almanac-ink-strong">
                 {kind === 'support' ? 'Still stuck?' : 'Questions about this document?'}
               </h3>
             </div>
-            <p className="mt-2 text-sm text-exvia-black/60 leading-relaxed">
+            <p className="mt-2 text-sm text-almanac-ink-soft leading-relaxed">
               We're a small studio and we read every message. Email us and we'll get back to you{' '}
               {kind === 'support'
                 ? (app.supportResponseTime ?? 'within a few business days')
@@ -200,7 +200,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
             </p>
             <a
               href={`mailto:${cardEmail}`}
-              className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-exvia-black hover:text-exvia-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exvia-focus focus-visible:ring-offset-2"
+              className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-almanac-ink hover:text-almanac-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-almanac-blue focus-visible:ring-offset-2"
             >
               <Mail className="w-4 h-4" aria-hidden="true" />
               <span>{cardEmail}</span>

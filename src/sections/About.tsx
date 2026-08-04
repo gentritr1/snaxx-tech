@@ -7,7 +7,7 @@ import { aboutConfig } from '@/config';
 function StatValue({ value }: { value: string }) {
   const { ref, display } = useCountUp<HTMLSpanElement>(value);
   return (
-    <span ref={ref} className="block text-3xl font-semibold text-exvia-black">
+    <span ref={ref} className="block font-display text-3xl font-semibold text-almanac-ink-strong">
       {display}
     </span>
   );
@@ -20,7 +20,7 @@ export function About() {
   if (!aboutConfig.description && aboutConfig.stats.length === 0 && aboutConfig.images.length === 0) return null;
 
   return (
-    <section id="about" className="w-full py-24 lg:py-32 bg-white">
+    <section id="about" className="w-full py-24 lg:py-32 bg-almanac-paper-deep">
       <div className="container-large px-6 lg:px-12">
         <div ref={sectionRef} className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
           {/* Left Column - Text Content */}
@@ -28,7 +28,7 @@ export function About() {
             {aboutConfig.heading && (
               <h2
                 className={cn(
-                  'type-h2 max-w-xl font-semibold text-exvia-black transition-[opacity,transform] duration-700 ease-out-quart',
+                  'type-h2 max-w-xl font-display font-semibold text-almanac-ink-strong transition-[opacity,transform] duration-700 ease-out-quart',
                   sectionVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0',
                 )}
               >
@@ -45,7 +45,7 @@ export function About() {
                 )}
                 style={{ transitionDelay: '100ms' }}
               >
-                <p className="max-w-2xl text-lg leading-relaxed text-exvia-black/75 lg:text-xl">
+                <p className="max-w-2xl text-lg leading-relaxed text-almanac-ink lg:text-xl">
                   {aboutConfig.description}
                 </p>
               </div>
@@ -60,11 +60,11 @@ export function About() {
                 )}
                 style={{ transitionDelay: '200ms' }}
               >
-                <span className="text-7xl lg:text-8xl font-black text-exvia-black leading-none">
+                <span className="font-display text-7xl lg:text-8xl font-semibold text-almanac-ink-strong leading-none">
                   {aboutConfig.experienceValue}
                 </span>
                 {aboutConfig.experienceLabel && (
-                  <span className="text-sm text-exvia-black/60 pb-3">
+                  <span className="text-sm text-almanac-ink-soft pb-3">
                     {aboutConfig.experienceLabel}
                   </span>
                 )}
@@ -75,7 +75,7 @@ export function About() {
             {aboutConfig.stats.length > 0 && (
               <div
                 className={cn(
-                  'grid grid-cols-1 gap-6 border-t border-exvia-border pt-8 transition-[opacity,transform] duration-700 ease-out-quart sm:grid-cols-3 sm:gap-8',
+                  'grid grid-cols-1 gap-6 border-t border-almanac-ink-faint pt-8 transition-[opacity,transform] duration-700 ease-out-quart sm:grid-cols-3 sm:gap-8',
                   sectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                 )}
                 style={{ transitionDelay: '300ms' }}
@@ -83,7 +83,7 @@ export function About() {
                 {aboutConfig.stats.map((stat, index) => (
                   <div key={index} className="max-w-[12rem]">
                     <StatValue value={stat.value} />
-                    <span className="mt-1 block text-sm leading-snug text-exvia-black/65">{stat.label}</span>
+                    <span className="mt-1 block text-sm leading-snug text-almanac-ink-soft">{stat.label}</span>
                   </div>
                 ))}
               </div>
@@ -97,19 +97,19 @@ export function About() {
                 <div
                   key={index}
                   className={cn(
-                    'relative overflow-hidden rounded-xl transition-[opacity,transform] duration-700 ease-out-quart',
+                    'relative overflow-hidden rounded-xl border border-almanac-ink-faint bg-almanac-paper-card p-1 transition-[opacity,transform] duration-700 ease-out-quart',
                     index % 2 === 1 ? 'mt-8' : '',
                     visibleItems[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                   )}
                 >
-                  <div className="group relative aspect-[4/5]">
+                  <div className="group relative aspect-[4/5] overflow-hidden rounded-lg">
                     <img
                       src={image.src}
                       alt={image.alt}
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-500 ease-out-quad group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-exvia-black/0 group-hover:bg-exvia-black/10 transition-colors duration-300" />
+                    <div className="absolute inset-0 bg-almanac-ink-strong/0 group-hover:bg-almanac-ink-strong/10 transition-colors duration-300" />
                   </div>
                 </div>
               ))}

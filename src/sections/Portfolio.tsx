@@ -15,7 +15,9 @@ interface ProjectCardProps {
 function ProjectCard({ project, index, isVisible, wide = false }: ProjectCardProps) {
   const mediaRef = useRef<HTMLDivElement>(null);
   const tiltEnabled = useRef(false);
-  const accent = project.accent || '#131313';
+  // Fallback accent = almanac ink (#3C2B19) so a project without its own
+  // accent still washes in sepia rather than the old exvia black.
+  const accent = project.accent || '#3C2B19';
   const isExternal = Boolean(project.href);
 
   useEffect(() => {
@@ -44,7 +46,7 @@ function ProjectCard({ project, index, isVisible, wide = false }: ProjectCardPro
         ref={mediaRef}
         onMouseMove={handleMove}
         onMouseLeave={resetTilt}
-        className="project-media relative overflow-hidden rounded-xl bg-exvia-subtle transition-transform duration-300 ease-out-quart"
+        className="project-media relative overflow-hidden rounded-xl border border-almanac-ink-faint bg-almanac-paper-deep transition-transform duration-300 ease-out-quart"
         style={{ '--project-accent': accent } as React.CSSProperties}
       >
         <div className={cn(wide ? 'aspect-[16/9]' : 'aspect-[4/3]')}>
@@ -61,17 +63,17 @@ function ProjectCard({ project, index, isVisible, wide = false }: ProjectCardPro
 
         <div className="project-accent-wash absolute inset-0 pointer-events-none" />
 
-        <div className="absolute left-3 top-3 flex min-h-9 items-center gap-2 rounded-full bg-white px-3 text-xs font-medium text-exvia-black sm:left-4 sm:top-4">
+        <div className="absolute left-3 top-3 flex min-h-9 items-center gap-2 rounded-full border border-almanac-ink-faint bg-almanac-paper-card px-3 text-xs font-medium text-almanac-ink-strong sm:left-4 sm:top-4">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: accent }} aria-hidden="true" />
           {project.status}
         </div>
 
-        <span className="absolute right-3 top-3 flex min-h-9 items-center rounded-full bg-exvia-black/75 px-3 font-geist-mono text-[0.6875rem] text-white sm:right-4 sm:top-4">
+        <span className="absolute right-3 top-3 flex min-h-9 items-center rounded-full bg-almanac-ink-strong/85 px-3 font-geist-mono text-[0.6875rem] tracking-[0.08em] text-almanac-paper sm:right-4 sm:top-4">
           {project.year}
         </span>
 
         {project.hasEmbeddedPromoFooter && (
-          <div className="absolute inset-x-0 bottom-0 flex min-h-14 items-center justify-between bg-[#faf9f7] px-4 text-xs font-medium text-exvia-black sm:px-6">
+          <div className="absolute inset-x-0 bottom-0 flex min-h-14 items-center justify-between border-t border-almanac-ink-faint bg-almanac-paper-card px-4 text-xs font-medium text-almanac-ink-strong sm:px-6">
             <span>Play FJALË online</span>
             <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
           </div>
@@ -80,13 +82,13 @@ function ProjectCard({ project, index, isVisible, wide = false }: ProjectCardPro
 
       <div className="mt-5 flex flex-col items-start justify-between gap-4 sm:flex-row">
         <div>
-          <h3 className="text-2xl font-semibold tracking-[-0.03em] text-exvia-black sm:text-3xl">
+          <h3 className="font-display text-2xl font-semibold tracking-[0.01em] text-almanac-ink-strong sm:text-3xl">
             {project.title}
           </h3>
-          <p className="mt-1 max-w-md text-sm leading-relaxed text-exvia-black/65">{project.category}</p>
+          <p className="mt-1 max-w-md text-sm leading-relaxed text-almanac-ink-soft">{project.category}</p>
         </div>
         {isExternal && project.action && (
-          <span className="mt-1 inline-flex min-h-10 shrink-0 items-center gap-1.5 text-sm font-medium text-exvia-black/70 group-hover:text-exvia-black">
+          <span className="mt-1 inline-flex min-h-10 shrink-0 items-center gap-1.5 text-sm font-medium text-almanac-ink-soft group-hover:text-almanac-ink-strong">
             <span className="hidden sm:inline">{project.action}</span>
             {isExternal && <ArrowUpRight className="h-4 w-4" aria-hidden="true" />}
           </span>
@@ -98,7 +100,7 @@ function ProjectCard({ project, index, isVisible, wide = false }: ProjectCardPro
           {project.privacyHref && (
             <Link
               to={project.privacyHref}
-              className="pressable inline-flex min-h-11 items-center gap-2 rounded-lg border border-exvia-black/15 bg-white px-3.5 text-sm font-medium text-exvia-black transition-colors duration-200 hover:border-exvia-black/35"
+              className="pressable inline-flex min-h-11 items-center gap-2 rounded-lg border border-almanac-ink-faint bg-almanac-paper-card px-3.5 text-sm font-medium text-almanac-ink transition-colors duration-200 hover:border-almanac-ink-strong hover:bg-almanac-ink-strong hover:text-almanac-paper"
             >
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />
               Privacy
@@ -107,7 +109,7 @@ function ProjectCard({ project, index, isVisible, wide = false }: ProjectCardPro
           {project.termsHref && (
             <Link
               to={project.termsHref}
-              className="pressable inline-flex min-h-11 items-center gap-2 rounded-lg border border-exvia-black/15 bg-white px-3.5 text-sm font-medium text-exvia-black transition-colors duration-200 hover:border-exvia-black/35"
+              className="pressable inline-flex min-h-11 items-center gap-2 rounded-lg border border-almanac-ink-faint bg-almanac-paper-card px-3.5 text-sm font-medium text-almanac-ink transition-colors duration-200 hover:border-almanac-ink-strong hover:bg-almanac-ink-strong hover:text-almanac-paper"
             >
               <FileText className="h-4 w-4" aria-hidden="true" />
               Terms
@@ -154,12 +156,12 @@ export function Portfolio() {
   if (!portfolioConfig.heading && portfolioConfig.projects.length === 0) return null;
 
   return (
-    <section id="portfolio" className="w-full bg-exvia-subtle/40 py-24 lg:py-32">
+    <section id="portfolio" className="w-full bg-almanac-paper-deep/50 py-24 lg:py-32">
       <div className="container-large px-6 lg:px-12">
         <div ref={headerRef} className="mb-14 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] lg:items-end lg:gap-16">
           <h2
             className={cn(
-              'type-h2 max-w-4xl font-semibold text-exvia-black transition-[opacity,transform] duration-700 ease-out-quart',
+              'type-h2 max-w-4xl font-display font-semibold text-almanac-ink-strong transition-[opacity,transform] duration-700 ease-out-quart',
               headerVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0',
             )}
           >
@@ -167,7 +169,7 @@ export function Portfolio() {
           </h2>
           <p
             className={cn(
-              'max-w-xl text-base leading-relaxed text-exvia-black/70 transition-[opacity,transform] duration-700 ease-out-quart lg:justify-self-end',
+              'max-w-xl text-base leading-relaxed text-almanac-ink transition-[opacity,transform] duration-700 ease-out-quart lg:justify-self-end',
               headerVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0',
             )}
             style={{ transitionDelay: '100ms' }}
@@ -197,20 +199,25 @@ export function Portfolio() {
             <a
               href={portfolioConfig.cta.linkHref || '#contact'}
               className={cn(
-                'group relative flex min-h-[20rem] flex-col justify-between overflow-hidden rounded-xl bg-exvia-black p-8 text-white transition-[opacity,transform] duration-700 ease-out-quart lg:min-h-0',
+                'group relative flex min-h-[20rem] flex-col justify-between overflow-hidden rounded-xl border border-almanac-ink-strong bg-almanac-ink-strong p-8 text-almanac-paper transition-[opacity,transform] duration-700 ease-out-quart lg:min-h-0',
                 visibleItems[ctaIndex] ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0',
               )}
               style={{ transitionDelay: `${ctaIndex * 90}ms` }}
             >
-              <span className="text-sm text-white/65">{portfolioConfig.cta.label}</span>
-              <h3 className="max-w-sm text-3xl font-semibold leading-tight tracking-[-0.035em]">
+              <span className="text-sm text-almanac-paper/75">
+                <span aria-hidden="true" className="mr-2 text-almanac-gold">
+                  ✦
+                </span>
+                {portfolioConfig.cta.label}
+              </span>
+              <h3 className="max-w-sm font-display text-3xl font-semibold leading-tight tracking-[0.01em]">
                 {portfolioConfig.cta.heading}
               </h3>
               <span className="inline-flex min-h-11 items-center gap-2 text-sm font-medium">
                 {portfolioConfig.cta.linkText}
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out-quart group-hover:translate-x-1" aria-hidden="true" />
               </span>
-              <span className="portfolio-cta-arrow absolute -right-3 top-1/2 -translate-y-1/2 text-[8rem] font-medium leading-none text-white/[0.06]" aria-hidden="true">
+              <span className="portfolio-cta-arrow absolute -right-3 top-1/2 -translate-y-1/2 text-[8rem] font-medium leading-none text-almanac-gold/[0.12]" aria-hidden="true">
                 →
               </span>
             </a>

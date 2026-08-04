@@ -32,7 +32,7 @@ export function Footer() {
   };
 
   return (
-    <footer ref={ref} className="w-full bg-exvia-black text-white py-16 lg:py-24">
+    <footer ref={ref} className="w-full bg-almanac-ink-strong text-almanac-paper py-16 lg:py-24">
       <div className="container-large px-6 lg:px-12">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-8">
           {/* Brand Column */}
@@ -44,11 +44,11 @@ export function Footer() {
           >
             {footerConfig.logo && (
               <a href="#" className="inline-block">
-                <span className="text-2xl font-semibold tracking-tight">{footerConfig.logo}</span>
+                <span className="text-2xl font-display font-semibold tracking-tight text-almanac-paper">{footerConfig.logo}</span>
               </a>
             )}
             {footerConfig.description && (
-              <p className="text-sm text-white/70 max-w-xs leading-relaxed">
+              <p className="text-sm text-almanac-paper/70 max-w-xs leading-relaxed">
                 {footerConfig.description}
               </p>
             )}
@@ -62,7 +62,7 @@ export function Footer() {
                     <a
                       key={social.label}
                       href={social.href}
-                      className="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center hover:bg-white hover:text-exvia-black transition-colors duration-300"
+                      className="w-10 h-10 border border-almanac-paper/20 rounded-full flex items-center justify-center hover:bg-almanac-paper hover:text-almanac-ink-strong transition-colors duration-300"
                       aria-label={social.label}
                     >
                       <Icon className="w-4 h-4" />
@@ -83,14 +83,14 @@ export function Footer() {
               )}
               style={{ transitionDelay: `${(colIndex + 1) * 100}ms` }}
             >
-              <h4 className="text-xs font-geist-mono uppercase tracking-widest text-white/65 mb-4">
+              <h4 className="text-xs font-geist-mono uppercase tracking-widest text-almanac-paper/60 mb-4">
                 {column.title}
               </h4>
               <ul className="space-y-3">
                 {column.links.map((link) => {
                   const isExternal = /^https?:\/\//.test(link.href);
                   const linkClass =
-                    'min-h-11 text-sm text-white/75 hover:text-white transition-colors inline-flex items-center gap-1 group';
+                    'min-h-11 text-sm text-almanac-paper/75 hover:text-almanac-paper transition-colors inline-flex items-center gap-1 group';
                   const arrow = (
                     <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-[opacity,transform] duration-200" />
                   );
@@ -128,11 +128,11 @@ export function Footer() {
               )}
               style={{ transitionDelay: '400ms' }}
             >
-              <h4 className="text-xs font-geist-mono uppercase tracking-widest text-white/40 mb-4">
+              <h4 className="text-xs font-geist-mono uppercase tracking-widest text-almanac-paper/60 mb-4">
                 {footerConfig.newsletterHeading}
               </h4>
               {footerConfig.newsletterDescription && (
-                <p className="text-sm text-white/60 mb-4">
+                <p className="text-sm text-almanac-paper/70 mb-4">
                   {footerConfig.newsletterDescription}
                 </p>
               )}
@@ -140,12 +140,12 @@ export function Footer() {
                 <input
                   type="email"
                   placeholder={footerConfig.newsletterPlaceholder || "your@email.com"}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full px-4 py-3 bg-almanac-paper/5 border border-almanac-paper/15 rounded-lg text-sm text-almanac-paper placeholder:text-almanac-paper/55 focus:outline-none focus:border-almanac-paper/30 transition-colors"
                 />
                 {footerConfig.newsletterButtonText && (
                   <button
                     type="submit"
-                    className="w-full px-4 py-3 bg-white text-exvia-black text-sm font-medium rounded-lg hover:bg-white/90 transition-colors"
+                    className="w-full px-4 py-3 bg-almanac-paper text-almanac-ink-strong text-sm font-medium rounded-lg hover:bg-almanac-paper/90 transition-colors"
                   >
                     {footerConfig.newsletterButtonText}
                   </button>
@@ -159,21 +159,21 @@ export function Footer() {
         {(footerConfig.copyright || footerConfig.credit) && (
           <div
             className={cn(
-              'mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 transition-[opacity,transform] duration-800 ease-out-quart',
+              'mt-16 pt-8 border-t border-almanac-paper/15 flex flex-col md:flex-row justify-between items-center gap-4 transition-[opacity,transform] duration-800 ease-out-quart',
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
             )}
             style={{ transitionDelay: '500ms' }}
           >
             {footerConfig.copyright && (
-                <p className="text-xs text-white/65">
+                <p className="text-xs text-almanac-paper/55">
                 {footerConfig.copyright}
               </p>
             )}
             {footerConfig.credit && (
-              <p className="text-xs text-white/65 inline-flex items-center gap-1.5">
+              <p className="text-xs text-almanac-paper/55 inline-flex items-center gap-1.5">
                 <span>{footerConfig.credit}</span>
-                <Heart className="credit-heart w-3.5 h-3.5 text-white/70" aria-hidden="true" />
-                <Coffee className="credit-coffee w-3.5 h-3.5 text-white/70" aria-hidden="true" />
+                <Heart className="credit-heart w-3.5 h-3.5 text-almanac-rust" aria-hidden="true" />
+                <Coffee className="credit-coffee w-3.5 h-3.5 text-almanac-gold" aria-hidden="true" />
               </p>
             )}
           </div>

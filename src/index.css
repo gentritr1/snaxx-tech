@@ -150,6 +150,13 @@
   }
 }
 
+/* The heading-size utilities bake in -0.04em tracking tuned for Geist;
+   Cormorant Garamond needs it relaxed or caps collide. */
+.font-display.type-h2,
+.font-display.text-h3 {
+  letter-spacing: 0.005em;
+}
+
 /* Paper grain — subtle print texture over any almanac surface. The SVG
    noise tile costs no network request; multiply keeps ink lines crisp. */
 .paper-grain {
@@ -440,7 +447,7 @@
   }
 
   .service-row:hover .service-icon {
-    border-color: color-mix(in srgb, var(--service-accent) 40%, white);
+    border-color: color-mix(in srgb, var(--service-accent) 40%, var(--almanac-paper));
   }
 }
 

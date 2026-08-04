@@ -12,7 +12,7 @@ export function CTA() {
   if (!ctaConfig.heading && !ctaConfig.description) return null;
 
   return (
-    <section id="contact" className="relative w-full py-32 lg:py-48 overflow-hidden">
+    <section id="contact" className="relative w-full py-32 lg:py-48 overflow-hidden bg-almanac-ink-strong">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
@@ -21,7 +21,8 @@ export function CTA() {
           loading="lazy"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-exvia-black/60" />
+        {/* Closing ink band: sepia-tinted overlay keeps paper text at ~14:1 */}
+        <div className="absolute inset-0 bg-almanac-ink-strong/90" />
       </div>
 
       {/* Content */}
@@ -36,7 +37,7 @@ export function CTA() {
               )}
             >
               {ctaConfig.tags.map((tag, index) => (
-                <span key={index} className="px-4 py-2 text-xs font-geist-mono text-white/80 border border-white/20 rounded-full">
+                <span key={index} className="px-4 py-2 text-xs font-geist-mono text-almanac-paper/80 border border-almanac-paper/40 rounded-full">
                   {tag}
                 </span>
               ))}
@@ -47,7 +48,7 @@ export function CTA() {
           {ctaConfig.heading && (
             <h2
               className={cn(
-                'text-3xl lg:text-5xl font-semibold text-white leading-tight transition-[opacity,transform] duration-800 ease-out-quart',
+                'font-display text-3xl lg:text-5xl font-semibold text-almanac-paper leading-tight transition-[opacity,transform] duration-800 ease-out-quart',
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               )}
               style={{ transitionDelay: '100ms' }}
@@ -60,7 +61,7 @@ export function CTA() {
           {ctaConfig.description && (
             <p
               className={cn(
-                'mt-6 text-lg text-white/70 max-w-xl mx-auto transition-[opacity,transform] duration-800 ease-out-quart',
+                'mt-6 text-lg text-almanac-paper/70 max-w-xl mx-auto transition-[opacity,transform] duration-800 ease-out-quart',
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               )}
               style={{ transitionDelay: '200ms' }}
@@ -81,10 +82,10 @@ export function CTA() {
               <div ref={magneticRef} className="inline-block will-change-transform">
                 <AnimatedButton
                   href={ctaConfig.buttonHref}
-                  variant="primary"
+                  variant="outline-white"
                   size="lg"
                   showIcon
-                  className="bg-white text-exvia-black hover:bg-white/90 pressable"
+                  className="bg-almanac-paper text-almanac-ink-strong hover:bg-almanac-paper/90 pressable"
                 >
                   {ctaConfig.buttonText}
                 </AnimatedButton>
@@ -94,9 +95,9 @@ export function CTA() {
             {ctaConfig.email && (
               <a
                 href={`mailto:${ctaConfig.email}`}
-                className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors group"
+                className="inline-flex items-center gap-2 text-sm text-almanac-paper/80 hover:text-almanac-paper transition-colors group"
               >
-                <Mail className="w-4 h-4" />
+                <Mail className="w-4 h-4 text-almanac-gold" />
                 <span>{ctaConfig.email}</span>
                 <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
               </a>

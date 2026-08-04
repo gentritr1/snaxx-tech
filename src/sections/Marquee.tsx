@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 
-// Infinite ticker bridging the dark hero and the white About section.
+// Infinite ticker rendered as a dark ink band between the cream paper hero
+// and the paper sections below it.
 // Two identical sequences slide left by 50% for a seamless loop; CSS pauses
 // on hover and disables the animation under prefers-reduced-motion.
 
@@ -11,10 +12,10 @@ function Sequence() {
     <>
       {ITEMS.map((item, i) => (
         <span key={i} className="inline-flex items-center">
-          <span className="px-6 text-sm font-geist-mono uppercase tracking-[0.2em] text-white/80">
+          <span className="px-6 text-sm font-geist-mono uppercase tracking-[0.2em] text-almanac-paper/80">
             {item}
           </span>
-          <span aria-hidden="true" className="text-white/30">
+          <span aria-hidden="true" className="text-almanac-gold/60">
             ✦
           </span>
         </span>
@@ -25,7 +26,7 @@ function Sequence() {
 
 export function Marquee() {
   return (
-    <div className="w-full bg-exvia-black border-y border-white/10 py-4 overflow-hidden">
+    <div className="w-full bg-almanac-ink-strong border-y border-almanac-paper/10 py-4 overflow-hidden">
       <div className={cn('marquee')} aria-hidden="true">
         <div className="marquee-track">
           {/* Two copies so translateX(-50%) wraps seamlessly */}

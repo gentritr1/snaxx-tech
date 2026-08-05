@@ -42,6 +42,8 @@ export const navigationConfig: NavigationConfig = {
 // Hero section configuration
 export interface HeroClip {
   src: string;
+  /** This clip's exact first frame — no pose jump when playback starts. */
+  poster: string;
   /** Relative pick probability. Rare "easter egg" clips get a low weight. */
   weight: number;
 }
@@ -52,13 +54,13 @@ export interface HeroConfig {
   intro: string;
   releaseNote: string;
   /**
-   * Pool of ambient "Snaxx Almanac" clips (silent). Every clip starts and
-   * ends on the same canonical base frame, so the player can hard-cut
-   * between randomly chosen clips with no visible seam — the scene keeps
-   * living without ever obviously restarting.
+   * Pool of ambient "Snaxx Almanac" clips (silent). Each clip is a baked
+   * SELF-LOOP: cut at phase-matched frames with the blend inside the file,
+   * so `<video loop>` wraps invisibly and motion never stops. One clip is
+   * picked per visit — variety lives between visits, transitions nowhere.
    */
   clips: HeroClip[];
-  /** Canonical base frame — poster, reduced-motion, and error fallback. */
+  /** Generic still — reduced-motion and error fallback. */
   posterSrc: string;
 }
 
@@ -68,10 +70,14 @@ export const heroConfig: HeroConfig = {
   intro: "We turn small ideas into apps, games, and satisfying little moments.",
   releaseNote: "Arrows + Block Destroy · coming to Android",
   clips: [
-    { src: "/videos/almanac-a.mp4", weight: 3 }, // calm: plane, smoke, water, flags, balloon
-    { src: "/videos/almanac-b.mp4", weight: 3 }, // arcade invader + windmill + windsock
-    { src: "/videos/almanac-c.mp4", weight: 3 }, // gliding birds + drifting balloon
-    { src: "/videos/almanac-d.mp4", weight: 1 }, // easter egg: shooting star + telescope
+    // calm: plane, smoke, water, flags, balloon
+    { src: "/videos/almanac-a.mp4", poster: "/images/almanac-poster-a.jpg", weight: 3 },
+    // arcade invader + windsock (rooftop spinners frozen — AI spin looked off)
+    { src: "/videos/almanac-b.mp4", poster: "/images/almanac-poster-b.jpg", weight: 3 },
+    // gliding birds + drifting balloon
+    { src: "/videos/almanac-c.mp4", poster: "/images/almanac-poster-c.jpg", weight: 3 },
+    // easter egg: shooting star + telescope
+    { src: "/videos/almanac-d.mp4", poster: "/images/almanac-poster-d.jpg", weight: 1 },
   ],
   posterSrc: "/images/hero-almanac-poster.jpg",
 };

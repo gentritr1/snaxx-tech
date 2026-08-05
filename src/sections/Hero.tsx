@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { heroConfig, type HeroClip } from '@/config';
@@ -6,35 +6,33 @@ import { heroConfig, type HeroClip } from '@/config';
 /**
  * Hero — "The Snaxx Almanac" living illustration.
  *
- * Plays an endless random chain of ambient clips. Every clip in the pool
- * starts and ends on the same canonical base frame (enforced at build time
- * with motion-interpolated bookends), so swapping videos on `ended` is a
- * pixel-continuous hard cut: the scene keeps living — plane bobbing, smoke
- * rising, sometimes a shooting star — without ever visibly restarting.
+ * Plays ONE ambient clip per visit, chosen by weighted random pick, as a
+ * native `<video loop>`. Each file is a baked self-loop: cut at
+ * phase-matched frames with the seam blend inside the file, so the wrap is
+ * two adjacent source frames and motion never stops or restarts. Variety
+ * (including the rare shooting-star easter egg) lives BETWEEN visits —
+ * transitions between different AI generations always shimmer, so the
+ * player simply never performs one.
  *
- * Two stacked <video> elements alternate: while one plays, the other
- * preloads the next randomly chosen clip. Reduced motion or any load error
- * falls back to the identical still frame.
+ * The underlay <img> is the chosen clip's exact first frame: no pose jump
+ * when playback begins. Reduced motion or any load error falls back to a
+ * still.
  */
 
-/** Weighted random pick, avoiding an immediate repeat when possible. */
-function pickClip(clips: HeroClip[], avoidSrc: string | null): HeroClip {
-  const pool = clips.length > 1 && avoidSrc ? clips.filter((c) => c.src !== avoidSrc) : clips;
-  const total = pool.reduce((sum, c) => sum + c.weight, 0);
+/** Weighted random pick. */
+function pickClip(clips: HeroClip[]): HeroClip {
+  const total = clips.reduce((sum, c) => sum + c.weight, 0);
   let roll = Math.random() * total;
-  for (const clip of pool) {
+  for (const clip of clips) {
     roll -= clip.weight;
     if (roll <= 0) return clip;
   }
-  return pool[pool.length - 1];
+  return clips[clips.length - 1];
 }
 
 export function Hero() {
-  const videoRefA = useRef<HTMLVideoElement>(null);
-  const videoRefB = useRef<HTMLVideoElement>(null);
-  /** Which element is currently front-and-playing: 0 = A, 1 = B. */
-  const [activeSlot, setActiveSlot] = useState(0);
-  const activeSlotRef = useRef(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [clip] = useState(() => pickClip(heroConfig.clips));
   const [isLoaded, setIsLoaded] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(
@@ -59,88 +57,25 @@ export function Hero() {
 
   const showVideo = !reducedMotion && !videoFailed;
 
-  /** Load the first clip into A and preload a different one into B. */
   useEffect(() => {
     if (!showVideo) return;
-    const a = videoRefA.current;
-    const b = videoRefB.current;
-    if (!a || !b || a.src) return; // already initialised
-    const first = pickClip(heroConfig.clips, null);
-    const next = pickClip(heroConfig.clips, first.src);
-    a.src = first.src;
-    b.src = next.src;
-    b.load();
-    a.play().catch(() => {
+    videoRef.current?.play().catch(() => {
       /* autoplay refused (battery saver etc.) — poster frame remains */
     });
   }, [showVideo]);
 
-  /**
-   * Every clip is cut so its first and last frames sit at the same motion
-   * phase (plane mid-bob, matched pose vs the base artwork) while the scene
-   * is in full motion. Shortly before the active clip runs out, the
-   * preloaded standby starts and a 200ms opacity crossfade hands over —
-   * motion never pauses, so no join reads as a restart.
-   */
-  const switchingRef = useRef(false);
-
-  const beginHandover = useCallback((fromSlot: 0 | 1) => {
-    if (fromSlot !== activeSlotRef.current || switchingRef.current) return;
-    const outgoing = fromSlot === 0 ? videoRefA.current : videoRefB.current;
-    const standby = fromSlot === 0 ? videoRefB.current : videoRefA.current;
-    if (!outgoing || !standby) return;
-    switchingRef.current = true;
-    const nextSlot = fromSlot === 0 ? 1 : 0;
-    activeSlotRef.current = nextSlot;
-    setActiveSlot(nextSlot);
-    standby.play().catch(() => {
-      // Standby refused to start (rare) — revert the swap and replay the
-      // outgoing clip instead of fading to a paused element.
-      activeSlotRef.current = fromSlot;
-      setActiveSlot(fromSlot);
-      outgoing.currentTime = 0;
-      outgoing.play().catch(() => {});
-    });
-    // After the fade completes, retire the outgoing element and turn it
-    // into the preloader for the following pick.
-    setTimeout(() => {
-      outgoing.pause();
-      const upcoming = pickClip(heroConfig.clips, standby.currentSrc);
-      outgoing.src = upcoming.src;
-      outgoing.load();
-      switchingRef.current = false;
-    }, 450);
-  }, []);
-
-  /** Fire the handover ~0.35s before the end (timeupdate ticks ~4Hz). */
-  const handleTimeUpdate = useCallback(
-    (slot: 0 | 1) => {
-      const v = slot === 0 ? videoRefA.current : videoRefB.current;
-      if (!v || !v.duration) return;
-      if (v.duration - v.currentTime <= 0.35) beginHandover(slot);
-    },
-    [beginHandover]
-  );
-
   // Chrome pauses muted video-only media in background tabs and doesn't
-  // reliably resume on return — nudge the active clip back to life.
+  // reliably resume on return — nudge the clip back to life.
   useEffect(() => {
     const onVisible = () => {
-      if (document.visibilityState !== 'visible') return;
-      const active = activeSlotRef.current === 0 ? videoRefA.current : videoRefB.current;
-      if (active && active.paused && active.src) {
-        active.play().catch(() => {});
+      const v = videoRef.current;
+      if (document.visibilityState === 'visible' && v && v.paused) {
+        v.play().catch(() => {});
       }
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, []);
-
-  const videoClass = (slot: 0 | 1) =>
-    cn(
-      'absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ease-linear',
-      activeSlot === slot ? 'opacity-100' : 'opacity-0'
-    );
 
   return (
     <section id="hero" className="relative w-full min-h-screen overflow-hidden bg-[#F2E9D6]">
@@ -158,45 +93,28 @@ export function Hero() {
           isLoaded ? 'opacity-100' : 'opacity-0'
         )}
       >
-        {showVideo ? (
-          <>
-            {/* Poster underlay — identical to every clip's first frame, so
-                there is no flash while the first video buffers. */}
-            <img
-              className="absolute inset-0 h-full w-full object-cover"
-              src={heroConfig.posterSrc}
-              alt=""
-              draggable={false}
-            />
-            <video
-              ref={videoRefA}
-              className={videoClass(0)}
-              muted
-              playsInline
-              preload="auto"
-              disablePictureInPicture
-              onTimeUpdate={() => handleTimeUpdate(0)}
-              onEnded={() => beginHandover(0)}
-              onError={() => setVideoFailed(true)}
-            />
-            <video
-              ref={videoRefB}
-              className={videoClass(1)}
-              muted
-              playsInline
-              preload="auto"
-              disablePictureInPicture
-              onTimeUpdate={() => handleTimeUpdate(1)}
-              onEnded={() => beginHandover(1)}
-              onError={() => setVideoFailed(true)}
-            />
-          </>
-        ) : (
-          <img
+        {/* Underlay — the chosen clip's exact first frame, so there is no
+            flash or pose jump while the video buffers. Doubles as the
+            reduced-motion / error fallback. */}
+        <img
+          className="absolute inset-0 h-full w-full object-cover"
+          src={showVideo ? clip.poster : heroConfig.posterSrc}
+          alt=""
+          draggable={false}
+        />
+        {showVideo && (
+          <video
+            ref={videoRef}
             className="absolute inset-0 h-full w-full object-cover"
-            src={heroConfig.posterSrc}
-            alt=""
-            draggable={false}
+            src={clip.src}
+            poster={clip.poster}
+            loop
+            muted
+            playsInline
+            autoPlay
+            preload="auto"
+            disablePictureInPicture
+            onError={() => setVideoFailed(true)}
           />
         )}
       </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { heroConfig, type HeroClip } from '@/config';
@@ -6,17 +6,20 @@ import { heroConfig, type HeroClip } from '@/config';
 /**
  * Hero — "The Snaxx Almanac" living illustration.
  *
- * Plays ONE ambient clip per visit, chosen by weighted random pick, as a
- * native `<video loop>`. Each file is a baked self-loop: cut at
- * phase-matched frames with the seam blend inside the file, so the wrap is
- * two adjacent source frames and motion never stops or restarts. Variety
- * (including the rare shooting-star easter egg) lives BETWEEN visits —
- * transitions between different AI generations always shimmer, so the
- * player simply never performs one.
+ * ONE ambient clip per visit (weighted random pick). Each file is a baked
+ * self-loop whose last and first frames are content-continuous, but native
+ * `<video loop>` is NOT used: Chrome's loop wrap seeks the decoder back to
+ * frame 0 and can stall playback for a few frames — a visible hitch even
+ * when the content is seamless.
  *
- * The underlay <img> is the chosen clip's exact first frame: no pose jump
- * when playback begins. Reduced motion or any load error falls back to a
- * still.
+ * Instead the SAME clip is double-buffered across two video elements: while
+ * one plays, the other sits fully decoded and parked on frame 0. On
+ * `ended`, the standby starts and an instant visibility swap hands over —
+ * no live element ever seeks, so the wrap costs zero playback stall. The
+ * retired element then re-parks itself on frame 0 for the next wrap.
+ *
+ * Reduced motion or any load error falls back to the clip's first-frame
+ * still (also the underlay poster, so nothing flashes while buffering).
  */
 
 /** Weighted random pick. */
@@ -31,7 +34,10 @@ function pickClip(clips: HeroClip[]): HeroClip {
 }
 
 export function Hero() {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRefA = useRef<HTMLVideoElement>(null);
+  const videoRefB = useRef<HTMLVideoElement>(null);
+  const activeSlotRef = useRef<0 | 1>(0);
+  const [activeSlot, setActiveSlot] = useState<0 | 1>(0);
   const [clip] = useState(() => pickClip(heroConfig.clips));
   const [isLoaded, setIsLoaded] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
@@ -57,25 +63,62 @@ export function Hero() {
 
   const showVideo = !reducedMotion && !videoFailed;
 
+  // Start the active player; park the standby fully decoded on frame 0.
   useEffect(() => {
     if (!showVideo) return;
-    videoRef.current?.play().catch(() => {
+    const a = videoRefA.current;
+    const b = videoRefB.current;
+    if (!a || !b) return;
+    a.play().catch(() => {
       /* autoplay refused (battery saver etc.) — poster frame remains */
     });
+    b.load();
   }, [showVideo]);
 
+  /**
+   * Wrap handover: the standby is already decoded at frame 0, whose content
+   * continues the ended element's last frame. Instant swap, zero seek.
+   */
+  const handleEnded = useCallback((endedSlot: 0 | 1) => {
+    if (endedSlot !== activeSlotRef.current) return;
+    const ended = endedSlot === 0 ? videoRefA.current : videoRefB.current;
+    const standby = endedSlot === 0 ? videoRefB.current : videoRefA.current;
+    if (!ended || !standby) return;
+    const nextSlot: 0 | 1 = endedSlot === 0 ? 1 : 0;
+    activeSlotRef.current = nextSlot;
+    setActiveSlot(nextSlot);
+    standby.play().catch(() => {
+      // Standby refused (rare) — fall back to rewinding the ended element.
+      activeSlotRef.current = endedSlot;
+      setActiveSlot(endedSlot);
+      ended.currentTime = 0;
+      ended.play().catch(() => {});
+    });
+    // Re-park the retired element on frame 0, decoded, for the next wrap.
+    ended.currentTime = 0;
+  }, []);
+
   // Chrome pauses muted video-only media in background tabs and doesn't
-  // reliably resume on return — nudge the clip back to life.
+  // reliably resume on return — nudge the active player back to life.
   useEffect(() => {
     const onVisible = () => {
-      const v = videoRef.current;
-      if (document.visibilityState === 'visible' && v && v.paused) {
-        v.play().catch(() => {});
+      if (document.visibilityState !== 'visible') return;
+      const active = activeSlotRef.current === 0 ? videoRefA.current : videoRefB.current;
+      if (active && active.paused) {
+        active.play().catch(() => {});
       }
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, []);
+
+  // Instant swap — no opacity transition: the two frames at the boundary
+  // are content-continuous, so any crossfade would only add ghosting.
+  const videoClass = (slot: 0 | 1) =>
+    cn(
+      'absolute inset-0 h-full w-full object-cover',
+      activeSlot === slot ? 'visible' : 'invisible'
+    );
 
   return (
     <section id="hero" className="relative w-full min-h-screen overflow-hidden bg-[#F2E9D6]">
@@ -93,9 +136,8 @@ export function Hero() {
           isLoaded ? 'opacity-100' : 'opacity-0'
         )}
       >
-        {/* Underlay — the chosen clip's exact first frame, so there is no
-            flash or pose jump while the video buffers. Doubles as the
-            reduced-motion / error fallback. */}
+        {/* Underlay — the clip's exact first frame: no flash while the
+            video buffers, and the reduced-motion / error fallback. */}
         <img
           className="absolute inset-0 h-full w-full object-cover"
           src={showVideo ? clip.poster : heroConfig.posterSrc}
@@ -103,19 +145,32 @@ export function Hero() {
           draggable={false}
         />
         {showVideo && (
-          <video
-            ref={videoRef}
-            className="absolute inset-0 h-full w-full object-cover"
-            src={clip.src}
-            poster={clip.poster}
-            loop
-            muted
-            playsInline
-            autoPlay
-            preload="auto"
-            disablePictureInPicture
-            onError={() => setVideoFailed(true)}
-          />
+          <>
+            <video
+              ref={videoRefA}
+              className={videoClass(0)}
+              src={clip.src}
+              poster={clip.poster}
+              muted
+              playsInline
+              autoPlay
+              preload="auto"
+              disablePictureInPicture
+              onEnded={() => handleEnded(0)}
+              onError={() => setVideoFailed(true)}
+            />
+            <video
+              ref={videoRefB}
+              className={videoClass(1)}
+              src={clip.src}
+              muted
+              playsInline
+              preload="auto"
+              disablePictureInPicture
+              onEnded={() => handleEnded(1)}
+              onError={() => setVideoFailed(true)}
+            />
+          </>
         )}
       </div>
 

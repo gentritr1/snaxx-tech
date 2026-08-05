@@ -76,30 +76,51 @@ export function Hero() {
   }, [showVideo]);
 
   /**
-   * When the active clip ends, start the preloaded standby (its first frame
-   * is pixel-identical to the ended clip's last frame), reveal it, and turn
-   * the finished element into the preloader for the following pick.
+   * Every clip is cut so its first and last frames sit at the same motion
+   * phase (plane mid-bob, matched pose vs the base artwork) while the scene
+   * is in full motion. Shortly before the active clip runs out, the
+   * preloaded standby starts and a 200ms opacity crossfade hands over —
+   * motion never pauses, so no join reads as a restart.
    */
-  const handleEnded = useCallback((endedSlot: 0 | 1) => {
-    if (endedSlot !== activeSlotRef.current) return;
-    const ended = endedSlot === 0 ? videoRefA.current : videoRefB.current;
-    const standby = endedSlot === 0 ? videoRefB.current : videoRefA.current;
-    if (!ended || !standby) return;
-    const nextSlot = endedSlot === 0 ? 1 : 0;
+  const switchingRef = useRef(false);
+
+  const beginHandover = useCallback((fromSlot: 0 | 1) => {
+    if (fromSlot !== activeSlotRef.current || switchingRef.current) return;
+    const outgoing = fromSlot === 0 ? videoRefA.current : videoRefB.current;
+    const standby = fromSlot === 0 ? videoRefB.current : videoRefA.current;
+    if (!outgoing || !standby) return;
+    switchingRef.current = true;
+    const nextSlot = fromSlot === 0 ? 1 : 0;
     activeSlotRef.current = nextSlot;
     setActiveSlot(nextSlot);
     standby.play().catch(() => {
       // Standby refused to start (rare) — revert the swap and replay the
-      // finished clip instead of freezing on a hidden, paused element.
-      activeSlotRef.current = endedSlot;
-      setActiveSlot(endedSlot);
-      ended.currentTime = 0;
-      ended.play().catch(() => {});
+      // outgoing clip instead of fading to a paused element.
+      activeSlotRef.current = fromSlot;
+      setActiveSlot(fromSlot);
+      outgoing.currentTime = 0;
+      outgoing.play().catch(() => {});
     });
-    const upcoming = pickClip(heroConfig.clips, standby.currentSrc);
-    ended.src = upcoming.src;
-    ended.load();
+    // After the fade completes, retire the outgoing element and turn it
+    // into the preloader for the following pick.
+    setTimeout(() => {
+      outgoing.pause();
+      const upcoming = pickClip(heroConfig.clips, standby.currentSrc);
+      outgoing.src = upcoming.src;
+      outgoing.load();
+      switchingRef.current = false;
+    }, 450);
   }, []);
+
+  /** Fire the handover ~0.35s before the end (timeupdate ticks ~4Hz). */
+  const handleTimeUpdate = useCallback(
+    (slot: 0 | 1) => {
+      const v = slot === 0 ? videoRefA.current : videoRefB.current;
+      if (!v || !v.duration) return;
+      if (v.duration - v.currentTime <= 0.35) beginHandover(slot);
+    },
+    [beginHandover]
+  );
 
   // Chrome pauses muted video-only media in background tabs and doesn't
   // reliably resume on return — nudge the active clip back to life.
@@ -117,7 +138,7 @@ export function Hero() {
 
   const videoClass = (slot: 0 | 1) =>
     cn(
-      'absolute inset-0 h-full w-full object-cover',
+      'absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ease-linear',
       activeSlot === slot ? 'opacity-100' : 'opacity-0'
     );
 
@@ -154,7 +175,8 @@ export function Hero() {
               playsInline
               preload="auto"
               disablePictureInPicture
-              onEnded={() => handleEnded(0)}
+              onTimeUpdate={() => handleTimeUpdate(0)}
+              onEnded={() => beginHandover(0)}
               onError={() => setVideoFailed(true)}
             />
             <video
@@ -164,7 +186,8 @@ export function Hero() {
               playsInline
               preload="auto"
               disablePictureInPicture
-              onEnded={() => handleEnded(1)}
+              onTimeUpdate={() => handleTimeUpdate(1)}
+              onEnded={() => beginHandover(1)}
               onError={() => setVideoFailed(true)}
             />
           </>

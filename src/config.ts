@@ -70,12 +70,14 @@ export const heroConfig: HeroConfig = {
   intro: "We turn small ideas into apps, games, and satisfying little moments.",
   releaseNote: "Arrows + Block Destroy · coming to Android",
   clips: [
+    // flagship: 12s calm take, longest loop (wraps ~12s apart)
+    { src: "/videos/almanac-e.mp4", poster: "/images/almanac-poster-e.jpg", weight: 4 },
     // calm: plane, smoke, water, flags, balloon
-    { src: "/videos/almanac-a.mp4", poster: "/images/almanac-poster-a.jpg", weight: 3 },
+    { src: "/videos/almanac-a.mp4", poster: "/images/almanac-poster-a.jpg", weight: 2 },
     // arcade invader + windsock (rooftop spinners frozen — AI spin looked off)
-    { src: "/videos/almanac-b.mp4", poster: "/images/almanac-poster-b.jpg", weight: 3 },
+    { src: "/videos/almanac-b.mp4", poster: "/images/almanac-poster-b.jpg", weight: 2 },
     // gliding birds + drifting balloon
-    { src: "/videos/almanac-c.mp4", poster: "/images/almanac-poster-c.jpg", weight: 3 },
+    { src: "/videos/almanac-c.mp4", poster: "/images/almanac-poster-c.jpg", weight: 2 },
     // easter egg: shooting star + telescope
     { src: "/videos/almanac-d.mp4", poster: "/images/almanac-poster-d.jpg", weight: 1 },
   ],

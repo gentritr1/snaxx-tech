@@ -240,7 +240,6 @@ export const portfolioConfig: PortfolioConfig = {
       image: "/images/app-fjale.webp",
       href: "https://xn--fjal-opa.com",
       accent: "#D08700",
-      hasEmbeddedPromoFooter: true,
     },
     {
       title: "What's Next",

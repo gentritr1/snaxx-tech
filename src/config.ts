@@ -73,7 +73,9 @@ export const heroConfig: HeroConfig = {
     // Single clip for now: the steadiest take (12s calm generation), cut to
     // its best window and played forward-then-back, so the loop wrap has no
     // positional jump. The other takes can return once each meets that bar.
-    { src: "/videos/almanac-e.mp4", poster: "/images/almanac-poster-e.jpg", weight: 1 },
+    // Filename carries a content hash so /videos/* can be cached immutably;
+    // regenerate the hash whenever the file changes.
+    { src: "/videos/almanac-e.99b1c015.mp4", poster: "/images/almanac-poster-e.jpg", weight: 1 },
   ],
   posterSrc: "/images/hero-almanac-poster.jpg",
 };

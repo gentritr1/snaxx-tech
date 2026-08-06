@@ -248,7 +248,7 @@ export const portfolioConfig: PortfolioConfig = {
       status: "Coming to Android",
       action: "Release in progress",
       year: "2026",
-      image: "/images/app-geo-guesser.svg",
+      image: "/images/app-geo-guesser.webp",
       accent: "#14B8A6",
       privacyHref: "/geo-guesser-world-3d/privacy",
       termsHref: "/geo-guesser-world-3d/terms",

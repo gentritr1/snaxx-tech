@@ -21,8 +21,9 @@ export function CTA() {
           loading="lazy"
           className="w-full h-full object-cover"
         />
-        {/* Closing ink band: sepia-tinted overlay keeps paper text at ~14:1 */}
-        <div className="absolute inset-0 bg-almanac-ink-strong/90" />
+        {/* Closing ink band over the night-village artwork — light enough to
+            let the constellations show, heavy enough for paper text. */}
+        <div className="absolute inset-0 bg-almanac-ink-strong/60" />
       </div>
 
       {/* Content */}

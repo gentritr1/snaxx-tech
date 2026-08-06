@@ -113,10 +113,10 @@ export const aboutConfig: AboutConfig = {
     { value: "100%", label: "Indie & independent" },
   ],
   images: [
-    { src: "/images/about-1.webp", alt: "Arrows being played on a phone at night" },
-    { src: "/images/about-2.webp", alt: "Hands holding a phone playing a glowing puzzle" },
-    { src: "/images/about-3.webp", alt: "App wireframe sketches on dark paper" },
-    { src: "/images/about-4.webp", alt: "Code on a laptop in a dark studio" },
+    { src: "/images/about-1.webp", alt: "Hand-drawn arcade cabinet standing on a storybook hillside" },
+    { src: "/images/about-2.webp", alt: "App wireframe sketches on a wooden workshop desk" },
+    { src: "/images/about-3.webp", alt: "Inside the apps workshop, shelves of tiny tools and gadgets" },
+    { src: "/images/about-4.webp", alt: "The indie studio cabin at dusk, lamp and laptop by a round window" },
   ],
 };
 
@@ -143,14 +143,14 @@ export const servicesConfig: ServicesConfig = {
       title: "Game Development",
       description:
         "We design and build tight, replayable arcade experiences like Arrows — simple to pick up, hard to put down.",
-      image: "/images/app-arrows.webp",
+      image: "/images/about-1.webp",
     },
     {
       iconName: "Smartphone",
       title: "App Design & Engineering",
       description:
         "From first sketch to release, we craft fast, thoughtful apps and games like Block Destroy that feel effortless in the hand.",
-      image: "/images/app-block-destroy.webp",
+      image: "/images/about-2.webp",
     },
     {
       iconName: "ShieldCheck",

@@ -114,7 +114,7 @@ arrow=mesh('Arrow',[(.3,0,0),(-.2,-.07,-.045),(-.2,.07,-.045),(-.2,0,.07)],[(0,2
 bevel(arrow,.012,2);limit(arrow,290);kit.append(arrow)
 # Authored Bezier centerline; re-sampled by distance for all runtime riders.
 # Word run -> exterior wrap -> interior rising flight. World coordinates are +Y up.
-controls=[(-12,-2.0,0),(-6,-1.2,0),(-3,-1,0),(0,-1.12,0),(3,-1.65,.2),(5,-1.5,1.1)]
+controls=[(-12,-2.0,0),(-6,-1.2,0),(-3,-1,0),(0,-1.12,0),(3,.1,.2),(4.4,.7,1.1)]
 for i in range(13):
  a=2.5-i/12*2*math.pi;controls.append((7+2.27*math.cos(a),2.27*math.sin(a)*math.sin(math.radians(40)),2.27*math.sin(a)*math.cos(math.radians(40))))
  if i==1:controls.append((7.2,2.6,1.6))
@@ -154,7 +154,15 @@ for i,t in enumerate(tangents):
 export={'version':2,'source':'Blender 5.2 authored Bezier; uniform arclength, parallel-transport Frenet frames','coordinateSystem':'Y_UP','length':length[-1],'points':[list(p) for p in points],'tangents':[list(t) for t in tangents],'normals':[list(n) for n in normals]}
 def nearest_t(co):
  v=Vector(co);return min(range(len(points)),key=lambda i:(points[i]-v).length_squared)/(len(points)-1)
-export.update({'phoneWorldCameraT':nearest_t((5,-1.5,1.1))-.03,'interiorStartT':nearest_t(controls[23]),'flightCameraT':nearest_t((7,1,6-(8+2.5*math.cos(14*math.pi*.35+5.19235452468313))))-.03, 'planeStartT':nearest_t((7.2,2.6,1.6))-.006, 'wrapEndT':length[wrap_end_index*128]/length[-1], 'pinT':nearest_t((7.27,1.45,1.73)), 'wordStartT':nearest_t((-2.76,-1,0)), 'wordSpacingT':1.3/length[-1], 'tileSpeedT':12.3/length[-1], 'wordCameraT':nearest_t((.3,-1.12,0))-.03, 'worldCameraT':nearest_t((2.8,-1.6,.14))-.03})
+export.update({'phoneWorldCameraT':nearest_t((4,.5,.8))-.03,'interiorStartT':nearest_t(controls[23]),'flightCameraT':nearest_t((7,1,6-(8+2.5*math.cos(14*math.pi*.35+5.19235452468313))))-.03, 'planeStartT':nearest_t((7.2,2.6,1.6))-.006, 'wrapEndT':length[wrap_end_index*128]/length[-1], 'pinT':nearest_t((7.27,1.45,1.73)), 'wordStartT':nearest_t((-2.76,-1,0)), 'wordSpacingT':1.3/length[-1], 'tileSpeedT':4.3/length[-1], 'wordCameraT':nearest_t((.3,-1.12,0))-.03, 'worldCameraT':nearest_t((3,.1,.2))-.03})
+# Choose readable authored rider seats, using the same transported frames as runtime.
+def face_visibility(i,camera):
+ view=(Vector(camera)-points[i]).normalized()
+ face=normals[i]*math.cos(-.205905194703051)+tangents[i].cross(normals[i])*math.sin(-.205905194703051)
+ return abs(view.dot(face))
+plane_candidates=[i for i,p in enumerate(points) if p.y>1.8 and (p-Vector((7.2,2.6,1.6))).length<1.3 and i/1024<export['pinT']]
+if plane_candidates:export['planeStartT']=max(plane_candidates,key=lambda i:face_visibility(i,(3,1,11.5)))/1024
+export['flightLeadT']=max(range(math.ceil(.74*1024),math.floor(.78*1024)+1),key=lambda i:face_visibility(i,(7,1,6)))/1024
 (OUT/'journey-spline.json').write_text(json.dumps(export,separators=(',',':')))
 active(thread);bpy.ops.object.convert(target='MESH');thread=bpy.context.object;kit.append(thread)
 # One shared UV atlas baked from the actual recessed meshes.

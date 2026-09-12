@@ -64,7 +64,7 @@ function Scene({
     undefined,
   );
   const shadowMoving = useRef(true);
-  const kit = useGLTF("/models/red-thread-kit.glb", false, true, (loader) =>
+  const kit = useGLTF("/models/red-thread-kit.glb", false, false, (loader) =>
     loader.setDRACOLoader(kitDecoder()),
   );
   const scene = useMemo(() => {
@@ -314,7 +314,7 @@ function Scene({
         size.height,
         (size.width > 600 ? -230 : 110) * range(p, 0.67, 0.72),
         (size.width > 600 ? 110 : 200) * (1 - range(p, 0.2, 0.3)) -
-          (size.width > 600 ? 130 : 230) *
+          (size.width > 600 ? 0 : 140) *
             range(p, 0.2, 0.3) *
             (1 - range(p, 0.45, 0.55)) -
           (size.width <= 600 ? 140 : 70) * range(p, 0.67, 0.72) -

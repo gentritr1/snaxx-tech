@@ -120,7 +120,7 @@ phoneT[2] = splineData.phoneWorldCameraT;
 phoneT[3] = splineData.pinT - 0.03;
 const phonePositions = authoredPositions.map((point) => point.clone());
 phonePositions[0].z = phonePositions[1].z = 22;
-phonePositions[2].set(4, 1, 26);
+phonePositions[2].set(4, 1, 30);
 phonePositions[8].z += 4;
 const phoneFrames = phoneT.map((t) => sampleFrame(t, new Quaternion()).clone());
 const phoneOffsets = phonePositions.map((point, i) =>
@@ -189,6 +189,13 @@ export function planeParameter(p: number) {
     const t = (p - 0.65) / 0.05;
     return splineData.pinT + (0.7 - splineData.pinT) * t * t * (3 - 2 * t);
   }
+  if (p < 0.78)
+    return 0.7 + (splineData.flightLeadT - 0.7) * ((p - 0.7) / 0.08);
+  if (p < 0.9)
+    return (
+      splineData.flightLeadT +
+      (0.9 - splineData.flightLeadT) * ((p - 0.78) / 0.12)
+    );
   return p;
 }
 export function sampleThread(t: number, _p: number, point: Vector3) {

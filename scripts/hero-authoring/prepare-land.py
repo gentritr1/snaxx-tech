@@ -5,6 +5,7 @@ import numpy as np
 from scipy.spatial import Delaunay
 from shapely.geometry import Polygon, Point
 ROOT=Path(__file__).resolve().parents[2]
+(ROOT/'design/hero-world-within/kit').mkdir(parents=True,exist_ok=True)
 polygons=json.loads((ROOT/'scripts/hero-authoring/natural-earth-polygons.json').read_text())
 vertices=[];faces=[]
 for ring in polygons:

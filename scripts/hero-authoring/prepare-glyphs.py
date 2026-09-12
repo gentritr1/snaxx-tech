@@ -8,6 +8,7 @@ from shapely.geometry import Polygon
 from shapely.ops import unary_union
 from shapely import constrained_delaunay_triangles
 ROOT=Path(__file__).resolve().parents[2]
+(ROOT/'design/hero-world-within/kit').mkdir(parents=True,exist_ok=True)
 f=TTFont(ROOT/'public/fonts/bricolage-grotesque-latin.woff2')
 f=instantiateVariableFont(f,{a.axisTag:700 if a.axisTag=='wght' else a.defaultValue for a in f['fvar'].axes})
 glyphs=f.getGlyphSet();cmap=f.getBestCmap();scale=.83/f['head'].unitsPerEm

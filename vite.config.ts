@@ -6,6 +6,8 @@ import { inspectAttr } from 'kimi-plugin-inspect-react'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
     base: '/',
+    build: { manifest: true },
+    preview: { port: 4300 },
     plugins: [mode === 'development' && inspectAttr(), react()].filter(Boolean),
     server: {
       port: 3000,

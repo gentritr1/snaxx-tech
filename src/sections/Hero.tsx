@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { heroConfig, type HeroClip } from '@/config';
+import { heroConfig, isThreadHero, type HeroClip } from '@/config';
+import ThreadHero from './hero-thread/ThreadHero';
 
 /**
  * Hero — "The Snaxx Almanac" living illustration.
@@ -34,6 +35,10 @@ function pickClip(clips: HeroClip[]): HeroClip {
 }
 
 export function Hero() {
+  return isThreadHero() ? <ThreadHero /> : <AlmanacHero />;
+}
+
+function AlmanacHero() {
   const videoRefA = useRef<HTMLVideoElement>(null);
   const videoRefB = useRef<HTMLVideoElement>(null);
   const activeSlotRef = useRef<0 | 1>(0);

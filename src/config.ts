@@ -49,6 +49,7 @@ export interface HeroClip {
 }
 
 export interface HeroConfig {
+  variant: 'almanac' | 'thread';
   name: string;
   roles: string[];
   intro: string;
@@ -65,6 +66,7 @@ export interface HeroConfig {
 }
 
 export const heroConfig: HeroConfig = {
+  variant: 'almanac',
   name: "SNAXX",
   roles: ["Apps, games & useful little things", "Independent by design"],
   intro: "We turn small ideas into apps, games, and satisfying little moments.",
@@ -384,3 +386,8 @@ export const footerConfig: FooterConfig = {
   copyright: "© 2026 Snaxx Tech. All rights reserved.",
   credit: "Made with care, coffee & code.",
 };
+
+/** Query override is review-only; production rollout stays explicit. */
+export function isThreadHero() {
+  return heroConfig.variant === 'thread' || (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('hero') === 'thread');
+}

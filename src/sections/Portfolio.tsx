@@ -3,7 +3,7 @@ import { ArrowRight, ArrowUpRight, FileText, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router';
 import { cn } from '@/lib/utils';
 import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
-import { portfolioConfig, type ProjectItem } from '@/config';
+import { portfolioConfig, isThreadHero, type ProjectItem } from '@/config';
 
 interface ProjectCardProps {
   project: ProjectItem;
@@ -161,11 +161,14 @@ export function Portfolio() {
         <div ref={headerRef} className="mb-14 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] lg:items-end lg:gap-16">
           <h2
             className={cn(
-              'type-h2 max-w-4xl font-display font-semibold text-almanac-ink-strong transition-[opacity,transform] duration-700 ease-out-quart',
+              'relative type-h2 max-w-4xl font-display font-semibold text-almanac-ink-strong transition-[opacity,transform] duration-700 ease-out-quart',
               headerVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0',
             )}
           >
             {portfolioConfig.heading}
+            {isThreadHero() && <svg aria-hidden="true" className="thread-portfolio-underline" viewBox="0 0 900 400" preserveAspectRatio="none">
+              <path d="M 860 0 C 810 170 660 350 460 360 C 340 373 120 358 0 365 C 270 378 700 355 1000 380" pathLength="1" fill="none" stroke="#D73626" strokeWidth="5" vectorEffect="non-scaling-stroke" strokeLinecap="round" style={{ strokeDasharray: 1, strokeDashoffset: 'calc(1 - var(--thread-landing, 0))' }} />
+            </svg>}
           </h2>
           <p
             className={cn(

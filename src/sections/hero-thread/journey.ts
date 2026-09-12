@@ -1,8 +1,9 @@
-import { CatmullRomCurve3, Vector3 } from 'three';
+import { CatmullRomCurve3, Vector3 } from "three";
 
 export const clamp = (value: number) => Math.max(0, Math.min(1, value));
 export const easeOutQuart = (value: number) => 1 - (1 - clamp(value)) ** 4;
-export const range = (p: number, start: number, end: number) => easeOutQuart((p - start) / (end - start));
+export const range = (p: number, start: number, end: number) =>
+  easeOutQuart((p - start) / (end - start));
 export const R = 2.2;
 export const globeCenter = new Vector3(7, 0, 0);
 
@@ -14,30 +15,81 @@ export const globeCenter = new Vector3(7, 0, 0);
 export const keys = [0, 0.2, 0.45, 0.65, 0.9, 1] as const;
 
 // One continuous thread: Word → one globe wrap → surface pin → interior → exit.
-const word = [[-9, 1.7, 0], [-5, 1.7, 0], [-2.4, 1.6, 0], [0, 1.7, 0], [2.4, 1.6, 0], [4, 1.3, 0]];
+const word = [
+  [-9, 1.7, 0],
+  [-5, 1.7, 0],
+  [-2.4, 1.6, 0],
+  [0, 1.7, 0],
+  [2.4, 1.6, 0],
+  [4, 1.3, 0],
+];
 const wrap = Array.from({ length: 17 }, (_, i) => {
   const angle = -Math.PI / 2 + (i / 16) * Math.PI * 2;
-  return [7 + Math.sin(angle) * R * 1.025, Math.cos(angle) * R * 0.42, Math.cos(angle) * R * 0.93];
+  return [
+    7 + Math.sin(angle) * R * 1.025,
+    Math.cos(angle) * R * 0.42,
+    Math.cos(angle) * R * 0.93,
+  ];
 });
-export const threadCurve = new CatmullRomCurve3([
-  ...word, ...wrap, [6.1, 0.4, 2.05], [7, 0, 1.4], [7.6, -0.4, 0.1],
-  [7, -0.8, -1.2], [8.5, -0.4, -2.7], [10.5, 0.3, -4], [14, 3, -6],
-].map(([x, y, z]) => new Vector3(x, y, z)));
+export const threadCurve = new CatmullRomCurve3(
+  [
+    ...word,
+    ...wrap,
+    [6.1, 0.4, 2.05],
+    [7, 0, 1.4],
+    [7.6, -0.4, 0.1],
+    [7, -0.8, -1.2],
+    [8.5, -0.4, -2.7],
+    [10.5, 0.3, -4],
+    [14, 3, -6],
+  ].map(([x, y, z]) => new Vector3(x, y, z)),
+);
 threadCurve.arcLengthDivisions = 2048;
+export const pinAnchor = threadCurve.getPointAt(0.37);
 
-// The camera spline has a point per key plus a settled inside pose at .78.
-export const cameraKeys = [0, 0.2, 0.45, 0.65, 0.78, 0.9, 1] as const;
-export const cameraCurve = new CatmullRomCurve3([
-  [0, 0, 12], [0, 0, 12], [4.3, 1.0, 7.04], [6.1, 0.4, 2.31],
-  [7.1, 0.2, 0.85], [7.7, 0.15, 0.1], [9, 1.5, -1],
-].map(([x, y, z]) => new Vector3(x, y, z)));
+// Distances in §6 are measured from the pin: 3.2R at .45, 1.05R at .65.
+// The .67 surface crossing is hidden by the reversible porcelain white-out.
+export const cameraKeys = [
+  0, 0.2, 0.3, 0.45, 0.65, 0.67, 0.78, 0.9, 1,
+] as const;
+export const cameraCurve = new CatmullRomCurve3(
+  [
+    [0, 0, 12],
+    [0, 0, 12],
+    [5.2, 0.4, 9.5],
+    [pinAnchor.x, pinAnchor.y, pinAnchor.z + 3.2 * R],
+    [pinAnchor.x, pinAnchor.y, pinAnchor.z + 1.05 * R],
+    [pinAnchor.x, pinAnchor.y, pinAnchor.z - 0.1],
+    [7.7, 0.8, 1.5],
+    [7.7, 0.15, 0.1],
+    [9, 1.5, -1],
+  ].map(([x, y, z]) => new Vector3(x, y, z)),
+);
 export const cameraTargets = [
-  [0, 0, 0], [0, 0, 0], [4.3, 0.1, 0], [6.1, 0.4, 0],
-  [8.3, -0.1, -3], [9.5, 0, -4], [11, -2, -5],
+  [0, 0, 0],
+  [0, 0, 0],
+  [4.5, 0, 0],
+  [4.5, 0.1, 0],
+  [pinAnchor.x, pinAnchor.y, 0],
+  [pinAnchor.x, pinAnchor.y, 0],
+  [4.5, -3.5, -3],
+  [9.5, 0, -4],
+  [11, -2, -5],
 ].map(([x, y, z]) => new Vector3(x, y, z));
 
 export function sampleCamera(p: number, position: Vector3, target: Vector3) {
-  const index = Math.min(cameraKeys.length - 2, Math.max(0, cameraKeys.reduce<number>((found, key, i) => p >= key ? i : found, 0)));
+  if (p <= 0.2) {
+    position.copy(cameraCurve.points[0]);
+    target.copy(cameraTargets[0]);
+    return;
+  }
+  const index = Math.min(
+    cameraKeys.length - 2,
+    Math.max(
+      0,
+      cameraKeys.reduce<number>((found, key, i) => (p >= key ? i : found), 0),
+    ),
+  );
   const blend = range(p, cameraKeys[index], cameraKeys[index + 1]);
   cameraCurve.getPoint((index + blend) / (cameraKeys.length - 1), position);
   target.copy(cameraTargets[index]).lerp(cameraTargets[index + 1], blend);
@@ -47,4 +99,12 @@ export function sampleCamera(p: number, position: Vector3, target: Vector3) {
 export function tileClick(p: number, index: number) {
   const t = clamp((p - index * 0.03) / 0.03);
   return 1 + Math.sin(t * Math.PI) * 0.06;
+}
+
+/** The slack Word strand settles below Act II copy; all riders share this deformation. */
+export function sampleThread(t: number, p: number, point: Vector3) {
+  threadCurve.getPointAt(clamp(t), point);
+  const x = clamp((t - 0.28) / 0.06);
+  point.y -= range(p, 0.2, 0.3) * 4 * (1 - x * x * (3 - 2 * x));
+  return point;
 }

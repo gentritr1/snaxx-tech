@@ -1,53 +1,464 @@
-@font-face{font-family:Bricolage;src:url('/fonts/bricolage-grotesque-latin.woff2') format('woff2');font-style:normal;font-weight:200 800;font-display:swap}
-.thread-hero{position:relative;background:#F9F4EE;color:#2A2D38;isolation:isolate}
-.thread-pinned{height:420vh}
-.thread-stage{position:sticky;top:0;height:100vh;min-height:640px;overflow:hidden;background:#F9F4EE}
-.thread-canvas,.thread-still,.thread-still picture,.thread-still img{position:absolute;inset:0;width:100%;height:100%}
-.thread-still img{object-fit:cover}
-.thread-copy,.thread-still-copy{position:absolute;z-index:2}
-.thread-hero h1,.thread-hero h2{font-family:Bricolage,Arial,sans-serif;font-weight:600;letter-spacing:-.03em;line-height:.96;text-wrap:balance;margin:0}
-.thread-hero p{margin:0;font-size:18px;line-height:1.55;color:#2A2D38;max-width:480px}
-.thread-hero .thread-eyebrow{font-family:GeistMono,monospace;font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:#5F636F;max-width:none}
-.thread-world .thread-eyebrow::before,.thread-arrow .thread-eyebrow::before,.thread-descent .thread-eyebrow::before{content:'';display:inline-block;width:6px;height:6px;background:#D73626;border-radius:50%;margin-right:10px}
-.thread-word{inset:0;text-align:center;pointer-events:none}
-.thread-word>.thread-eyebrow{position:absolute;top:14.22%;left:0;right:0}
-.thread-word-body{position:absolute;top:53.33%;left:48px;right:48px;display:flex;align-items:center;flex-direction:column;gap:26px}
-.thread-word h1{font-size:64px}
-.thread-word-body p{max-width:560px}
-.thread-hero .thread-studio{position:absolute;bottom:64px;left:48px;max-width:420px;font-size:15px;text-align:left;color:#5F636F}
-.thread-world,.thread-arrow{top:16.67%;left:48px;width:min(42%,600px);display:flex;flex-direction:column;gap:24px;pointer-events:none}
-.thread-world h2{font-size:80px}.thread-arrow h2{font-size:76px}.thread-arrow{width:min(38%,520px);gap:22px}
-.thread-descent{left:57%;right:80px;top:12.44%;display:flex;flex-direction:column;gap:14px;pointer-events:none}
-.thread-descent h2{font-size:40px;line-height:1.02}.thread-descent p{font-size:16px;max-width:400px}
-.thread-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.thread-act-actions{position:absolute;z-index:5;left:48px;top:55%}
-.thread-actions-word{top:75%;left:0;right:0;justify-content:center;gap:28px}
-.thread-primary,.thread-secondary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:16px 32px;border-radius:12px;font-size:16px;font-weight:500;text-decoration:none}
-.thread-primary{background:#D73626;color:white;transition:background-color 160ms}.thread-secondary{border:1px solid #2A2D38;color:#2A2D38}
-.thread-primary:focus-visible,.thread-secondary:focus-visible,.thread-link:focus-visible{outline:3px solid #2A2D38;outline-offset:5px}
-.thread-link{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:#2A2D38;text-decoration:underline;text-decoration-color:#D73626;text-underline-offset:6px}
-.thread-pill{display:inline-flex;align-items:center;gap:8px;border:1px solid #DCD6CF;background:#FEFBF8;border-radius:999px;padding:10px 14px;font:11px GeistMono,monospace;letter-spacing:.14em;text-transform:uppercase;color:#2A2D38}
-.thread-pill::before{content:'';width:8px;height:8px;border-radius:50%;background:#D73626;flex-shrink:0}.thread-pills{display:flex;flex-wrap:wrap;gap:10px}
-.thread-still-copy{left:48px;top:15.55%;width:620px;display:flex;flex-direction:column;gap:20px}.thread-still h1{font-size:84px}
-.thread-rail{position:absolute;z-index:6;right:50px;top:calc(50% - 120px);width:2px;height:240px;background:#DCD6CF;pointer-events:none}.thread-rail-fill{position:absolute;inset:0;background:#D73626;transform-origin:top}.thread-rail i,.thread-rail b{position:absolute;left:50%;border-radius:50%;transform:translate(-50%,-50%);width:6px;height:6px}.thread-rail b{width:12px;height:12px;background:#D73626;box-shadow:0 0 0 3px #F9F4EE}
-.thread-whiteout{position:absolute;inset:0;background:#F9F4EE;z-index:1;pointer-events:none}
-/* The Hero owns this visual treatment; Navigation's handlers and menu stay intact. */
-html[data-thread-hero] nav.fixed{background:rgb(249 244 238 / .93)}
-html[data-thread-nav=clear] nav.fixed:not(:has([aria-expanded=true])){background:transparent;box-shadow:none;backdrop-filter:none}
-@media(hover:hover) and (pointer:fine){.thread-primary:hover{background:#C63223}}
-@media(max-width:600px){
- .thread-pinned{height:300vh}.thread-stage{min-height:600px}
- .thread-word>.thread-eyebrow{top:14%;font-size:9px;letter-spacing:.14em}
- .thread-word-body{top:39.1%;left:24px;right:40px;gap:22px}.thread-word h1{font-size:40px;line-height:1.02}.thread-hero p{font-size:16px}.thread-hero .thread-eyebrow{font-size:11px}
- .thread-hero .thread-studio{display:none}
- .thread-actions-word{top:64%;left:24px;right:40px;gap:14px;flex-direction:column}.thread-primary{width:100%}
- .thread-world,.thread-arrow{top:15.16%;left:24px;right:40px;width:auto;gap:18px}.thread-world h2{font-size:48px}.thread-arrow h2{font-size:44px}
- .thread-act-actions:not(.thread-actions-word){top:43%;left:24px;right:40px;gap:10px;align-items:flex-start;flex-direction:column}
- .thread-act-actions.thread-actions-arrow{top:auto;bottom:8.5%;padding:16px;background:rgb(254 251 248 / .94);border:1px solid #DCD6CF;border-radius:16px}
- .thread-arrow>p:last-child{margin-top:32vh;padding:12px;background:rgb(254 251 248 / .94);border-radius:12px}
- .thread-descent{left:24px;right:40px;top:13%;gap:14px}.thread-descent h2{font-size:40px}.thread-descent p{font-size:14px}
- .thread-world:has(~.thread-descent[aria-hidden=false]){visibility:hidden}
- .thread-still-copy{left:24px;right:24px;width:auto;top:15%;gap:18px}.thread-still h1{font-size:48px}.thread-still img{object-position:65% bottom;opacity:.45}.thread-still .thread-actions{align-items:stretch}.thread-still .thread-primary,.thread-still .thread-secondary{width:100%}.thread-pill{font-size:9px;letter-spacing:.1em}
- .thread-rail{height:160px;right:26px;top:calc(50% - 80px)}
+@font-face {
+  font-family: Bricolage;
+  src: url("/fonts/bricolage-grotesque-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
 }
-@media(prefers-reduced-motion:reduce){.thread-primary{transition:none}}
+.thread-hero {
+  position: relative;
+  background: #f9f4ee;
+  color: #2a2d38;
+  isolation: isolate;
+  z-index: 1;
+}
+.thread-pinned {
+  height: 420vh;
+  margin-bottom: -100vh;
+  background: transparent;
+  pointer-events: none;
+}
+.thread-stage {
+  pointer-events: auto;
+}
+.thread-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  background: #f9f4ee;
+}
+.thread-canvas,
+.thread-still,
+.thread-still picture,
+.thread-still img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.thread-still img {
+  object-fit: cover;
+}
+.thread-copy,
+.thread-still-copy {
+  position: absolute;
+  z-index: 2;
+}
+.thread-hero h1,
+.thread-hero h2 {
+  font-family: Bricolage, Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 0.96;
+  text-wrap: balance;
+  margin: 0;
+}
+.thread-hero p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.55;
+  color: #2a2d38;
+  max-width: 480px;
+}
+.thread-hero .thread-eyebrow {
+  font-family: GeistMono, monospace;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #5f636f;
+  max-width: none;
+}
+.thread-world .thread-eyebrow::before,
+.thread-arrow .thread-eyebrow::before,
+.thread-descent .thread-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #d73626;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+.thread-word {
+  inset: 0;
+  text-align: center;
+  pointer-events: none;
+}
+.thread-word > .thread-eyebrow {
+  position: absolute;
+  top: 14.22%;
+  left: 0;
+  right: 0;
+}
+.thread-word-body {
+  position: absolute;
+  top: 53.33%;
+  left: 48px;
+  right: 48px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 26px;
+}
+.thread-word h1 {
+  font-size: 64px;
+}
+.thread-word-body p {
+  max-width: 560px;
+}
+.thread-hero .thread-studio {
+  position: absolute;
+  bottom: 64px;
+  left: 48px;
+  max-width: 420px;
+  font-size: 15px;
+  text-align: left;
+  color: #5f636f;
+}
+.thread-world,
+.thread-arrow {
+  top: 16.67%;
+  left: 48px;
+  width: min(42%, 600px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  pointer-events: none;
+}
+.thread-world h2 {
+  font-size: 80px;
+}
+.thread-arrow h2 {
+  font-size: 76px;
+}
+.thread-arrow {
+  width: min(38%, 520px);
+  gap: 22px;
+}
+.thread-descent {
+  left: 57%;
+  right: 80px;
+  top: 12.44%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  pointer-events: none;
+}
+.thread-descent h2 {
+  font-size: 40px;
+  line-height: 1.02;
+}
+.thread-descent p {
+  font-size: 16px;
+  max-width: 400px;
+}
+.thread-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.thread-act-actions {
+  position: absolute;
+  z-index: 5;
+  left: 48px;
+  top: 55%;
+}
+.thread-actions-word {
+  top: 75%;
+  left: 0;
+  right: 0;
+  justify-content: center;
+  gap: 28px;
+}
+.thread-primary,
+.thread-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.thread-primary {
+  background: #d73626;
+  color: white;
+  transition: background-color 160ms;
+}
+.thread-secondary {
+  border: 1px solid #2a2d38;
+  color: #2a2d38;
+}
+.thread-primary:focus-visible,
+.thread-secondary:focus-visible,
+.thread-link:focus-visible {
+  outline: 3px solid #2a2d38;
+  outline-offset: 5px;
+}
+.thread-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: #2a2d38;
+  text-decoration: underline;
+  text-decoration-color: #d73626;
+  text-underline-offset: 6px;
+}
+.thread-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #dcd6cf;
+  background: #fefbf8;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font:
+    11px GeistMono,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #2a2d38;
+}
+.thread-pill::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d73626;
+  flex-shrink: 0;
+}
+.thread-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.thread-still-copy {
+  left: 48px;
+  top: 15.55%;
+  width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.thread-still h1 {
+  font-size: 84px;
+}
+.thread-rail {
+  position: absolute;
+  z-index: 6;
+  right: 50px;
+  top: calc(50% - 120px);
+  width: 2px;
+  height: 240px;
+  background: #dcd6cf;
+  pointer-events: none;
+}
+.thread-rail-fill {
+  position: absolute;
+  inset: 0;
+  background: #d73626;
+  transform-origin: top;
+}
+.thread-rail i,
+.thread-rail b {
+  position: absolute;
+  left: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+}
+.thread-rail b {
+  width: 12px;
+  height: 12px;
+  background: #d73626;
+  box-shadow: 0 0 0 3px #f9f4ee;
+}
+.thread-whiteout {
+  position: absolute;
+  inset: 0;
+  background: #f9f4ee;
+  z-index: 1;
+  pointer-events: none;
+}
+/* The Hero owns this visual treatment; Navigation's handlers and menu stay intact. */
+html[data-thread-hero] nav.fixed {
+  background: rgb(249 244 238 / 0.93);
+}
+html[data-thread-nav="clear"] nav.fixed:not(:has([aria-expanded="true"])) {
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .thread-primary:hover {
+    background: #c63223;
+  }
+}
+@media (max-width: 600px) {
+  .thread-pinned {
+    height: 300vh;
+  }
+  .thread-stage {
+    min-height: 600px;
+  }
+  .thread-word > .thread-eyebrow {
+    top: 14%;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+  }
+  .thread-word-body {
+    top: 39.1%;
+    left: 24px;
+    right: 40px;
+    gap: 22px;
+  }
+  .thread-word h1 {
+    font-size: 40px;
+    line-height: 1.02;
+  }
+  .thread-hero p {
+    font-size: 16px;
+  }
+  .thread-hero .thread-eyebrow {
+    font-size: 11px;
+  }
+  .thread-hero .thread-studio {
+    display: none;
+  }
+  .thread-actions-word {
+    top: 64%;
+    left: 24px;
+    right: 40px;
+    gap: 14px;
+    flex-direction: column;
+  }
+  .thread-primary {
+    width: 100%;
+  }
+  .thread-world,
+  .thread-arrow {
+    top: 15.16%;
+    left: 24px;
+    right: 40px;
+    width: auto;
+    gap: 18px;
+  }
+  .thread-world h2 {
+    font-size: 48px;
+  }
+  .thread-arrow h2 {
+    font-size: 44px;
+  }
+  .thread-act-actions:not(.thread-actions-word) {
+    top: 43%;
+    left: 24px;
+    right: 40px;
+    gap: 10px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .thread-act-actions.thread-actions-arrow {
+    top: auto;
+    bottom: 8.5%;
+    padding: 16px;
+    background: rgb(254 251 248 / 0.94);
+    border: 1px solid #dcd6cf;
+    border-radius: 16px;
+  }
+  .thread-arrow > p:last-child {
+    margin-top: 32vh;
+    padding: 12px;
+    background: rgb(254 251 248 / 0.94);
+    border-radius: 12px;
+  }
+  .thread-descent {
+    left: 24px;
+    right: 40px;
+    top: 13%;
+    gap: 14px;
+  }
+  .thread-descent h2 {
+    font-size: 40px;
+  }
+  .thread-descent p {
+    font-size: 14px;
+  }
+  .thread-world:has(~ .thread-descent[aria-hidden="false"]) {
+    visibility: hidden;
+  }
+  .thread-descent[aria-hidden="false"] ~ .thread-act-actions {
+    top: auto;
+    bottom: 8.5%;
+    padding: 16px;
+    background: rgb(254 251 248 / 0.94);
+    border: 1px solid #dcd6cf;
+    border-radius: 16px;
+  }
+  .thread-still-copy {
+    left: 24px;
+    right: 24px;
+    width: auto;
+    top: 15%;
+    gap: 18px;
+  }
+  .thread-still h1 {
+    font-size: 48px;
+  }
+  .thread-still img {
+    object-position: 65% bottom;
+    opacity: 0.45;
+  }
+  .thread-still .thread-actions {
+    align-items: stretch;
+  }
+  .thread-still .thread-primary,
+  .thread-still .thread-secondary {
+    width: 100%;
+  }
+  .thread-pill {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .thread-rail {
+    height: 160px;
+    right: 26px;
+    top: calc(50% - 80px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .thread-primary {
+    transition: none;
+  }
+}
+.thread-portfolio-underline {
+  position: absolute;
+  left: 0;
+  bottom: -52px;
+  width: calc(100% + 20vw);
+  height: 400px;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.thread-landing-actions {
+  position: fixed;
+  bottom: 32px;
+  right: 48px;
+  z-index: 5;
+  pointer-events: auto;
+}
+@media (max-width: 600px) {
+  .thread-landing-actions {
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+  }
+}

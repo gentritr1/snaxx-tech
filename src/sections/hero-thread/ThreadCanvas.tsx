@@ -133,7 +133,12 @@ function Scene({
     }
     tube.setAttribute("threadCenter", new Float32BufferAttribute(centers, 3));
     const threadMaterial = new MeshPhysicalMaterial({
-      color: "#D73626",
+      // Physical extends Standard: an unlit vermilion base with a clearcoat highlight.
+      // Interior lighting must never turn the story's cord black.
+      color: "#000000",
+      emissive: "#D73626",
+      emissiveIntensity: 1,
+      envMapIntensity: 0,
       clearcoat: 1,
       clearcoatRoughness: 0.12,
       roughness: 0.3,
@@ -300,6 +305,15 @@ function Scene({
     const p = state.p;
     const moving = Math.abs(state.targetP.current - p) >= 0.0005;
     state.present(p, dt);
+    // Native scroll can reach the un-pin before the damped playhead catches up.
+    // Stop drawing there; the scroll listener wakes us again on reversal.
+    scene.group.visible = state.targetP.current < 1;
+    if (!scene.group.visible) {
+      shadowMoving.current = false;
+      clearTimeout(idleTimer.current);
+      if (p < 1) invalidate();
+      return;
+    }
     scene.time += dt;
     scene.idleWeight +=
       ((moving || state.reviewStill ? 0 : 1) - scene.idleWeight) *

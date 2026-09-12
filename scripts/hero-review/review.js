@@ -99,3 +99,16 @@ document.querySelectorAll('button').forEach(b=>b.disabled=true);
 const traceDetails=document.createElement('details');traceDetails.innerHTML='<summary>Raw performance marks</summary><pre id="raw-trace"></pre>';document.body.append(traceDetails);
 const rendererInfo=document.createElement('button');rendererInfo.textContent='Renderer info';document.querySelector('#controls').append(rendererInfo);
 rendererInfo.onclick=()=>{const w=frame.contentWindow,c=w.document.querySelector('canvas'),gl=c?.getContext('webgl2'),ext=gl?.getExtension('WEBGL_debug_renderer_info');status.textContent=JSON.stringify({dpr:w.devicePixelRatio,canvasWidth:c?.width,canvasHeight:c?.height,renderer:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):null,vendor:ext?gl.getParameter(ext.UNMASKED_VENDOR_WEBGL):null})};
+
+const seekInput=document.createElement('input');seekInput.type='number';seekInput.min='0';seekInput.max='1';seekInput.step='.005';seekInput.value='.94';seekInput.setAttribute('aria-label','Review progress');seekInput.style.width='65px';
+const seekButton=document.createElement('button');seekButton.textContent='Seek p';seekButton.onclick=()=>seek(Number(seekInput.value));
+const unpinCheck=document.createElement('button');unpinCheck.textContent='Check un-pin';
+unpinCheck.onclick=async()=>{
+ const w=frame.contentWindow,h=w.document.querySelector('#hero');
+ const read=()=>({p:h.dataset.progress,unpinned:h.dataset.unpinned,stageVisibility:w.getComputedStyle(h.querySelector('.thread-stage')).visibility,canvasOpacity:w.getComputedStyle(h.querySelector('.thread-canvas')).opacity,visibleCopy:[...h.querySelectorAll('.thread-copy')].filter(e=>Number(w.getComputedStyle(e).opacity)>.02).length});
+ w.scrollTo({top:h.offsetTop+h.offsetHeight-w.innerHeight+40,behavior:'instant'});
+ await new Promise(r=>w.requestAnimationFrame(()=>w.requestAnimationFrame(r)));
+ const firstFrame=read();await new Promise(r=>setTimeout(r,2400));
+ status.textContent=JSON.stringify({method:'native un-pin + 40px; UNVERIFIED on device',firstFrame,settled:read()});
+};
+document.querySelector('#controls').append(seekInput,seekButton,unpinCheck);

@@ -472,6 +472,17 @@ html[data-thread-nav="clear"] nav.fixed:not(:has([aria-expanded="true"])) {
 .thread-hero[data-act="descent"] .thread-world {
   opacity: 0.28;
 }
+/* R8 is independent of the film: no delayed copy or canvas after native un-pin. */
+.thread-hero[data-copy-ended="true"] [data-visible-in] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: none;
+}
+.thread-hero[data-unpinned="true"] .thread-stage {
+  visibility: hidden;
+  pointer-events: none;
+}
 .thread-hero .thread-whiteout {
   opacity: min(
     clamp(0, (var(--p) - 0.64) * 33.333333, 1),

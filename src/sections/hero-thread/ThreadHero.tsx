@@ -197,6 +197,9 @@ export default function ThreadHero({
     const dots = [...element.querySelectorAll<HTMLElement>("[data-seat]")];
     state.present = (p, dt) => {
       state.reviewStill = element.dataset.reviewStill === "true";
+      const unpinned = showScene && targetP.current >= 1;
+      element.dataset.unpinned = String(unpinned);
+      element.dataset.copyEnded = String(p >= 0.91 || unpinned);
       if (element.dataset.trace === "record")
         performance.mark("hero:frame", {
           detail: { p, targetP: targetP.current, dt },
@@ -211,7 +214,7 @@ export default function ThreadHero({
       );
       document.documentElement.dataset.threadNav =
         p > 0.2 ? "scrolled" : "clear";
-      const act = actAt(p);
+      const act = unpinned ? "landed" : actAt(p);
       if (act !== previousAct) {
         previousAct = act;
         element.dataset.act = act;
@@ -230,6 +233,7 @@ export default function ThreadHero({
         performance.mark("hero:scroll", {
           detail: { targetP: targetP.current },
         });
+      state.wake();
     };
     const measure = () => {
       top = scrollY + element.getBoundingClientRect().top;
@@ -274,7 +278,9 @@ export default function ThreadHero({
           <div
             className="thread-canvas"
             aria-hidden="true"
-            style={{ opacity: ready ? 1 : 0 }}
+            style={{
+              opacity: ready ? "clamp(0, (1 - var(--p)) * 25, 1)" : 0,
+            }}
           >
             <CanvasBoundary onFailure={fail}>
               <Suspense fallback={null}>

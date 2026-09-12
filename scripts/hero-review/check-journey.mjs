@@ -28,10 +28,10 @@ for (let i = 1000; i >= 0; i--) {
   assert.deepEqual([...position.toArray(), ...target.toArray(), ...point.toArray()], snapshots[i]);
 }
 for (const p of journey.cameraKeys.slice(1, -1)) {
-  const before = new Vector3(), after = new Vector3();
-  journey.sampleCamera(p - 1e-8, before, target);
-  journey.sampleCamera(p + 1e-8, after, target);
-  assert(before.distanceTo(after) < 1e-4, `Camera jumps at ${p}`);
+  const before = new Vector3(), after = new Vector3(), beforeTarget = new Vector3(), afterTarget = new Vector3();
+  journey.sampleCamera(p - 1e-8, before, beforeTarget);
+  journey.sampleCamera(p + 1e-8, after, afterTarget);
+  assert(before.distanceTo(after) < 1e-4 && beforeTarget.distanceTo(afterTarget) < 1e-4, `Camera jumps at ${p}`);
 }
 journey.sampleCamera(0, position, target);
 const k0 = position.clone();
@@ -57,10 +57,10 @@ for (const mobile of [false, true]) {
   journey.sampleCamera(.67, position, target, mobile);
   assert(Math.abs(position.distanceTo(journey.globeCenter) - journey.R) < 1e-7, 'Surface crossing must coincide with the whiteout peak');
   for (const p of journey.cameraKeys.slice(1, -1)) {
-    const before = new Vector3(), after = new Vector3();
-    journey.sampleCamera(p - 1e-8, before, target, mobile);
-    journey.sampleCamera(p + 1e-8, after, target, mobile);
-    assert(before.distanceTo(after) < 1e-4, `Camera jump: mobile=${mobile}, p=${p}`);
+    const before = new Vector3(), after = new Vector3(), beforeTarget = new Vector3(), afterTarget = new Vector3();
+    journey.sampleCamera(p - 1e-8, before, beforeTarget, mobile);
+    journey.sampleCamera(p + 1e-8, after, afterTarget, mobile);
+    assert(before.distanceTo(after) < 1e-4 && beforeTarget.distanceTo(afterTarget) < 1e-4, `Camera jump: mobile=${mobile}, p=${p}`);
   }
 }
 console.log(`PASS: ${spline.points.length} orthonormal exported frames; wrap ends at t=${spline.wrapEndT.toFixed(6)} <= .45; desktop and phone camera boundaries continuous; sphere crossing exactly at p=.67.`);

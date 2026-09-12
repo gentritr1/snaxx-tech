@@ -295,18 +295,7 @@ export default function ThreadHero({
           </>
         )}
       </div>
-      {showScene && inView && (
-        <div
-          className="thread-landing-actions"
-          aria-hidden={p < 0.9}
-          inert={p < 0.9}
-          style={{ opacity: eased(p, 0.9, 0.92) }}
-        >
-          <a href="#portfolio" className="thread-primary">
-            See the apps <ArrowRight size={16} />
-          </a>
-        </div>
-      )}
+
     </section>
   );
 }

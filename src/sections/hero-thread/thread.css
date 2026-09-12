@@ -448,17 +448,3 @@ html[data-thread-nav="clear"] nav.fixed:not(:has([aria-expanded="true"])) {
   overflow: visible;
 }
 
-.thread-landing-actions {
-  position: fixed;
-  bottom: 32px;
-  right: 48px;
-  z-index: 5;
-  pointer-events: auto;
-}
-@media (max-width: 600px) {
-  .thread-landing-actions {
-    left: 24px;
-    right: 24px;
-    bottom: 24px;
-  }
-}

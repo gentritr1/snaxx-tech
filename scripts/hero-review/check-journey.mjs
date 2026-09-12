@@ -43,3 +43,24 @@ assert(Math.abs(position.distanceTo(pin) - 3.2 * journey.R) < 1e-8);
 journey.sampleCamera(.65, position, target);
 assert(Math.abs(position.distanceTo(pin) - 1.05 * journey.R) < 1e-8);
 console.log('PASS: 1001 finite poses, 1001 exact reverse poses, all key boundaries continuous, static K0, pin-relative 3.2R → 1.05R dolly.');
+const spline = JSON.parse(readFileSync('src/sections/hero-thread/assets/journey-spline.json', 'utf8'));
+assert(spline.points.length >= 512);
+assert(spline.wrapEndT <= .45, 'The full wrap must be drawn by .45');
+for (let i = 0; i < spline.points.length; i++) {
+  const tangent = new Vector3(...spline.tangents[i]);
+  const normal = new Vector3(...spline.normals[i]);
+  assert(Math.abs(tangent.length() - 1) < 1e-5);
+  assert(Math.abs(normal.length() - 1) < 1e-5);
+  assert(Math.abs(tangent.dot(normal)) < 1e-5);
+}
+for (const mobile of [false, true]) {
+  journey.sampleCamera(.67, position, target, mobile);
+  assert(Math.abs(position.distanceTo(journey.globeCenter) - journey.R) < 1e-7, 'Surface crossing must coincide with the whiteout peak');
+  for (const p of journey.cameraKeys.slice(1, -1)) {
+    const before = new Vector3(), after = new Vector3();
+    journey.sampleCamera(p - 1e-8, before, target, mobile);
+    journey.sampleCamera(p + 1e-8, after, target, mobile);
+    assert(before.distanceTo(after) < 1e-4, `Camera jump: mobile=${mobile}, p=${p}`);
+  }
+}
+console.log(`PASS: ${spline.points.length} orthonormal exported frames; wrap ends at t=${spline.wrapEndT.toFixed(6)} <= .45; desktop and phone camera boundaries continuous; sphere crossing exactly at p=.67.`);

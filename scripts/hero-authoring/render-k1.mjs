@@ -1,0 +1,10 @@
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import ts from 'typescript';
+const three = pathToFileURL(resolve('node_modules/three/build/three.module.js')).href;
+const source = ts.transpile(readFileSync('src/sections/hero-thread/journey.ts','utf8'),{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}).replace('from "three"',`from ${JSON.stringify(three)}`).replace('import splineData from "./assets/journey-spline.json";',`const splineData=${readFileSync('src/sections/hero-thread/assets/journey-spline.json','utf8')};`);
+const j=await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const {Vector3,Quaternion}=await import(three);const camera=new Vector3(),target=new Vector3();j.sampleCamera(.3,camera,target);
+const rider=t=>({position:j.threadCurve.getPointAt(t).toArray(),quaternion:j.sampleFrame(t,new Quaternion()).toArray()});
+writeFileSync('/tmp/red-thread-k1-pose.json',JSON.stringify({camera:camera.toArray(),target:target.toArray(),tiles:[0,1,2,3,4].map(i=>rider(j.tileParameter(.3,i))),plane:rider(j.planeParameter(.3)),pin:j.pinAnchor.toArray()}));

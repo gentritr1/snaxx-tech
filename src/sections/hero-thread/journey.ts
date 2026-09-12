@@ -1,4 +1,4 @@
-import { CatmullRomCurve3, Curve, Vector3, Quaternion, Matrix4 } from "three";
+import { Curve, Vector3, Quaternion, Matrix4 } from "three";
 import splineData from "./assets/journey-spline.json";
 
 export const clamp = (value: number) => Math.max(0, Math.min(1, value));
@@ -6,6 +6,8 @@ export const easeOutQuart = (value: number) => 1 - (1 - clamp(value)) ** 4;
 export const range = (p: number, start: number, end: number) =>
   easeOutQuart((p - start) / (end - start));
 export const R = 2.2;
+export const interiorStartT = splineData.interiorStartT;
+export const exteriorEndT = splineData.wrapEndT;
 export const globeCenter = new Vector3(7, 0, 0);
 
 /** §3: K0 .00–.20 Word; K1 .20–.45 World; K2 .45–.65 Descent;
@@ -55,44 +57,86 @@ export function sampleFrame(t: number, quaternion: Quaternion) {
     frameMatrix.makeBasis(frameTangent, frameNormal, frameBinormal),
   );
 }
-export const pinAnchor = threadCurve.getPointAt(0.37);
+export const pinAnchor = threadCurve.getPointAt(splineData.pinT);
 
-// Distances in §6 are measured from the pin: 3.2R at .45, 1.05R at .65.
-// The .67 surface crossing is hidden by the reversible porcelain white-out.
 export const cameraKeys = [
-  0, 0.2, 0.3, 0.45, 0.65, 0.67, 0.78, 0.9, 1,
+  0, 0.2, 0.3, 0.45, 0.55, 0.65, 0.67, 0.7, 0.78, 0.9, 1,
 ] as const;
-export const cameraCurve = new CatmullRomCurve3(
-  [
-    [0, 0, 12],
-    [0, 0, 12],
-    [5.2, 0.4, 9.5],
-    [pinAnchor.x, pinAnchor.y, pinAnchor.z + 3.2 * R],
-    [pinAnchor.x, pinAnchor.y, pinAnchor.z + 1.05 * R],
-    [pinAnchor.x, pinAnchor.y, pinAnchor.z - 0.1],
-    [7.7, 0.8, 1.5],
-    [7.7, 0.15, 0.1],
-    [9, 1.5, -1],
-  ].map(([x, y, z]) => new Vector3(x, y, z)),
+const cameraT = [
+  splineData.wordCameraT,
+  splineData.wordCameraT,
+  splineData.worldCameraT,
+  splineData.pinT - 0.03,
+  splineData.pinT - 0.03,
+  splineData.pinT - 0.03,
+  splineData.pinT,
+  0.49,
+  splineData.flightCameraT,
+  0.83,
+  0.89,
+];
+const crossing = pinAnchor
+  .clone()
+  .sub(globeCenter)
+  .normalize()
+  .multiplyScalar(R)
+  .add(globeCenter);
+// Authored positions become local (side, up, back) offsets in each spline frame.
+// Interpolation then follows the centerline, with frame quaternions slerped across keys.
+const authoredPositions = [
+  [0, 1.2, 12],
+  [0, 1.2, 12],
+  [3, 1.0, 11.5],
+  [4.8, 3.3, 9],
+  [12, 4, 2.1],
+  [9.4, 2.3, 1.9],
+  crossing.toArray(),
+  [5, 2, 6],
+  [7, 1, 6],
+  [8, 3, 8],
+  [10, 4, 10],
+].map((p) => new Vector3(...p));
+for (const [index, distance] of [
+  [3, 3.2 * R],
+  [5, 1.05 * R],
+]) {
+  authoredPositions[index]
+    .sub(pinAnchor)
+    .normalize()
+    .multiplyScalar(distance)
+    .add(pinAnchor);
+}
+const cameraFrames = cameraT.map((t) =>
+  sampleFrame(t, new Quaternion()).clone(),
 );
-export const cameraTargets = [
-  [0, 0, 0],
-  [0, 0, 0],
-  [4.5, 0, 0],
-  [4.5, 0.1, 0],
-  [pinAnchor.x, pinAnchor.y, 0],
-  [pinAnchor.x, pinAnchor.y, 0],
-  [4.5, -3.5, -3],
-  [9.5, 0, -4],
-  [11, -2, -5],
-].map(([x, y, z]) => new Vector3(x, y, z));
-
-export function sampleCamera(p: number, position: Vector3, target: Vector3) {
-  if (p <= 0.2) {
-    position.copy(cameraCurve.points[0]);
-    target.copy(cameraTargets[0]);
-    return;
-  }
+const cameraOffsets = authoredPositions.map((point, i) =>
+  point
+    .clone()
+    .sub(threadCurve.getPointAt(cameraT[i]))
+    .applyQuaternion(cameraFrames[i].clone().invert()),
+);
+const phoneT = [...cameraT];
+phoneT[2] = splineData.phoneWorldCameraT;
+phoneT[3] = splineData.pinT - 0.03;
+const phonePositions = authoredPositions.map((point) => point.clone());
+phonePositions[0].z = phonePositions[1].z = 22;
+phonePositions[2].set(4, 1, 26);
+phonePositions[8].z += 4;
+const phoneFrames = phoneT.map((t) => sampleFrame(t, new Quaternion()).clone());
+const phoneOffsets = phonePositions.map((point, i) =>
+  point
+    .clone()
+    .sub(threadCurve.getPointAt(phoneT[i]))
+    .applyQuaternion(phoneFrames[i].clone().invert()),
+);
+const cameraFrame = new Quaternion(),
+  cameraOffset = new Vector3();
+export function sampleCamera(
+  p: number,
+  position: Vector3,
+  target: Vector3,
+  mobile = false,
+) {
   const index = Math.min(
     cameraKeys.length - 2,
     Math.max(
@@ -100,21 +144,53 @@ export function sampleCamera(p: number, position: Vector3, target: Vector3) {
       cameraKeys.reduce<number>((found, key, i) => (p >= key ? i : found), 0),
     ),
   );
-  const blend = range(p, cameraKeys[index], cameraKeys[index + 1]);
-  cameraCurve.getPoint((index + blend) / (cameraKeys.length - 1), position);
-  target.copy(cameraTargets[index]).lerp(cameraTargets[index + 1], blend);
+  const u = clamp(
+    (p - cameraKeys[index]) / (cameraKeys[index + 1] - cameraKeys[index]),
+  );
+  const blend = u * u * (3 - 2 * u);
+  const parameters = mobile ? phoneT : cameraT;
+  const frames = mobile ? phoneFrames : cameraFrames;
+  const offsets = mobile ? phoneOffsets : cameraOffsets;
+  const t =
+    parameters[index] + (parameters[index + 1] - parameters[index]) * blend;
+  cameraFrame.copy(frames[index]).slerp(frames[index + 1], blend);
+  cameraOffset
+    .copy(offsets[index])
+    .lerp(offsets[index + 1], blend)
+    .applyQuaternion(cameraFrame);
+  threadCurve.getPointAt(t, position).add(cameraOffset);
+  threadCurve.getPointAt(Math.min(1, t + 0.03), target);
 }
-
-/** A reversible pulse: 0.03 of the 3-second reference scrub = 90ms per tile. */
+export function tileParameter(p: number, index: number) {
+  return clamp(
+    splineData.wordStartT +
+      index * splineData.wordSpacingT +
+      p * splineData.tileSpeedT,
+  );
+}
 export function tileClick(p: number, index: number) {
-  const t = clamp((p - index * 0.03) / 0.03);
-  return 1 + Math.sin(t * Math.PI) * 0.06;
+  const seat =
+    splineData.wordStartT +
+    index * splineData.wordSpacingT +
+    index * 0.03 * splineData.tileSpeedT;
+  const distance = Math.abs(tileParameter(p, index) - seat);
+  return 1 + Math.max(0, 1 - distance / 0.003) * 0.06;
 }
-
-/** The slack Word strand settles below Act II copy; all riders share this deformation. */
-export function sampleThread(t: number, p: number, point: Vector3) {
-  threadCurve.getPointAt(clamp(t), point);
-  const x = clamp((t - 0.28) / 0.06);
-  point.y -= range(p, 0.2, 0.3) * 4 * (1 - x * x * (3 - 2 * x));
-  return point;
+export function planeParameter(p: number) {
+  if (p <= 0.45) return splineData.planeStartT;
+  if (p <= 0.65) {
+    const t = clamp((p - 0.45) / 0.2);
+    return (
+      splineData.planeStartT +
+      (splineData.pinT - splineData.planeStartT) * t * t * (3 - 2 * t)
+    );
+  }
+  if (p < 0.7) {
+    const t = (p - 0.65) / 0.05;
+    return splineData.pinT + (0.7 - splineData.pinT) * t * t * (3 - 2 * t);
+  }
+  return p;
+}
+export function sampleThread(t: number, _p: number, point: Vector3) {
+  return threadCurve.getPointAt(clamp(t), point);
 }

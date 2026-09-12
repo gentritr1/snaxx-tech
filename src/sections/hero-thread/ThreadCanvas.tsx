@@ -3,9 +3,15 @@
 import { useEffect, useMemo, useRef, type RefObject } from "react";
 import { dampProgress, type MotionDriver } from "./motion";
 import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
-import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { useGLTF } from "@react-three/drei";
+import { EffectComposer, SMAA } from "@react-three/postprocessing";
+import { kitDecoder } from "./kit";
+import { JourneyContactShadows } from "./JourneyContactShadows";
 import {
-  CanvasTexture,
+  Quaternion,
+  Object3D,
+  InstancedMesh,
+  PerspectiveCamera,
   Group,
   LineSegments,
   Mesh,
@@ -13,12 +19,12 @@ import {
   MeshMatcapMaterial,
   MeshPhysicalMaterial,
   NoToneMapping,
-  PlaneGeometry,
   SRGBColorSpace,
   TextureLoader,
   TubeGeometry,
   Vector3,
   Float32BufferAttribute,
+  InstancedBufferAttribute,
 } from "three";
 import {
   clamp,
@@ -27,9 +33,17 @@ import {
   sampleThread,
   threadCurve,
   tileClick,
+  sampleFrame,
+  tileParameter,
+  planeParameter,
+  globeCenter,
+  pinAnchor,
+  interiorStartT,
+  exteriorEndT,
 } from "./journey";
-import { createWorld, createFlight } from "./world";
-import matcapUrl from "./assets/clay-matcap.png";
+
+import matcapUrl from "./assets/Matcap_Clay.png";
+import aoUrl from "./assets/AO_Clay.png";
 
 type Props = {
   driver: RefObject<MotionDriver>;
@@ -40,55 +54,77 @@ type Props = {
 
 function Scene({
   driver,
-  letters,
   onReady,
   onFailure,
   matcap,
-}: Props & { matcap: import("three").Texture }) {
+  ao,
+}: Props & { matcap: import("three").Texture; ao: import("three").Texture }) {
   const { camera, gl, size, invalidate } = useThree();
   const idleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
-  const floor = useRef<Mesh>(null);
+  const shadowMoving = useRef(true);
+  const kit = useGLTF("/models/red-thread-kit.glb", false, true, (loader) =>
+    loader.setDRACOLoader(kitDecoder()),
+  );
   const scene = useMemo(() => {
     matcap.colorSpace = SRGBColorSpace;
+    ao.flipY = false;
     const clay = new MeshMatcapMaterial({ matcap });
+    const occludedClay = clay.clone();
+    occludedClay.onBeforeCompile = (shader) => {
+      shader.uniforms.clayAO = { value: ao };
+      shader.vertexShader = "varying vec2 clayUV;\n" + shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace(
+        "#include <begin_vertex>",
+        "#include <begin_vertex>\n clayUV = uv;",
+      );
+      shader.fragmentShader =
+        "varying vec2 clayUV; uniform sampler2D clayAO;\n" +
+        shader.fragmentShader;
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <opaque_fragment>",
+        "outgoingLight *= mix(1.0, texture2D(clayAO, clayUV).r, 0.9);\n#include <opaque_fragment>",
+      );
+    };
     const group = new Group();
-    const tileGeometry = new RoundedBoxGeometry(1, 1, 0.35, 3, 0.12);
-    const letterGeometry = new PlaneGeometry(0.68, 0.68);
-    const tiles = Array.from(letters)
-      .slice(0, 5)
-      .map((letter, i) => {
-        const tile = new Group();
-        const box = new Mesh(tileGeometry, clay);
-        box.castShadow = true;
-        tile.add(box);
-        const bitmap = document.createElement("canvas");
-        bitmap.width = 256;
-        bitmap.height = 256;
-        const context = bitmap.getContext("2d")!;
-        context.fillStyle = i === 4 ? "#D73626" : "#2A2D38";
-        context.font = "600 190px Arial";
-        context.textAlign = "center";
-        context.textBaseline = "middle";
-        context.fillText(letter, 128, 139);
-        const texture = new CanvasTexture(bitmap);
-        texture.colorSpace = SRGBColorSpace;
-        const glyph = new Mesh(
-          letterGeometry,
-          new MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            depthWrite: false,
-            depthTest: false,
-          }),
-        );
-        glyph.position.z = 0.19;
-        glyph.renderOrder = 2;
-        tile.add(glyph);
-        group.add(tile);
-        return tile;
+    const kitMaterials = new Map<string, MeshMatcapMaterial>();
+    function object(name: string, aoEnabled = false) {
+      const source = kit.scene.getObjectByName(name);
+      if (!source) throw new Error(`Missing kit object: ${name}`);
+      const clone = source.clone(true);
+      clone.traverse((child) => {
+        if (child instanceof Mesh) {
+          child.geometry = child.geometry.clone();
+          if (
+            name.startsWith("Tile_") ||
+            ["Globe", "Graticule", "Pin", "Plane"].includes(name)
+          )
+            child.layers.enable(1);
+          const original = Array.isArray(child.material)
+            ? child.material[0]
+            : child.material;
+          const color =
+            "color" in original
+              ? (original.color as import("three").Color)
+              : clay.color;
+          const key = `${name}:${aoEnabled}:${color.getHexString()}`;
+          if (!kitMaterials.has(key)) {
+            const material = clay.clone();
+            material.color.copy(color);
+            if (aoEnabled)
+              material.onBeforeCompile = occludedClay.onBeforeCompile;
+            kitMaterials.set(key, material);
+          }
+          child.material = kitMaterials.get(key)!;
+        }
       });
+      return clone;
+    }
+    const tiles = ["F", "J", "A", "L", "E"].map((letter) =>
+      object("Tile_" + letter, true),
+    );
+    group.add(...tiles);
     const tube = new TubeGeometry(threadCurve, 512, 1, 24, false);
     const centers = new Float32Array(tube.attributes.position.count * 3);
     for (let i = 0; i <= 512; i++) {
@@ -105,25 +141,23 @@ function Scene({
     });
     const pixelRadius = { value: 3 },
       viewportHeight = { value: 900 },
-      wordDrop = { value: 0 },
       interior = { value: 0 },
       progress = { value: 0 };
     // Tube stays 6 CSS px (4 on phones) through the full camera dolly.
     threadMaterial.onBeforeCompile = (shader) => {
-      shader.uniforms.wordDrop = wordDrop;
       shader.uniforms.interior = interior;
       shader.uniforms.uProgress = progress;
       shader.uniforms.threadPixelRadius = pixelRadius;
       shader.uniforms.threadViewportHeight = viewportHeight;
       shader.vertexShader =
-        "varying float threadT; uniform float wordDrop; attribute vec3 threadCenter; uniform float threadPixelRadius; uniform float threadViewportHeight;\n" +
+        "varying float threadT; attribute vec3 threadCenter; uniform float threadPixelRadius; uniform float threadViewportHeight;\n" +
         shader.vertexShader;
       shader.vertexShader = shader.vertexShader.replace(
         "#include <begin_vertex>",
         `threadT = uv.x; float viewDepth = abs((modelViewMatrix * vec4(threadCenter, 1.0)).z);
         float radius = threadPixelRadius * 2.0 * viewDepth / (projectionMatrix[1][1] * threadViewportHeight);
         vec3 transformed = threadCenter + (position - threadCenter) * radius;
-        transformed.y -= wordDrop * (1.0 - smoothstep(.28, .34, uv.x));`,
+`,
       );
     };
     const compileThread = threadMaterial.onBeforeCompile;
@@ -135,27 +169,72 @@ function Scene({
       // The surface crossing occludes the exterior strand, without changing its draw length.
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <clipping_planes_fragment>",
-        "#include <clipping_planes_fragment>\n if (uProgress <= 0.0 || threadT > uProgress || (interior > .5 && threadT < .68)) discard;",
+        `#include <clipping_planes_fragment>\n if (uProgress <= 0.0 || threadT > uProgress || (interior > .5 && threadT < ${interiorStartT.toFixed(8)}) || (interior <= .5 && threadT > ${exteriorEndT.toFixed(8)})) discard;`,
       );
     };
     const thread = new Mesh(tube, threadMaterial);
     thread.frustumCulled = false;
     group.add(thread);
-    const world = createWorld(clay);
-    group.add(world.globe);
-    const flight = createFlight(clay);
-    group.add(flight.plane, flight.swarm);
+    const globe = new Group();
+    globe.add(object("Globe", true), object("Graticule"));
+    globe.position.copy(globeCenter);
+    const pin = object("Pin");
+    pin.position.copy(pinAnchor).sub(globeCenter);
+    globe.add(pin);
+    const plane = object("Plane", true);
+    const horizon = object("Horizon");
+    horizon.scale.setScalar(5);
+    horizon.position.set(7, -12, -10);
+    group.add(horizon);
+    const arrow = object("Arrow");
+    let arrowMesh: Mesh | undefined;
+    arrow.traverse((child) => {
+      if (child instanceof Mesh) arrowMesh = child;
+    });
+    if (!arrowMesh) throw new Error("Arrow kit mesh is missing");
+    const arrowParameters = new InstancedBufferAttribute(
+      new Float32Array(70),
+      1,
+    );
+    arrowMesh.geometry.setAttribute("journeyParameter", arrowParameters);
+    const arrowMaterial = clay.clone();
+    arrowMaterial.onBeforeCompile = (shader) => {
+      shader.vertexShader =
+        "attribute float journeyParameter; varying float arrowT;\n" +
+        shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace(
+        "#include <begin_vertex>",
+        "#include <begin_vertex>\n arrowT = journeyParameter;",
+      );
+      shader.fragmentShader = "varying float arrowT;\n" + shader.fragmentShader;
+      // Riders on the exterior strand are occluded by the crossed globe surface.
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <clipping_planes_fragment>",
+        `#include <clipping_planes_fragment>\n if (arrowT < ${interiorStartT.toFixed(8)}) discard;`,
+      );
+    };
+    const swarm = new InstancedMesh(arrowMesh.geometry, arrowMaterial, 70);
+    swarm.frustumCulled = false;
+    group.add(globe, plane, swarm);
     return {
-      ...world,
-      ...flight,
+      globe,
+      horizon,
+      pin,
+      plane,
+      swarm,
+      arrowParameters,
+      instance: new Object3D(),
+      frame: new Quaternion(),
+      tangent: new Vector3(),
+      nextTangent: new Vector3(),
       group,
       tiles,
+      tileFrames: tiles.map(() => new Quaternion()),
       tube,
       clay,
       threadMaterial,
       pixelRadius,
       viewportHeight,
-      wordDrop,
       interior,
       progress,
       time: 0,
@@ -164,7 +243,7 @@ function Scene({
       target: new Vector3(),
       pinView: new Vector3(),
     };
-  }, [letters, matcap]);
+  }, [kit, matcap, ao]);
 
   useEffect(() => {
     const state = driver.current;
@@ -225,120 +304,105 @@ function Scene({
     scene.idleWeight +=
       ((moving || state.reviewStill ? 0 : 1) - scene.idleWeight) *
       (1 - Math.exp(-dt * 12));
-    if (floor.current) floor.current.visible = p > 0.2 && p < 0.64;
+    shadowMoving.current = moving && p < 0.64;
     if (moving) invalidate();
     else idleTimer.current = setTimeout(invalidate, 1000 / 30);
-    sampleCamera(p, scene.position, scene.target);
-    if (size.width <= 600) {
-      // Narrow K0 needs the whole five-letter strand; orbit shifts below the copy.
-      scene.position.z +=
-        (1 - range(p, 0.45, 0.65)) * (10 - 5 * range(p, 0.2, 0.3));
-      scene.position.x += range(p, 0.2, 0.4) * (1 - range(p, 0.45, 0.65)) * 2.7;
-      scene.target.x += range(p, 0.2, 0.4) * (1 - range(p, 0.45, 0.65)) * 2.7;
-      scene.target.y -= (1 - range(p, 0.2, 0.3)) * 2.1;
-      scene.target.y += range(p, 0.2, 0.4) * (1 - range(p, 0.45, 0.65)) * 3.4;
+    sampleCamera(p, scene.position, scene.target, size.width <= 600);
+    if (camera instanceof PerspectiveCamera) {
+      camera.setViewOffset(
+        size.width,
+        size.height,
+        (size.width > 600 ? -230 : 110) * range(p, 0.67, 0.72),
+        (size.width > 600 ? 110 : 200) * (1 - range(p, 0.2, 0.3)) -
+          (size.width > 600 ? 130 : 230) *
+            range(p, 0.2, 0.3) *
+            (1 - range(p, 0.45, 0.55)) -
+          (size.width <= 600 ? 140 : 70) * range(p, 0.67, 0.72),
+        size.width,
+        size.height,
+      );
     }
-    if (size.width <= 600) scene.target.x += 0.5 * range(p, 0.65, 0.75);
     camera.position.copy(scene.position);
     camera.lookAt(scene.target);
     camera.updateMatrixWorld();
     scene.pixelRadius.value = size.width <= 600 ? 2 : 3;
     scene.viewportHeight.value = size.height;
     scene.progress.value = p;
-    const slide = range(p, 0.2, 0.45);
     scene.interior.value = range(p, 0.64, 0.67);
-    scene.wordDrop.value = range(p, 0.2, 0.3) * 4;
+    scene.horizon.visible = p > 0.665;
     scene.globe.visible = p > 0.2 && p < 0.67;
-    scene.globe.position.x = 7 + 7 * (1 - range(p, 0.2, 0.3));
-    scene.globe.scale.setScalar(0.92 + 0.08 * range(p, 0.2, 0.3));
-    scene.globe.rotation.z = (1 - range(p, 0.2, 0.4)) * -0.25;
-    scene.pin
-      .getWorldPosition(scene.pinView)
-      .applyMatrix4(camera.matrixWorldInverse);
-    const pinScale =
-      ((size.width <= 600 ? 32 : 48) * 2 * Math.max(0.01, -scene.pinView.z)) /
-      (camera.projectionMatrix.elements[5] * size.height * 0.7);
-    scene.pin.scale.setScalar(range(p, 0.37, 0.4) * Math.min(1, pinScale));
-    scene.plane.visible = p > 0.4;
-    const descentT = 0.37 + 0.006 * range(p, 0.4, 0.65);
-    const flightT =
-      descentT * (1 - range(p, 0.65, 0.7)) + p * range(p, 0.65, 0.7);
+    scene.globe.traverse((object) => {
+      if (
+        object instanceof Mesh &&
+        object.material instanceof MeshMatcapMaterial
+      ) {
+        object.material.transparent = true;
+        object.material.opacity = range(p, 0.2, 0.28);
+      }
+    });
+    // Pin and plane arrive together with the globe; no delayed one-shot entry.
+    scene.pin.scale.setScalar(1);
+    scene.plane.visible = p > 0.2;
+    const flightT = planeParameter(p);
     sampleThread(flightT, p, scene.plane.position);
-    sampleThread(Math.min(1, flightT + 0.001), p, scene.tangent);
-    scene.plane.lookAt(scene.tangent);
+    sampleFrame(flightT, scene.frame);
+    scene.plane.quaternion.copy(scene.frame);
+    threadCurve.getTangentAt(flightT, scene.tangent);
+    threadCurve.getTangentAt(clamp(flightT + 0.003), scene.nextTangent);
+    const curvature = scene.tangent.cross(scene.nextTangent).y;
+    scene.plane.rotateX(
+      Math.max(-Math.PI / 10, Math.min(Math.PI / 10, curvature * 12)),
+    );
     scene.plane.position.y +=
       Math.sin(scene.time * Math.PI * 0.8) * 0.02 * scene.idleWeight;
-    scene.plane.scale.setScalar(0.8 - 0.58 * range(p, 0.45, 0.7));
-    scene.swarm.visible = p >= 0.65;
+    scene.plane.scale.setScalar(1);
+    scene.swarm.visible = p >= 0.665;
     for (let i = 0; i < 70; i++) {
-      const t = clamp(flightT - 0.0016 * (i + 1));
+      const t = clamp(flightT - 0.012 * i);
+      scene.arrowParameters.setX(i, t);
       sampleThread(t, p, scene.instance.position);
-      sampleThread(Math.min(1, t + 0.001), p, scene.tangent);
-      scene.instance.lookAt(scene.tangent);
-      scene.instance.rotateZ(Math.sin(i * 2.4) * 0.45);
-      const spread = 0.1 + (0.45 * i) / 70;
-      scene.instance.position.x += Math.sin(i * 2.4) * spread;
-      scene.instance.position.y += Math.cos(i * 2.4) * spread;
-      scene.instance.scale.setScalar(
-        (0.12 + 0.18 * (1 - i / 70)) * range(p, 0.65, 0.7),
-      );
+      sampleFrame(t, scene.instance.quaternion);
+      scene.instance.translateY(Math.sin(i * 2.4) * 0.08);
+      scene.instance.scale.setScalar(0.35 + 0.65 * (1 - i / 70));
       scene.instance.updateMatrix();
       scene.swarm.setMatrixAt(i, scene.instance.matrix);
     }
     scene.swarm.instanceMatrix.needsUpdate = true;
+    scene.arrowParameters.needsUpdate = true;
     scene.tiles.forEach((tile, i) => {
-      const start = size.width <= 600 ? 0.134 + i * 0.032 : 0.12 + i * 0.039;
-      const t = start * (1 - slide) + (0.37 + i * 0.015) * slide;
+      const t = tileParameter(p, i);
       sampleThread(t, p, tile.position);
-      tile.quaternion.copy(camera.quaternion);
-      tile.rotateZ(
+      sampleFrame(t, scene.frame);
+      scene.tileFrames[i].slerp(scene.frame, 1 - Math.exp((-dt * 60) / 6));
+      tile.quaternion.copy(scene.tileFrames[i]);
+      tile.rotateX(
         Math.sin(i * 1.7 + scene.time * Math.PI * 0.8) *
           0.02618 *
           scene.idleWeight,
       );
-      tile.scale.setScalar(
-        ((size.width <= 600 ? 1.2 : 1.45) * (1 - slide) + 0.4 * slide) *
-          tileClick(p, i),
-      );
-      tile.visible = p < 0.54;
+      tile.scale.setScalar(tileClick(p, i));
+      tile.visible = p < 0.6;
     });
   });
 
   return (
     <>
       <color attach="background" args={["#F9F4EE"]} />
-      <ambientLight intensity={1.4} />
-      <directionalLight
-        position={[-4, 7, 8]}
-        intensity={3}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-14}
-        shadow-camera-right={14}
-        shadow-camera-top={8}
-        shadow-camera-bottom={-8}
-        shadow-bias={-0.001}
-      />
-      <mesh
-        ref={floor}
-        visible={false}
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[3, -2.25, 0]}
-        receiveShadow
-      >
-        <planeGeometry args={[40, 40]} />
-        <shadowMaterial transparent opacity={0.1} />
-      </mesh>
+      <hemisphereLight args={["#ffffff", "#e7ddd3", 0.65]} />
+      <directionalLight position={[-4, 7, 8]} intensity={3} />
+      <JourneyContactShadows moving={shadowMoving} driver={driver} />
       <primitive object={scene.group} />
+      <EffectComposer multisampling={0}>
+        <SMAA />
+      </EffectComposer>
     </>
   );
 }
 
 export default function ThreadCanvas(props: Props) {
-  const matcap = useLoader(TextureLoader, matcapUrl);
+  const [matcap, ao] = useLoader(TextureLoader, [matcapUrl, aoUrl]);
   return (
     <Canvas
-      shadows
       aria-hidden="true"
       dpr={[1, 2]}
       frameloop="demand"
@@ -348,9 +412,10 @@ export default function ThreadCanvas(props: Props) {
         alpha: false,
         powerPreference: "high-performance",
         toneMapping: NoToneMapping,
+        outputColorSpace: SRGBColorSpace,
       }}
     >
-      <Scene {...props} matcap={matcap} />
+      <Scene {...props} matcap={matcap} ao={ao} />
     </Canvas>
   );
 }

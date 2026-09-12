@@ -448,3 +448,24 @@ html[data-thread-nav="clear"] nav.fixed:not(:has([aria-expanded="true"])) {
   overflow: visible;
 }
 
+
+/* The single damped --p value drives compositor properties. No scroll-time React renders. */
+.thread-hero { --p: 0; --rail-height: 240px; }
+.thread-hero[data-ready="true"] .thread-stage {
+  transform: translate3d(0, calc(-100vh * clamp(0, (var(--p) - .9) * 10, 1)), 0);
+}
+.thread-hero [data-visible-in] {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms cubic-bezier(.23, 1, .32, 1);
+}
+.thread-hero [data-visible-in][aria-hidden="false"] { opacity: 1; pointer-events: auto; }
+.thread-hero[data-act="descent"] .thread-world { opacity: .28; }
+.thread-hero .thread-whiteout {
+  opacity: min(clamp(0, (var(--p) - .64) * 33.333333, 1), clamp(0, (.70 - var(--p)) * 33.333333, 1));
+}
+.thread-rail-fill { transform: scaleY(var(--p)); }
+.thread-rail i { background: #dcd6cf; }
+.thread-rail i[data-passed="true"] { background: #d73626; }
+.thread-rail b { top: 0; transform: translate(-50%, calc(var(--p) * var(--rail-height) - 50%)); }
+@media (max-width: 600px) { .thread-hero { --rail-height: 160px; } }

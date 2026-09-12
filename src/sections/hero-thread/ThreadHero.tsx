@@ -10,12 +10,10 @@ import {
 } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { ThreadStill } from "./ThreadStill";
+import { actAt, clamp, type MotionDriver } from "./motion";
 import "./thread.css";
 
 const ThreadCanvas = lazy(() => import("./ThreadCanvas"));
-const clamp = (n: number) => Math.max(0, Math.min(1, n));
-const eased = (p: number, a: number, b: number) =>
-  1 - (1 - clamp((p - a) / (b - a))) ** 4;
 
 class CanvasBoundary extends Component<
   { children: ReactNode; onFailure: () => void },
@@ -33,40 +31,125 @@ class CanvasBoundary extends Component<
   }
 }
 
+function ActActions({ act, visibleIn }: { act: string; visibleIn: string }) {
+  return (
+    <div
+      className={`thread-actions thread-act-actions thread-actions-${act}`}
+      data-visible-in={visibleIn}
+    >
+      <a className="thread-primary" href="#portfolio">
+        See the apps <ArrowRight size={16} />
+      </a>
+      {act === "word" ? (
+        <a
+          className="thread-link"
+          href="https://xn--fjal-opa.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Play FJALË online <ArrowUpRight size={16} />
+        </a>
+      ) : (
+        <span className="thread-pill">Coming to Google Play</span>
+      )}
+    </div>
+  );
+}
+
+// This DOM is mounted once after loading. Scrubbing never renders React.
+function CopyLayer() {
+  return (
+    <>
+      <div className="thread-copy thread-word" data-visible-in="word">
+        <p className="thread-eyebrow">The Snaxx story · Act I · The Word</p>
+        <div className="thread-word-body">
+          <h1>In the beginning was the Word.</h1>
+          <p>
+            FJALË is the daily Albanian word game. Five letters, five minutes,
+            live on the web today.
+          </p>
+        </div>
+        <p className="thread-studio">
+          Snaxx Tech turns small ideas into apps, games, and satisfying little
+          moments.
+        </p>
+      </div>
+      <div className="thread-copy thread-world" data-visible-in="world descent">
+        <p className="thread-eyebrow">Act II · The World</p>
+        <h2>Then, a world to get lost in.</h2>
+        <p>Geo Guesser World 3D! drops you anywhere on Earth. Guess where.</p>
+      </div>
+      <div className="thread-copy thread-descent" data-visible-in="descent">
+        <p className="thread-eyebrow">Act II · dropping in</p>
+        <h2>Somewhere on Earth. The ground comes up fast.</h2>
+        <p>
+          The camera follows the thread down to the pin. Through the surface,
+          the next act is already in flight.
+        </p>
+      </div>
+      <div className="thread-copy thread-arrow" data-visible-in="arrow">
+        <p className="thread-eyebrow">Act III · The Arrow</p>
+        <h2>And something to aim for.</h2>
+        <p>
+          Arrows is a precision arcade game. Every launch gets attention until
+          it feels just right.
+        </p>
+      </div>
+      <ActActions act="word" visibleIn="word" />
+      <ActActions act="world" visibleIn="world descent" />
+      <ActActions act="arrow" visibleIn="arrow" />
+      <div className="thread-whiteout" aria-hidden="true" />
+      <div className="thread-rail" aria-hidden="true">
+        <div className="thread-rail-fill" />
+        {[0, 0.2, 0.45, 0.65, 0.9].map((t) => (
+          <i key={t} data-seat={t} style={{ top: `${t * 100}%` }} />
+        ))}
+        <b />
+      </div>
+    </>
+  );
+}
+
 export default function ThreadHero({
   letters = "FJALË",
 }: {
   letters?: string;
 }) {
   const wrapper = useRef<HTMLElement>(null);
-  const [p, setP] = useState(0);
+  const targetP = useRef(0);
+  const driver = useRef<MotionDriver>({
+    targetP,
+    p: 0,
+    inView: true,
+    wake: () => {},
+    present: () => {},
+    reviewStill: false,
+  });
   const [eligible, setEligible] = useState(false);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [inView, setInView] = useState(true);
+  const active = eligible && !failed;
+  const showScene = active && ready;
+  const loaded = useCallback(() => setReady(true), []);
   const fail = useCallback(() => {
     const element = wrapper.current;
     if (element) {
       const rect = element.getBoundingClientRect();
       if (rect.top < 0 && rect.bottom > 0)
-        window.scrollTo({
-          top: window.scrollY + rect.top,
-          behavior: "instant",
-        });
+        window.scrollTo({ top: scrollY + rect.top, behavior: "instant" });
     }
     setFailed(true);
   }, []);
-  const loaded = useCallback(() => setReady(true), []);
-  const active = eligible && !failed;
-  const showScene = active && ready;
 
   useEffect(() => {
     const preload = document.createElement("link");
-    preload.rel = "preload";
-    preload.as = "font";
-    preload.type = "font/woff2";
-    preload.href = "/fonts/bricolage-grotesque-latin.woff2";
-    preload.crossOrigin = "anonymous";
+    Object.assign(preload, {
+      rel: "preload",
+      as: "font",
+      type: "font/woff2",
+      href: "/fonts/bricolage-grotesque-latin.woff2",
+      crossOrigin: "anonymous",
+    });
     document.head.append(preload);
     const motion = matchMedia("(prefers-reduced-motion: reduce)");
     let first = 0,
@@ -78,16 +161,15 @@ export default function ThreadHero({
         setEligible(false);
         return;
       }
-      // Two frames guarantee a painted, useful poster before requesting WebGL code.
       first = requestAnimationFrame(() => {
         second = requestAnimationFrame(() => {
-          const probe = document.createElement("canvas");
           try {
-            setEligible(Boolean(probe.getContext("webgl2")));
+            setEligible(
+              Boolean(document.createElement("canvas").getContext("webgl2")),
+            );
           } catch {
             setEligible(false);
           }
-          // Let the detached feature probe be collected; never send a synthetic loss event.
         });
       });
     };
@@ -104,68 +186,89 @@ export default function ThreadHero({
   useEffect(() => {
     const element = wrapper.current;
     if (!element) return;
-    let frame = 0;
-    const read = () => {
-      frame = 0;
-      const rect = element.getBoundingClientRect();
-      const next = active
-        ? clamp(-rect.top / Math.max(1, element.offsetHeight - innerHeight))
-        : 0;
-      setP(next);
-      // Only the optional Portfolio stroke consumes this property.
+    const state = driver.current;
+    let top = 0,
+      distance = 1;
+    let previousAct = "";
+    let previousP = -1;
+    const copy = [
+      ...element.querySelectorAll<HTMLElement>("[data-visible-in]"),
+    ];
+    const dots = [...element.querySelectorAll<HTMLElement>("[data-seat]")];
+    state.present = (p, dt) => {
+      state.reviewStill = element.dataset.reviewStill === "true";
+      if (element.dataset.trace === "record")
+        performance.mark("hero:frame", {
+          detail: { p, targetP: targetP.current, dt },
+        });
+      if (p === previousP) return;
+      previousP = p;
+      element.style.setProperty("--p", String(p));
+      element.dataset.progress = p.toFixed(5);
       document.documentElement.style.setProperty(
         "--thread-landing",
-        String(eased(next, 0.9, 1)),
+        String(clamp((p - 0.9) * 10)),
       );
       document.documentElement.dataset.threadNav =
-        next > 0.2 || rect.bottom <= 0 ? "scrolled" : "clear";
+        p > 0.2 ? "scrolled" : "clear";
+      const act = actAt(p);
+      if (act !== previousAct) {
+        previousAct = act;
+        element.dataset.act = act;
+        for (const block of copy) {
+          const visible = block.dataset.visibleIn!.split(" ").includes(act);
+          block.inert = !visible;
+          block.setAttribute("aria-hidden", String(!visible));
+        }
+      }
+      for (const dot of dots)
+        dot.dataset.passed = String(p >= Number(dot.dataset.seat));
     };
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(read);
+    const readScroll = () => {
+      targetP.current = active ? clamp((scrollY - top) / distance) : 0;
+      if (element.dataset.trace === "record")
+        performance.mark("hero:scroll", {
+          detail: { targetP: targetP.current },
+        });
     };
-    const observer = new IntersectionObserver(([entry]) =>
-      setInView(entry.isIntersecting),
-    );
-    observer.observe(element);
+    const measure = () => {
+      top = scrollY + element.getBoundingClientRect().top;
+      distance = Math.max(1, element.offsetHeight - innerHeight);
+      readScroll();
+    };
+    const resize = new ResizeObserver(measure);
+    resize.observe(element);
+    const visibility = new IntersectionObserver(([entry]) => {
+      state.inView = entry.isIntersecting;
+      state.wake();
+    });
+    visibility.observe(element);
     document.documentElement.dataset.threadHero = "true";
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    schedule();
+    window.addEventListener("scroll", readScroll, { passive: true });
+    window.addEventListener("resize", measure);
+    measure();
+    state.present(state.p, 0);
+    state.wake();
     return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
+      resize.disconnect();
+      visibility.disconnect();
+      window.removeEventListener("scroll", readScroll);
+      window.removeEventListener("resize", measure);
+      state.present = () => {};
       delete document.documentElement.dataset.threadHero;
       delete document.documentElement.dataset.threadNav;
       document.documentElement.style.removeProperty("--thread-landing");
     };
-  }, [active]);
-
-  const wordOpacity = 1 - eased(p, 0.2, 0.25);
-  const worldOpacity =
-    eased(p, 0.2, 0.25) *
-    (1 - 0.72 * eased(p, 0.45, 0.49)) *
-    (1 - eased(p, 0.63, 0.68));
-  const arrowOpacity = eased(p, 0.65, 0.7);
-  const act = p < 0.23 ? "word" : p < 0.65 ? "world" : "arrow";
+  }, [active, showScene]);
 
   return (
     <section
       id="hero"
       ref={wrapper}
       className={`thread-hero ${active ? "thread-pinned" : ""}`}
-      data-progress={p.toFixed(4)}
       data-ready={showScene}
     >
-      <div
-        className="thread-stage"
-        style={{
-          transform: showScene
-            ? `translateY(${-eased(p, 0.9, 1) * 100}vh)`
-            : undefined,
-        }}
-      >
+      <div className="thread-stage">
         {!showScene && <ThreadStill />}
         {active && (
           <div
@@ -176,8 +279,7 @@ export default function ThreadHero({
             <CanvasBoundary onFailure={fail}>
               <Suspense fallback={null}>
                 <ThreadCanvas
-                  p={p}
-                  inView={inView}
+                  driver={driver}
                   letters={letters}
                   onReady={loaded}
                   onFailure={fail}
@@ -186,116 +288,8 @@ export default function ThreadHero({
             </CanvasBoundary>
           </div>
         )}
-        {showScene && (
-          <>
-            <div
-              className="thread-copy thread-word"
-              style={{ opacity: wordOpacity }}
-              aria-hidden={act !== "word"}
-              inert={act !== "word"}
-            >
-              <p className="thread-eyebrow">
-                The Snaxx story · Act I · The Word
-              </p>
-              <div className="thread-word-body">
-                <h1>In the beginning was the Word.</h1>
-                <p>
-                  FJALË is the daily Albanian word game. Five letters, five
-                  minutes, live on the web today.
-                </p>
-              </div>
-              <p className="thread-studio">
-                Snaxx Tech turns small ideas into apps, games, and satisfying
-                little moments.
-              </p>
-            </div>
-            <div
-              className="thread-copy thread-world"
-              style={{ opacity: worldOpacity }}
-              aria-hidden={act !== "world"}
-              inert={act !== "world"}
-            >
-              <p className="thread-eyebrow">Act II · The World</p>
-              <h2>Then, a world to get lost in.</h2>
-              <p>
-                Geo Guesser World 3D! drops you anywhere on Earth. Guess where.
-              </p>
-            </div>
-            <div
-              className="thread-copy thread-descent"
-              style={{
-                opacity: eased(p, 0.45, 0.49) * (1 - eased(p, 0.63, 0.67)),
-              }}
-              aria-hidden={p < 0.45 || p >= 0.65}
-            >
-              <p className="thread-eyebrow">Act II · dropping in</p>
-              <h2>Somewhere on Earth. The ground comes up fast.</h2>
-              <p>
-                The camera follows the thread down to the pin. Through the
-                surface, the next act is already in flight.
-              </p>
-            </div>
-            <div
-              className="thread-copy thread-arrow"
-              style={{ opacity: arrowOpacity }}
-              aria-hidden={act !== "arrow"}
-              inert={act !== "arrow"}
-            >
-              <p className="thread-eyebrow">Act III · The Arrow</p>
-              <h2>And something to aim for.</h2>
-              <p>
-                Arrows is a precision arcade game. Every launch gets attention
-                until it feels just right.
-              </p>
-            </div>
-            <div
-              className={`thread-actions thread-act-actions thread-actions-${act}`}
-              inert={p > 0.92}
-              aria-hidden={p > 0.92}
-            >
-              <a className="thread-primary" href="#portfolio">
-                See the apps <ArrowRight size={16} />
-              </a>
-              {act === "word" ? (
-                <a
-                  className="thread-link"
-                  href="https://xn--fjal-opa.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Play FJALË online <ArrowUpRight size={16} />
-                </a>
-              ) : (
-                <span className="thread-pill">Coming to Google Play</span>
-              )}
-            </div>
-            <div
-              className="thread-whiteout"
-              aria-hidden="true"
-              style={{
-                opacity: eased(p, 0.65, 0.667) * (1 - eased(p, 0.667, 0.69)),
-              }}
-            />
-            <div className="thread-rail" aria-hidden="true">
-              <div
-                className="thread-rail-fill"
-                style={{ transform: `scaleY(${p})` }}
-              />
-              {[0, 0.2, 0.45, 0.65, 0.9].map((t) => (
-                <i
-                  key={t}
-                  style={{
-                    top: `${t * 100}%`,
-                    background: p >= t ? "#D73626" : "#DCD6CF",
-                  }}
-                />
-              ))}
-              <b style={{ top: `${p * 100}%` }} />
-            </div>
-          </>
-        )}
+        {showScene && <CopyLayer />}
       </div>
-
     </section>
   );
 }

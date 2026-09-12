@@ -41,3 +41,19 @@ routes.onclick=async()=>{
  }
  status.textContent=JSON.stringify(results);
 };
+const trace=document.createElement('button');trace.textContent='Trace 3s';document.querySelector('#controls').append(trace);
+trace.onclick=async()=>{
+ const w=frame.contentWindow, h=w.document.querySelector('#hero');
+ seek(0);status.textContent='Preparing trace';await new Promise(r=>setTimeout(r,1800));
+ w.performance.clearMarks('hero:frame');w.performance.clearMarks('hero:scroll');h.dataset.trace='record';
+ const start=w.performance.now(),distance=h.offsetHeight-w.innerHeight,top=h.offsetTop;
+ await new Promise(resolve=>{
+  function step(){const elapsed=w.performance.now()-start;w.scrollTo({top:top+Math.min(1,elapsed/3000)*distance,behavior:'instant'});if(elapsed<3000)requestAnimationFrame(step);else resolve()}
+  requestAnimationFrame(step);
+ });
+ h.dataset.trace='';
+ const frames=w.performance.getEntriesByName('hero:frame').filter(f=>f.startTime>=start&&f.startTime<=start+3000);
+ const intervals=frames.slice(1).map((f,i)=>f.startTime-frames[i].startTime).sort((a,b)=>a-b);
+ const result={method:'3s native programmatic scroll, emulation; not a physical wheel or device trace',samples:frames.length,expected:180,p95:intervals[Math.ceil(intervals.length*.95)-1],maxLag:Math.max(...frames.map(f=>Math.abs(f.detail.targetP-f.detail.p))),scrollEvents:w.performance.getEntriesByName('hero:scroll').length};
+ status.textContent=JSON.stringify(result);
+};

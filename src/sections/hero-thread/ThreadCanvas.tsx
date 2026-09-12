@@ -1,6 +1,7 @@
 /* Three objects are deliberately mutable inside the renderer, never React state. */
 /* eslint-disable react-hooks/immutability */
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, type RefObject } from "react";
+import { dampProgress, type MotionDriver } from "./motion";
 import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import {
@@ -31,22 +32,24 @@ import { createWorld, createFlight } from "./world";
 import matcapUrl from "./assets/clay-matcap.png";
 
 type Props = {
-  p: number;
-  inView: boolean;
+  driver: RefObject<MotionDriver>;
   letters: string;
   onReady: () => void;
   onFailure: () => void;
 };
 
 function Scene({
-  p,
-  inView,
+  driver,
   letters,
   onReady,
   onFailure,
   matcap,
 }: Props & { matcap: import("three").Texture }) {
   const { camera, gl, size, invalidate } = useThree();
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  const floor = useRef<Mesh>(null);
   const scene = useMemo(() => {
     matcap.colorSpace = SRGBColorSpace;
     const clay = new MeshMatcapMaterial({ matcap });
@@ -86,27 +89,30 @@ function Scene({
         group.add(tile);
         return tile;
       });
-    const tube = new TubeGeometry(threadCurve, 512, 1, 8, false);
+    const tube = new TubeGeometry(threadCurve, 512, 1, 24, false);
     const centers = new Float32Array(tube.attributes.position.count * 3);
     for (let i = 0; i <= 512; i++) {
       const center = threadCurve.getPointAt(i / 512);
-      for (let j = 0; j <= 8; j++) center.toArray(centers, (i * 9 + j) * 3);
+      for (let j = 0; j <= 24; j++) center.toArray(centers, (i * 25 + j) * 3);
     }
     tube.setAttribute("threadCenter", new Float32BufferAttribute(centers, 3));
     const threadMaterial = new MeshPhysicalMaterial({
       color: "#D73626",
       clearcoat: 1,
-      clearcoatRoughness: 0.15,
-      roughness: 0.35,
+      clearcoatRoughness: 0.12,
+      roughness: 0.3,
+      metalness: 0,
     });
     const pixelRadius = { value: 3 },
       viewportHeight = { value: 900 },
       wordDrop = { value: 0 },
-      interior = { value: 0 };
+      interior = { value: 0 },
+      progress = { value: 0 };
     // Tube stays 6 CSS px (4 on phones) through the full camera dolly.
     threadMaterial.onBeforeCompile = (shader) => {
       shader.uniforms.wordDrop = wordDrop;
       shader.uniforms.interior = interior;
+      shader.uniforms.uProgress = progress;
       shader.uniforms.threadPixelRadius = pixelRadius;
       shader.uniforms.threadViewportHeight = viewportHeight;
       shader.vertexShader =
@@ -124,12 +130,12 @@ function Scene({
     threadMaterial.onBeforeCompile = (shader, renderer) => {
       compileThread(shader, renderer);
       shader.fragmentShader =
-        "varying float threadT; uniform float interior;\n" +
+        "varying float threadT; uniform float interior; uniform float uProgress;\n" +
         shader.fragmentShader;
       // The surface crossing occludes the exterior strand, without changing its draw length.
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <clipping_planes_fragment>",
-        "#include <clipping_planes_fragment>\n if (interior > .5 && threadT < .68) discard;",
+        "#include <clipping_planes_fragment>\n if (uProgress <= 0.0 || threadT > uProgress || (interior > .5 && threadT < .68)) discard;",
       );
     };
     const thread = new Mesh(tube, threadMaterial);
@@ -151,6 +157,9 @@ function Scene({
       viewportHeight,
       wordDrop,
       interior,
+      progress,
+      time: 0,
+      idleWeight: 0,
       position: new Vector3(),
       target: new Vector3(),
       pinView: new Vector3(),
@@ -158,8 +167,17 @@ function Scene({
   }, [letters, matcap]);
 
   useEffect(() => {
-    if (inView) invalidate();
-  }, [p, size, inView, invalidate]);
+    const state = driver.current;
+    state.wake = () => {
+      clearTimeout(idleTimer.current);
+      if (state.inView) invalidate();
+    };
+    state.wake();
+    return () => {
+      clearTimeout(idleTimer.current);
+      state.wake = () => {};
+    };
+  }, [driver, size, invalidate]);
   useEffect(() => {
     const canvas = gl.domElement;
     const lost = (event: Event) => {
@@ -194,7 +212,22 @@ function Scene({
     [scene],
   );
 
-  useFrame(() => {
+  useFrame((_, dt) => {
+    const state = driver.current;
+    if (!state.inView) return;
+    state.p = dampProgress(state.p, state.targetP.current, dt);
+    if (Math.abs(state.p - state.targetP.current) < 1e-7)
+      state.p = state.targetP.current;
+    const p = state.p;
+    const moving = Math.abs(state.targetP.current - p) >= 0.0005;
+    state.present(p, dt);
+    scene.time += dt;
+    scene.idleWeight +=
+      ((moving || state.reviewStill ? 0 : 1) - scene.idleWeight) *
+      (1 - Math.exp(-dt * 12));
+    if (floor.current) floor.current.visible = p > 0.2 && p < 0.64;
+    if (moving) invalidate();
+    else idleTimer.current = setTimeout(invalidate, 1000 / 30);
     sampleCamera(p, scene.position, scene.target);
     if (size.width <= 600) {
       // Narrow K0 needs the whole five-letter strand; orbit shifts below the copy.
@@ -211,9 +244,9 @@ function Scene({
     camera.updateMatrixWorld();
     scene.pixelRadius.value = size.width <= 600 ? 2 : 3;
     scene.viewportHeight.value = size.height;
-    scene.tube.setDrawRange(0, Math.floor(p * 512) * 8 * 6);
+    scene.progress.value = p;
     const slide = range(p, 0.2, 0.45);
-    scene.interior.value = range(p, 0.65, 0.667);
+    scene.interior.value = range(p, 0.64, 0.67);
     scene.wordDrop.value = range(p, 0.2, 0.3) * 4;
     scene.globe.visible = p > 0.2 && p < 0.67;
     scene.globe.position.x = 7 + 7 * (1 - range(p, 0.2, 0.3));
@@ -233,6 +266,8 @@ function Scene({
     sampleThread(flightT, p, scene.plane.position);
     sampleThread(Math.min(1, flightT + 0.001), p, scene.tangent);
     scene.plane.lookAt(scene.tangent);
+    scene.plane.position.y +=
+      Math.sin(scene.time * Math.PI * 0.8) * 0.02 * scene.idleWeight;
     scene.plane.scale.setScalar(0.8 - 0.58 * range(p, 0.45, 0.7));
     scene.swarm.visible = p >= 0.65;
     for (let i = 0; i < 70; i++) {
@@ -256,7 +291,11 @@ function Scene({
       const t = start * (1 - slide) + (0.37 + i * 0.015) * slide;
       sampleThread(t, p, tile.position);
       tile.quaternion.copy(camera.quaternion);
-      tile.rotateZ(Math.sin(i * 1.7 + p * Math.PI * 2) * 0.026);
+      tile.rotateZ(
+        Math.sin(i * 1.7 + scene.time * Math.PI * 0.8) *
+          0.02618 *
+          scene.idleWeight,
+      );
       tile.scale.setScalar(
         ((size.width <= 600 ? 1.2 : 1.45) * (1 - slide) + 0.4 * slide) *
           tileClick(p, i),
@@ -281,7 +320,8 @@ function Scene({
         shadow-bias={-0.001}
       />
       <mesh
-        visible={p > 0.2 && p < 0.64}
+        ref={floor}
+        visible={false}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[3, -2.25, 0]}
         receiveShadow

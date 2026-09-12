@@ -1,4 +1,5 @@
-import { CatmullRomCurve3, Vector3 } from "three";
+import { CatmullRomCurve3, Curve, Vector3, Quaternion, Matrix4 } from "three";
+import splineData from "./assets/journey-spline.json";
 
 export const clamp = (value: number) => Math.max(0, Math.min(1, value));
 export const easeOutQuart = (value: number) => 1 - (1 - clamp(value)) ** 4;
@@ -14,37 +15,46 @@ export const globeCenter = new Vector3(7, 0, 0);
  */
 export const keys = [0, 0.2, 0.45, 0.65, 0.9, 1] as const;
 
-// One continuous thread: Word → one globe wrap → surface pin → interior → exit.
-const word = [
-  [-9, 1.7, 0],
-  [-5, 1.7, 0],
-  [-2.4, 1.6, 0],
-  [0, 1.7, 0],
-  [2.4, 1.6, 0],
-  [4, 1.3, 0],
-];
-const wrap = Array.from({ length: 17 }, (_, i) => {
-  const angle = -Math.PI / 2 + (i / 16) * Math.PI * 2;
-  return [
-    7 + Math.sin(angle) * R * 1.025,
-    Math.cos(angle) * R * 0.42,
-    Math.cos(angle) * R * 0.93,
-  ];
-});
-export const threadCurve = new CatmullRomCurve3(
-  [
-    ...word,
-    ...wrap,
-    [6.1, 0.4, 2.05],
-    [7, 0, 1.4],
-    [7.6, -0.4, 0.1],
-    [7, -0.8, -1.2],
-    [8.5, -0.4, -2.7],
-    [10.5, 0.3, -4],
-    [14, 3, -6],
-  ].map(([x, y, z]) => new Vector3(x, y, z)),
-);
-threadCurve.arcLengthDivisions = 2048;
+// The same exported points and transported Frenet frames are used by the kit and every rider.
+const points = splineData.points.map((p) => new Vector3(...p));
+const tangents = splineData.tangents.map((p) => new Vector3(...p));
+const normals = splineData.normals.map((p) => new Vector3(...p));
+function interpolate(values: Vector3[], t: number, result: Vector3) {
+  const segment = clamp(t) * (values.length - 1);
+  const index = Math.min(values.length - 2, Math.floor(segment));
+  return result.copy(values[index]).lerp(values[index + 1], segment - index);
+}
+class ExportedJourney extends Curve<Vector3> {
+  constructor() {
+    super();
+  }
+  getPoint(t: number, result = new Vector3()) {
+    return interpolate(points, t, result);
+  }
+  getPointAt(t: number, result = new Vector3()) {
+    return this.getPoint(t, result);
+  }
+  getTangent(t: number, result = new Vector3()) {
+    return interpolate(tangents, t, result).normalize();
+  }
+  getTangentAt(t: number, result = new Vector3()) {
+    return this.getTangent(t, result);
+  }
+}
+export const threadCurve = new ExportedJourney();
+const frameTangent = new Vector3(),
+  frameNormal = new Vector3(),
+  frameBinormal = new Vector3();
+const frameMatrix = new Matrix4();
+export function sampleFrame(t: number, quaternion: Quaternion) {
+  interpolate(tangents, t, frameTangent).normalize();
+  interpolate(normals, t, frameNormal).normalize();
+  frameBinormal.crossVectors(frameTangent, frameNormal).normalize();
+  frameNormal.crossVectors(frameBinormal, frameTangent).normalize();
+  return quaternion.setFromRotationMatrix(
+    frameMatrix.makeBasis(frameTangent, frameNormal, frameBinormal),
+  );
+}
 export const pinAnchor = threadCurve.getPointAt(0.37);
 
 // Distances in §6 are measured from the pin: 3.2R at .45, 1.05R at .65.

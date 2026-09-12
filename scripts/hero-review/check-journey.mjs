@@ -7,7 +7,7 @@ import ts from 'typescript';
 const threeUrl = pathToFileURL(resolve('node_modules/three/build/three.module.js')).href;
 const source = ts.transpile(readFileSync('src/sections/hero-thread/journey.ts', 'utf8'), {
   module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022,
-}).replace('from "three"', `from ${JSON.stringify(threeUrl)}`);
+}).replace('from "three"', `from ${JSON.stringify(threeUrl)}`).replace('import splineData from "./assets/journey-spline.json";', `const splineData = ${readFileSync('src/sections/hero-thread/assets/journey-spline.json', 'utf8')};`);
 const journey = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 const { Vector3 } = await import(threeUrl);
 const position = new Vector3(), target = new Vector3();

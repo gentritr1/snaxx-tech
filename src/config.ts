@@ -111,7 +111,7 @@ export const aboutConfig: AboutConfig = {
   experienceValue: "",
   experienceLabel: "",
   stats: [
-    { value: "4", label: "Products in our world" },
+    { value: "3", label: "Apps in our world" },
     { value: "2", label: "Platforms — Android & web" },
     { value: "100%", label: "Indie & independent" },
   ],
@@ -389,5 +389,15 @@ export const footerConfig: FooterConfig = {
 
 /** Query override is review-only; production rollout stays explicit. */
 export function isThreadHero() {
-  return heroConfig.variant === 'thread' || (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('hero') === 'thread');
+  return import.meta.env.VITE_HERO_VARIANT === 'thread' || heroConfig.variant === 'thread' || (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('hero') === 'thread');
 }
+
+// Red Thread page composition. Almanac retains its original project list and copy.
+export const threadPageConfig = {
+  logo: 'SNAXX',
+  projectTitles: ['Arrows', 'Geo Guesser World 3D!', 'FJALË'],
+  description: 'Three different sparks, one shared obsession: make the next tap feel obvious, useful, or unexpectedly fun.',
+  footerDescription: 'An independent studio crafting apps and games with care.',
+  contactLabel: 'Get in touch',
+  supportLabel: 'Support',
+};

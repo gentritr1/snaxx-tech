@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, type MouseEvent } from 'react';
 import { cn } from '@/lib/utils';
 import { AnimatedButton } from './AnimatedButton';
 import { useMagnetic } from '@/hooks/useMotion';
-import { navigationConfig } from '@/config';
+import { navigationConfig, threadPageConfig, isThreadHero } from '@/config';
 
 export function Navigation() {
   const magneticRef = useMagnetic<HTMLDivElement>(8);
@@ -34,6 +34,7 @@ export function Navigation() {
   }, [isMenuOpen]);
 
   useEffect(() => {
+    if (isThreadHero()) return;
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -70,14 +71,15 @@ export function Navigation() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             {navigationConfig.logo && (
-              <a href="#hero" className="flex min-h-11 items-center gap-2" aria-label="Snaxx Tech home">
+              <a href="#hero" className="site-wordmark flex min-h-11 items-center gap-2" aria-label="Snaxx Tech home">
+                <span className="thread-nav-wordmark"><i aria-hidden="true" />{threadPageConfig.logo}</span>
                 <img
                   src="/images/wordmark/letter-5.webp"
                   alt=""
                   draggable={false}
                   className="h-6 w-auto select-none"
                 />
-                <span className="text-2xl font-display font-semibold tracking-wide text-almanac-ink-strong transition-colors duration-200">
+                <span className="almanac-nav-wordmark text-2xl font-display font-semibold tracking-wide text-almanac-ink-strong transition-colors duration-200">
                   {navigationConfig.logo}
                 </span>
               </a>

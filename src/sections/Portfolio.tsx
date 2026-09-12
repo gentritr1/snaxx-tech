@@ -3,7 +3,80 @@ import { ArrowRight, ArrowUpRight, FileText, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router';
 import { cn } from '@/lib/utils';
 import { useScrollAnimation, useStaggerAnimation } from '@/hooks/useScrollAnimation';
-import { portfolioConfig, isThreadHero, type ProjectItem } from '@/config';
+import { portfolioConfig, threadPageConfig, isThreadHero, type ProjectItem } from '@/config';
+
+import arrowsArt from './hero-thread/assets/card-arrows.webp';
+import geoArt from './hero-thread/assets/card-geo.webp';
+import provisionalFjaleArt from './hero-thread/assets/poster-1600.webp';
+
+function ThreadPortfolio() {
+  const art = [arrowsArt, geoArt, provisionalFjaleArt];
+  const projects = threadPageConfig.projectTitles.map((title) =>
+    portfolioConfig.projects.find((project) => project.title === title)!,
+  );
+  return (
+    <section id="apps" className="thread-page-section thread-apps">
+      <span id="portfolio" className="thread-anchor" />
+      <header className="thread-section-heading">
+        <p className="thread-section-label">01 / {portfolioConfig.label}</p>
+        <h2>
+          {portfolioConfig.heading}
+          <svg
+            className="thread-heading-underline"
+            viewBox="0 0 800 16"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path d="M2 10 C220 19 480 0 798 9" pathLength="1" />
+          </svg>
+        </h2>
+        <p>{threadPageConfig.description}</p>
+      </header>
+      <div className="thread-app-grid">
+        {projects.map((project, index) => (
+          <article className="thread-app-card" key={project.title}>
+            <div className="thread-app-art">
+              <img
+                src={art[index]}
+                alt={`${project.title} clay artwork`}
+                width="1200"
+                height="675"
+                loading="lazy"
+              />
+              <span className="thread-app-status">
+                <i aria-hidden="true" />
+                {project.status}
+              </span>
+            </div>
+            <h3>{project.title}</h3>
+            <p>{project.category}</p>
+            <div className="thread-card-links">
+              {project.privacyHref && (
+                <Link to={project.privacyHref}>
+                  Privacy <ArrowUpRight size={13} aria-hidden="true" />
+                </Link>
+              )}
+              {project.termsHref && (
+                <Link to={project.termsHref}>
+                  Terms <ArrowUpRight size={13} aria-hidden="true" />
+                </Link>
+              )}
+              {project.href && (
+                <a
+                  href={project.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {project.action} <ArrowUpRight size={13} aria-hidden="true" />
+                </a>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 interface ProjectCardProps {
   project: ProjectItem;
@@ -152,6 +225,8 @@ export function Portfolio() {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.25 });
   const { containerRef: gridRef, visibleItems } = useStaggerAnimation(portfolioConfig.projects.length + 1, 110);
   const ctaIndex = portfolioConfig.projects.length;
+
+  if (isThreadHero()) return <ThreadPortfolio />;
 
   if (!portfolioConfig.heading && portfolioConfig.projects.length === 0) return null;
 

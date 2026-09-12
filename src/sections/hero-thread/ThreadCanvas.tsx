@@ -317,7 +317,10 @@ function Scene({
           (size.width > 600 ? 130 : 230) *
             range(p, 0.2, 0.3) *
             (1 - range(p, 0.45, 0.55)) -
-          (size.width <= 600 ? 140 : 70) * range(p, 0.67, 0.72),
+          (size.width <= 600 ? 140 : 70) * range(p, 0.67, 0.72) -
+          (size.width <= 600 ? 220 : 0) *
+            range(p, 0.45, 0.55) *
+            (1 - range(p, 0.65, 0.67)),
         size.width,
         size.height,
       );

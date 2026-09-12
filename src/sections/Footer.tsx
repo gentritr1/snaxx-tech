@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { cn } from '@/lib/utils';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { ArrowUpRight, Circle, Coffee, Github, Heart, Instagram, Linkedin } from 'lucide-react';
-import { footerConfig } from '@/config';
+import { footerConfig, portfolioConfig, threadPageConfig, ctaConfig, isThreadHero } from '@/config';
 
 const SOCIAL_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   Github,
@@ -15,8 +15,80 @@ function getIcon(iconName: string): ComponentType<{ className?: string }> {
   return SOCIAL_ICONS[iconName] || Circle;
 }
 
+function ThreadFooter() {
+  const projects = threadPageConfig.projectTitles.map((title) =>
+    portfolioConfig.projects.find((project) => project.title === title)!,
+  );
+  return (
+    <footer className="thread-page-section thread-footer">
+      <div className="thread-footer-grid">
+        <div>
+          <a className="thread-wordmark" href="#hero">
+            <i aria-hidden="true" />
+            {threadPageConfig.logo}
+          </a>
+          <p>{threadPageConfig.footerDescription}</p>
+        </div>
+        <div>
+          <h3>Apps</h3>
+          <ul>
+            {projects.map((project) => (
+              <li key={project.title}>
+                <a href={project.href || '#apps'}>{project.title}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3>Legal</h3>
+          <ul>
+            {projects.map((project) => (
+              <li key={project.title}>
+                {project.href ? (
+                  <a href={project.href}>{project.action}</a>
+                ) : (
+                  <>
+                    <span>{project.title}</span>
+                    <div>
+                      <Link to={project.privacyHref!}>Privacy</Link>
+                      <Link to={project.termsHref!}>Terms</Link>
+                    </div>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3>Studio</h3>
+          <ul>
+            <li>
+              <a href="#studio">{aboutLabel}</a>
+            </li>
+            <li>
+              <a href={ctaConfig.buttonHref}>{threadPageConfig.contactLabel}</a>
+            </li>
+            <li>
+              <a href="#apps">{threadPageConfig.supportLabel}</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div className="thread-footer-bottom">
+        <p>{footerConfig.copyright}</p>
+        <p>{footerConfig.credit}</p>
+      </div>
+    </footer>
+  );
+}
+const aboutLabel = footerConfig.columns.find(
+  (column) => column.title === 'Studio',
+)?.links[0]?.label;
+
 export function Footer() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 });
+
+  if (isThreadHero()) return <ThreadFooter />;
 
   if (!footerConfig.logo && footerConfig.columns.length === 0 && footerConfig.socialLinks.length === 0) return null;
 

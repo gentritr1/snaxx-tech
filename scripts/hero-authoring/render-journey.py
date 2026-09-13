@@ -10,14 +10,20 @@ parser.add_argument('--start',type=int,default=0)
 parser.add_argument('--end',type=int,default=240)
 parser.add_argument('--aspect',help='Supplemental desktop contact sheet resolution, e.g. 1024x768')
 parser.add_argument('--viewport',choices=['1440','390','both'],default='both')
+parser.add_argument('--settings-only',action='store_true')
+parser.add_argument('--output',type=Path)
 args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
 bpy.ops.wm.open_mainfile(filepath=str(OUT/'red-thread-journey.blend'))
+if args.output:OUT=args.output
 for name in (['1440','390'] if args.viewport=='both' else [args.viewport]):
     scene=bpy.data.scenes['Journey '+name];bpy.context.window.scene=scene
+    if args.settings_only:
+        from review_settings import apply_settings
+        apply_settings(scene)
     if args.aspect:
         scene.render.resolution_x,scene.render.resolution_y=map(int,args.aspect.split('x'))
     scene.render.resolution_percentage=50 if args.preview else 100
-    directory=OUT/name/('preview' if args.preview else 'raw');directory.mkdir(exist_ok=True)
+    directory=OUT/name/('preview' if args.preview else 'raw');directory.mkdir(parents=True,exist_ok=True)
     if args.aspect:
         directory=OUT/args.aspect/'raw';directory.mkdir(parents=True,exist_ok=True)
     camera=scene.camera;thread=bpy.data.objects[name+'/ReviewThread']
@@ -29,6 +35,9 @@ for name in (['1440','390'] if args.viewport=='both' else [args.viewport]):
     if args.aspect:frames=range(math.ceil(args.start/6)*6,min(239,args.end)+1,6)
     for frame in frames:
         scene.frame_set(frame)
+        if args.settings_only:
+            from review_settings import shadow_receivers
+            shadow_receivers(scene,frame/240)
         view=camera.matrix_world.inverted()
         for point in thread.data.splines[0].bezier_points:
             depth=-(view@point.co).z

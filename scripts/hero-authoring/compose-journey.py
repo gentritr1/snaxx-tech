@@ -2,11 +2,12 @@
 import argparse
 import json
 import math
+import os
 import subprocess
 from pathlib import Path
 from PIL import Image,ImageDraw,ImageFont
 ROOT=Path(__file__).resolve().parents[2]
-OUT=ROOT/'design/hero-world-within/journey-v3'
+OUT=Path(os.environ.get('JOURNEY_OUTPUT',str(ROOT/'design/hero-world-within/journey-v3')))
 FONTS=Path('/tmp/red-thread-film-fonts')
 BG='#FEFBF8';INK='#2A2D38';RED='#D73626';MUTED='#5F636F'
 COPY={

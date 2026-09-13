@@ -26,15 +26,15 @@ for name in ['1440','390']:
    if obj.type!='MESH' or obj.get('reviewOnly') or max(abs(v) for v in obj.scale)<1e-6:continue
    box=bounds(obj,camera,w,h)
    if box and intersects(box,[0,0,w,h]):boxes[obj.name.split('/')[-1]]=box
-  # The shell encloses the camera: its full 8-corner box is not its visible band.
-  # Keep that conservative violation in the report rather than silently dropping it.
+  # §14 replaces only these two strict boxes with the separate object-ID pass.
   if active:
    for key,box in boxes.items():
+    if key in ('Globe_Inner','Graticule'):continue
     if intersects(box,zones[active]):
      zone=zones[active];overlaps.append({'p':p,'object':key,'zone':active,'box':box,'intersectionPixels':[min(box[2],zone[2])-max(box[0],zone[0]),min(box[3],zone[3])-max(box[1],zone[1])]})
   heroes=[(key,box) for key,box in boxes.items() if key.startswith(('Tile_','Arrow_')) or key in ('Globe','Globe_Smooth','Plane')]
   if .20<=p<=.90 and not .66<=p<=.68 and not any(intersects(box,[w/3,h/3,2*w/3,2*h/3]) for key,box in heroes):dead.append(p)
   rows.append({'frame':frame,'p':p,'copy':active,'boxes':boxes})
- reports[name]={'method':'conservative projected 8-corner boxes; occlusion not subtracted; not browser §8 acceptance','overlapCandidates':overlaps,'deadAirCandidates':dead,'frames':rows}
+ reports[name]={'method':'strict projected 8-corner boxes except Globe_Inner and Graticule (§14); separate object-ID pass required for those two; not browser §8 acceptance','overlapCandidates':overlaps,'deadAirCandidates':dead,'frames':rows}
  print('PREFLIGHT',name,'overlap candidates',len(overlaps),'dead-air candidates',dead)
 (OUT/'staging-preflight.json').write_text(json.dumps(reports,indent=2))

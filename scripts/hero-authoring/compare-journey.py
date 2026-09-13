@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DESIGN = ROOT / 'design/hero-world-within'
 parser = argparse.ArgumentParser()
 parser.add_argument('output', type=Path)
+parser.add_argument('--viewport', choices=['1440','390','both'], default='both')
 args = parser.parse_args()
 spec = importlib.util.spec_from_file_location('compose', Path(__file__).with_name('compose-journey.py'))
 compose = importlib.util.module_from_spec(spec)
@@ -28,6 +29,10 @@ def reference(name, source, size, p):
     if name == '390' and p == .30: source = 'rt-k1-mobile.png'
     if name == '390' and p == .78: source = 'rt-k3-mobile.png'
     picture = Image.open(DESIGN / source).convert('RGB')
+    if name=='390' and p==.08:
+        picture=picture.resize((524,round(picture.height*.39)),Image.Resampling.LANCZOS)
+        canvas.paste(picture,(-67,146))
+        return canvas,'rt-word.png; §5 phone tile-scale crop: scale .39, offset -67,146; middle tile centre near y=252'
     picture = ImageOps.contain(picture, size, Image.Resampling.LANCZOS)
     x, y = (size[0]-picture.width)//2, (size[1]-picture.height)//2
     canvas.paste(picture, (x,y))
@@ -40,6 +45,8 @@ def red_mask(image):
 
 
 for name, size in [('1440',(1440,900)), ('390',(390,844))]:
+    if args.viewport != 'both' and name != args.viewport:
+        continue
     destination = args.output / 'matches'
     destination.mkdir(exist_ok=True)
     for p, frame, source in keys:
@@ -63,8 +70,10 @@ for name, size in [('1440',(1440,900)), ('390',(390,844))]:
                 distances=np.concatenate([distance_transform_edt(~b)[a],distance_transform_edt(~a)[b]])
                 entry.update(cordEdgeMaxPx=float(distances.max()),cordEdgeP95Px=float(np.percentile(distances,95)),cordEdgePass=bool(distances.max()<=.03*size[0]))
             else: entry['cordEdgePass']=False
-            entry['fullSilhouettePass']=False
-            entry['status']='NOT PASSED — red-edge screen-space check only; globe/plane/tile silhouette proof outstanding'
+            entry['fullSilhouettePass']=False if not entry['cordEdgePass'] else None
+            entry['status']=('FAILED — cord/pin red-edge discrepancy exceeds the gate; other silhouettes are not certified'
+                             if not entry['cordEdgePass'] else
+                             'UNVERIFIED — red-edge check passes; globe/plane/tile silhouette proof outstanding')
         else:
             entry['endpointExact']=bool(np.array_equal(np.asarray(ref),np.asarray(film)))
         report['keys'].append(entry)
@@ -74,5 +83,16 @@ for name, size in [('1440',(1440,900)), ('390',(390,844))]:
     column=mask[:,12]
     report[name+'CordWidthPx']=int(column.sum())
     print('K0 CORD RASTER WIDTH', name, int(column.sum()), 'px at x=12')
+    id_path=args.output/name/'object-ids'/'0019.png'
+    if id_path.exists():
+        ids=np.asarray(Image.open(id_path).convert('RGB')).astype(float)
+        colour=np.array([255,64,128],dtype=float)
+        coverage=np.clip((ids[:,2:23,:]@colour)/(colour@colour),0,1)
+        mass=coverage.sum(axis=0)
+        centres=(coverage*np.arange(size[1])[:,None]).sum(axis=0)/np.maximum(mass,1e-9)
+        slope=np.gradient(centres)
+        normal_width=float(np.mean(mass/np.sqrt(1+slope*slope)))
+        report[name+'CordNormalWidthPx']=normal_width
+        print('K0 CORD NORMAL WIDTH',name,round(normal_width,3),'px; antialiased object-ID coverage / local arc length')
 (args.output/'reference-match-report.json').write_text(json.dumps(report,indent=2))
 print(json.dumps(report,indent=2))

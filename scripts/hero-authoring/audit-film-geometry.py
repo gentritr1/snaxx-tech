@@ -34,7 +34,21 @@ for name in ['1440','390']:
             distance=float(np.linalg.norm(points[visible],axis=1).min())
             if nearest is None or distance<nearest['distance']:
                 nearest={'object':obj_name,'distance':distance,'distanceR':distance/3}
-        rows.append({'frame':frame,'p':p,'arrowsWithVerticesInFrame':arrow_count,'nearestCandidate':nearest})
-    report['viewports'][name]={'frames':rows,'insideMinimumArrowCount':min(row['arrowsWithVerticesInFrame'] for row in rows if .71<=row['p']<=.90),'nearCandidates':[row for row in rows if row['nearestCandidate'] and row['nearestCandidate']['distance']<18]}
+        thread=bpy.data.objects[name+'/ReviewThread']
+        start=math.floor(thread.data.bevel_factor_start*1024)
+        end=math.ceil(thread.data.bevel_factor_end*1024)
+        for point in thread.data.splines[0].bezier_points[max(0,start):min(1025,end+1)]:
+            position=camera.matrix_world.inverted()@point.co
+            depth=-position.z
+            if depth<=0:continue
+            x=w/2+F*position.x/depth;y=h/2-F*position.y/depth
+            if not(0<=x<=w and 0<=y<=h):continue
+            radius=(3 if name=='1440' else 2)*depth/F
+            distance=position.length-radius
+            if nearest is None or distance<nearest['distance']:
+                nearest={'object':name+'/Thread','distance':distance,'distanceR':distance/3}
+        covered=.64<=p<=.68
+        rows.append({'frame':frame,'p':p,'coveredByWhiteout':covered,'arrowsWithVerticesInFrame':arrow_count,'nearestCandidate':nearest})
+    report['viewports'][name]={'frames':rows,'insideMinimumArrowCount':min(row['arrowsWithVerticesInFrame'] for row in rows if .71<=row['p']<=.90),'nearCandidates':[row for row in rows if not row['coveredByWhiteout'] and row['nearestCandidate'] and row['nearestCandidate']['distance']<18]}
 (OUT/'geometry-audit.json').write_text(json.dumps(report,indent=2))
 for name,data in report['viewports'].items():print('GEOMETRY AUDIT',name,'inside minimum arrows',data['insideMinimumArrowCount'],'near candidates',len(data['nearCandidates']))

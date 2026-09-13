@@ -1,6 +1,7 @@
 """Blender-only helpers for the V3 approval film. Never imported by the app."""
 import bisect
 import math
+import os
 from pathlib import Path
 import bpy
 from mathutils import Vector, Quaternion
@@ -8,7 +9,7 @@ from mathutils.bvhtree import BVHTree
 
 ROOT = Path(__file__).resolve().parents[2]
 KIT = ROOT / 'design/hero-world-within/kit'
-OUT = ROOT / 'design/hero-world-within/journey-v3'
+OUT = Path(os.environ.get('JOURNEY_OUTPUT', str(ROOT / 'design/hero-world-within/journey-v3')))
 OUT.mkdir(parents=True, exist_ok=True)
 
 
@@ -37,12 +38,17 @@ def inside_u(p):
     return lerp(.10, .95, quart(phase(p, .68, .90)))
 
 
+def inside_parameter(u):
+    # §13C replaces negative-u hiding with a baked, visible entry pre-roll.
+    return clamp((u+.63)/1.63)
+
+
 def draw_t(p, t_in):
     if p < .66:
         return t_in*p/.66
     if p < .68:
         return t_in+.06
-    return min(1, t_in+inside_u(p)*(1-t_in)+.04)
+    return min(1, t_in+inside_parameter(inside_u(p))*(1-t_in)+.04)
 
 
 def action_for(obj, action):
@@ -214,7 +220,7 @@ def whiteout_plane(scene, camera, prefix):
     mat.node_tree.links.new(transparent.outputs[0],mix.inputs[1])
     mat.node_tree.links.new(emission.outputs[0],mix.inputs[2])
     mat.node_tree.links.new(mix.outputs[0],out.inputs['Surface'])
-    for p,value in [(0,0),(.63,0),(.66,1),(.68,1),(.71,0),(1,0)]:
+    for p,value in [(0,0),(.63,0),(.64,1),(.68,1),(.71,0),(1,0)]:
         mix.inputs[0].default_value=value
         mix.inputs[0].keyframe_insert('default_value',frame=p*240)
     obj.data.materials.append(mat)

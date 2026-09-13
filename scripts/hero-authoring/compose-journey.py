@@ -116,7 +116,7 @@ def compose(name,preview):
   art=Image.open(source).convert('RGBA').resize((w,h),Image.Resampling.LANCZOS)
   if p>.96:art.putalpha(round(255*(1-phase(p,.96,1))))
   base=Image.new('RGBA',(w,h),BG);base=Image.alpha_composite(base,art)
-  white=min(phase(p,.63,.66),1-phase(p,.68,.71))
+  white=min(phase(p,.63,.64 if metadata.get('referenceRevision')=='v3.1' else .66),1-phase(p,.68,.71))
   if white>0:base=Image.alpha_composite(base,Image.new('RGBA',(w,h),(255,255,255,round(255*white))))
   base=Image.alpha_composite(base,copy_overlay((w,h),p,zones,True))
   base.convert('RGB').save(dest/source.name);count+=1
@@ -147,7 +147,13 @@ def compose_framing():
   draw.text((10,10),aspect+' · SAME JOURNEY CAMERA · ART FRAMING',font=font(13,'mono'),fill=INK)
   for i,frame in enumerate(range(0,240,6)):
    x=(i%8)*tw;y=36+(i//8)*(th+24)
-   still=Image.open(directory/f'{frame:04d}.png');still.thumbnail((tw,th),Image.Resampling.LANCZOS);sheet.paste(still,(x,y))
+   p=frame/240
+   art=Image.open(directory/f'{frame:04d}.png').convert('RGBA')
+   if p>.96:art.putalpha(round(255*(1-phase(p,.96,1))))
+   still=Image.alpha_composite(Image.new('RGBA',art.size,BG),art)
+   white=min(phase(p,.63,.64),1-phase(p,.68,.71))
+   if white>0:still=Image.alpha_composite(still,Image.new('RGBA',art.size,(255,255,255,round(255*white))))
+   still=still.convert('RGB');still.thumbnail((tw,th),Image.Resampling.LANCZOS);sheet.paste(still,(x,y))
    draw.text((x+8,y+th+4),f'p = {frame/240:.3f}',font=font(12,'mono'),fill=INK)
   sheet.save(OUT/f'contact-sheet-framing-{aspect}.png')
 

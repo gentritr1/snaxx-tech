@@ -11,7 +11,7 @@ def linear_hex(value):
     return tuple(linear(int(value[i:i+2], 16) / 255) for i in (0, 2, 4)) + (1,)
 
 
-def material(name, colour, clay=False, cord=False):
+def material(name, colour, clay=False, cord=False, atlas=True):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
     nodes, links = mat.node_tree.nodes, mat.node_tree.links
@@ -37,7 +37,7 @@ def material(name, colour, clay=False, cord=False):
         multiply.inputs[0].default_value = 1
         links.new(ao.outputs['Color'], multiply.inputs[1])
         links.new(texture.outputs['Color'], multiply.inputs[2])
-        links.new(multiply.outputs[0], shader.inputs['Base Color'])
+        links.new(multiply.outputs[0] if atlas else ao.outputs['Color'], shader.inputs['Base Color'])
     return mat
 
 
@@ -80,9 +80,10 @@ def apply_settings(scene):
             if obj.type == 'MESH' and not obj.data.uv_layers:
                 clay = False
             colour = 'D73626' if is_cord or 'Vermilion' in source else ('2A2D38' if 'Graphite' in source else 'F9F4EE')
-            key = (colour, clay, is_cord)
+            atlas = not any(name in obj.name for name in ('Globe_Inner', 'Globe_Smooth'))
+            key = (colour, clay, is_cord, atlas)
             if key not in cache:
-                cache[key] = material(prefix + 'ReviewPrincipled/' + str(key), colour, clay, is_cord)
+                cache[key] = material(prefix + 'ReviewPrincipled/' + str(key), colour, clay, is_cord, atlas)
                 cache[key]['sourceMaterial'] = source
             slot.link = 'OBJECT'
             slot.material = cache[key]

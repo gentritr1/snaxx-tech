@@ -15,9 +15,20 @@ for (let frame = 0; frame < 180; frame++) {
   const next = dampProgress(p, .3, 1 / 60);
   assert(next <= p && next >= .3, 'Reversal must not overshoot'); p = next;
 }
-assert(Math.abs(p - .3) < 1e-10);
-const oneStep = dampProgress(.2, .8, .1);
-let sixSteps = .2;
-for (let i = 0; i < 6; i++) sixSteps = dampProgress(sixSteps, .8, 1 / 60);
-assert(Math.abs(oneStep - sixSteps) < 1e-12, 'Damping must be frame-rate independent');
-console.log(`PASS: 180-step forward scrub, no overshoot on reversal, frame-rate independence; simulated max lag=${maxLag.toFixed(6)} (not a device measurement).`);
+assert(Math.abs(p - .3) < 1e-7, 'Settle within runtime precision after 3 seconds');
+for (const hz of [60, 120]) {
+  let value = 0;
+  for (let i = 0; i < hz * 4; i++) {
+    const target = i < hz * 2 ? 1 : 0;
+    const next = dampProgress(value, target, 1 / hz);
+    assert(Math.abs(next - value) <= .012 + 1e-12);
+    assert(next >= 0 && next <= 1);
+    value = next;
+  }
+}
+for (const dt of [0, 1 / 120, 1 / 60, .05, .1, 1, 10]) {
+  assert(Math.abs(dampProgress(.2, 1, dt) - .2) <= .012 + 1e-12);
+  assert(Math.abs(dampProgress(.8, 0, dt) - .8) <= .012 + 1e-12);
+}
+assert.equal(dampProgress(.2, 1, 0), .2);
+console.log(`PASS: no overshoot, 60/120 Hz forward/reverse, max step ≤ .012 even after dropped frames; simulated 3s-scroll max lag=${maxLag.toFixed(6)}. UNVERIFIED on device.`);

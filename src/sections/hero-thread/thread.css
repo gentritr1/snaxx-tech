@@ -302,7 +302,7 @@ html[data-thread-nav="clear"] nav.fixed:not(:has([aria-expanded="true"])) {
     background: #c63223;
   }
 }
-@media (max-width: 600px) {
+@media (max-width: 767px) {
   .thread-pinned {
     height: 300vh;
   }
@@ -453,25 +453,9 @@ html[data-thread-nav="clear"] nav.fixed:not(:has([aria-expanded="true"])) {
   --p: 0;
   --rail-height: 240px;
 }
-.thread-hero[data-ready="true"] .thread-stage {
-  transform: translate3d(
-    0,
-    calc(-100vh * clamp(0, (var(--p) - 0.9) * 10, 1)),
-    0
-  );
-}
-.thread-hero [data-visible-in] {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-.thread-hero [data-visible-in][aria-hidden="false"] {
-  opacity: 1;
-  pointer-events: auto;
-}
-.thread-hero[data-act="descent"] .thread-world {
-  opacity: 0.28;
-}
+.thread-hero[data-ready="true"] .thread-stage { transform: none; }
+.thread-hero [data-visible-in] { opacity: 0; pointer-events: none; }
+.thread-hero [data-visible-in][aria-hidden="false"] { pointer-events: auto; }
 /* R8 is independent of the film: no delayed copy or canvas after native un-pin. */
 .thread-hero[data-copy-ended="true"] [data-visible-in] {
   opacity: 0;
@@ -484,10 +468,8 @@ html[data-thread-nav="clear"] nav.fixed:not(:has([aria-expanded="true"])) {
   pointer-events: none;
 }
 .thread-hero .thread-whiteout {
-  opacity: min(
-    clamp(0, (var(--p) - 0.64) * 33.333333, 1),
-    clamp(0, (0.7 - var(--p)) * 33.333333, 1)
-  );
+  background: #fff;
+  opacity: min(clamp(0, (var(--p) - .63) * 100, 1), clamp(0, (.71 - var(--p)) / .03, 1));
 }
 .thread-rail-fill {
   transform: scaleY(var(--p));
@@ -502,10 +484,65 @@ html[data-thread-nav="clear"] nav.fixed:not(:has([aria-expanded="true"])) {
   top: 0;
   transform: translate(-50%, calc(var(--p) * var(--rail-height) - 50%));
 }
-@media (max-width: 600px) {
+@media (max-width: 767px) {
   .thread-hero {
     --rail-height: 160px;
   }
+}
+
+/* Copy positions and sequential envelopes port the staged film compositor. */
+.thread-copy h1, .thread-copy h2 { text-wrap: wrap; letter-spacing: 0; line-height: .98; }
+.thread-copy > .thread-eyebrow { letter-spacing: 0; }
+.thread-copy > .thread-eyebrow::before { display: none; }
+.thread-copy p { line-height: 1.5; }
+.thread-copy .thread-primary { width: 174px; min-height: 52px; padding: 0; justify-content: center; }
+.thread-actions-word { position: relative; }
+.thread-actions-word .thread-link { position: absolute; left: calc(100% + 20px); white-space: nowrap; }
+.thread-stage { background: #FEFBF8; min-height: 0; }
+.thread-word {
+  inset: auto 48px auto 48px;
+  top: 53.333333vh;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 26px;
+}
+.thread-word > .thread-eyebrow { top: -39.111111vh; }
+.thread-word-body { position: static; gap: 22px; }
+.thread-world, .thread-arrow { top: 16.666667vh; width: 592px; max-width: 42%; gap: 20px; }
+.thread-arrow { width: 520px; }
+.thread-world > h2, .thread-arrow > h2 { margin-top: -8px; }
+.thread-descent { top: 12.222222vh; left: 50%; right: auto; width: 33.333333%; }
+.thread-act-actions, .thread-actions-word {
+  position: static;
+  justify-content: flex-start;
+  flex-direction: row;
+  gap: 20px;
+}
+.thread-actions-word { position: relative; justify-content: center; }
+.thread-rail { right: 28px; top: 24%; height: 52%; }
+.thread-rail b { transform: translate(-50%, -50%); top: calc(var(--p) * 100%); }
+@media (max-width: 767px) {
+  .thread-word { top: 40.521327vh; left: 24px; right: 24px; }
+  .thread-word > .thread-eyebrow { top: -26.540284vh; }
+  .thread-word-body { gap: 0; }
+  .thread-copy p:not(.thread-eyebrow) { display: none; }
+  .thread-world, .thread-arrow, .thread-descent {
+    top: 13.981043vh; left: 24px; right: 24px; width: auto; max-width: none; gap: 12px;
+  }
+  .thread-world h2 { font-size: 48px; }
+  .thread-arrow h2 { font-size: 44px; }
+  .thread-copy .thread-act-actions {
+    position: static; padding: 0; background: none; border: 0; border-radius: 0;
+    flex-direction: row; gap: 10px; align-items: center;
+  }
+  .thread-copy .thread-actions-word { flex-direction: column; gap: 14px; }
+  .thread-copy .thread-primary { width: 144px; min-height: 40px; padding: 0; font-size: 14px; }
+  .thread-actions-word .thread-link { position: static; }
+  .thread-word h1 { font-size: 40px; }
+  .thread-copy .thread-pill { flex: 1; padding: 8px; font-size: 8px; letter-spacing: 0; }
+  .thread-copy .thread-pill::before { display: none; }
+  .thread-rail { right: 16px; }
 }
 
 /* Full-page theme; original Almanac markup remains on the flag-off route. */

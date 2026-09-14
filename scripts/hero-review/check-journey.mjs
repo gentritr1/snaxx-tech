@@ -4,63 +4,44 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import ts from 'typescript';
 
-const threeUrl = pathToFileURL(resolve('node_modules/three/build/three.module.js')).href;
-const source = ts.transpile(readFileSync('src/sections/hero-thread/journey.ts', 'utf8'), {
+const compile = (path) => ts.transpile(readFileSync(path, 'utf8'), {
   module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022,
-}).replace('from "three"', `from ${JSON.stringify(threeUrl)}`).replace('import splineData from "./assets/journey-spline.json";', `const splineData = ${readFileSync('src/sections/hero-thread/assets/journey-spline.json', 'utf8')};`);
-const journey = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
-const { Vector3 } = await import(threeUrl);
-const position = new Vector3(), target = new Vector3();
-const snapshots = [];
-for (let i = 0; i <= 1000; i++) {
-  const p = i / 1000;
-  journey.sampleCamera(p, position, target);
-  assert([...position.toArray(), ...target.toArray()].every(Number.isFinite));
-  assert(position.distanceTo(target) > .01, `Camera direction degenerates at ${p}`);
-  const point = journey.sampleThread(p, p, new Vector3());
-  assert(point.toArray().every(Number.isFinite));
-  snapshots.push([...position.toArray(), ...target.toArray(), ...point.toArray()]);
-}
-for (let i = 1000; i >= 0; i--) {
-  const p = i / 1000;
-  journey.sampleCamera(p, position, target);
-  const point = journey.sampleThread(p, p, new Vector3());
-  assert.deepEqual([...position.toArray(), ...target.toArray(), ...point.toArray()], snapshots[i]);
-}
-for (const p of journey.cameraKeys.slice(1, -1)) {
-  const before = new Vector3(), after = new Vector3(), beforeTarget = new Vector3(), afterTarget = new Vector3();
-  journey.sampleCamera(p - 1e-8, before, beforeTarget);
-  journey.sampleCamera(p + 1e-8, after, afterTarget);
-  assert(before.distanceTo(after) < 1e-4 && beforeTarget.distanceTo(afterTarget) < 1e-4, `Camera jumps at ${p}`);
-}
-journey.sampleCamera(0, position, target);
-const k0 = position.clone();
-journey.sampleCamera(.1999, position, target);
-assert(position.equals(k0), 'K0 must remain static');
-const pin = journey.pinAnchor;
-journey.sampleCamera(.45, position, target);
-assert(Math.abs(position.distanceTo(pin) - 3.2 * journey.R) < 1e-8);
-journey.sampleCamera(.65, position, target);
-assert(Math.abs(position.distanceTo(pin) - 1.05 * journey.R) < 1e-8);
-console.log('PASS: 1001 finite poses, 1001 exact reverse poses, all key boundaries continuous, static K0, pin-relative 3.2R → 1.05R dolly.');
-const spline = JSON.parse(readFileSync('src/sections/hero-thread/assets/journey-spline.json', 'utf8'));
-assert(spline.points.length >= 512);
-assert(spline.wrapEndT <= .45, 'The full wrap must be drawn by .45');
-for (let i = 0; i < spline.points.length; i++) {
-  const tangent = new Vector3(...spline.tangents[i]);
-  const normal = new Vector3(...spline.normals[i]);
-  assert(Math.abs(tangent.length() - 1) < 1e-5);
-  assert(Math.abs(normal.length() - 1) < 1e-5);
-  assert(Math.abs(tangent.dot(normal)) < 1e-5);
-}
-for (const mobile of [false, true]) {
-  journey.sampleCamera(.67, position, target, mobile);
-  assert(Math.abs(position.distanceTo(journey.globeCenter) - journey.R) < 1e-7, 'Surface crossing must coincide with the whiteout peak');
-  for (const p of journey.cameraKeys.slice(1, -1)) {
-    const before = new Vector3(), after = new Vector3(), beforeTarget = new Vector3(), afterTarget = new Vector3();
-    journey.sampleCamera(p - 1e-8, before, beforeTarget, mobile);
-    journey.sampleCamera(p + 1e-8, after, afterTarget, mobile);
-    assert(before.distanceTo(after) < 1e-4 && beforeTarget.distanceTo(afterTarget) < 1e-4, `Camera jump: mobile=${mobile}, p=${p}`);
+});
+const moduleUrl = (source) => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
+const motionUrl = moduleUrl(compile('src/sections/hero-thread/motion.ts'));
+const threeUrl = pathToFileURL(resolve('node_modules/three/build/three.module.js')).href;
+const { sampleScalar, createThreadCurve } = await import(moduleUrl(
+  compile('src/sections/hero-thread/journey.ts')
+    .replace('from "three"', `from ${JSON.stringify(threeUrl)}`)
+    .replace('from "./motion"', `from ${JSON.stringify(motionUrl)}`)));
+for (const viewport of ['1440', '390']) {
+  const data = JSON.parse(readFileSync(`public/models/journey-spline-${viewport}.json`, 'utf8'));
+  let error = 0;
+  for (const [p, start, end] of data.revealVerification) {
+    error = Math.max(error, Math.abs(sampleScalar(data.reveal.start, p) - start), Math.abs(sampleScalar(data.reveal.end, p) - end));
   }
+  assert(error < 2e-6, `Saved Blender scalar values differ by ${error}`);
+  const curve = createThreadCurve(data);
+  const snapshots = Array.from({length: 1001}, (_, i) => {
+    const p = i / 1000;
+    const values = [sampleScalar(data.reveal.start, p), sampleScalar(data.reveal.end, p), ...curve.getPoint(p).toArray()];
+    assert(values.every(Number.isFinite));
+    return values;
+  });
+  for (let i = 1000; i >= 0; i--) {
+    const p = i / 1000;
+    assert.deepEqual([sampleScalar(data.reveal.start, p), sampleScalar(data.reveal.end, p), ...curve.getPoint(p).toArray()], snapshots[i]);
+  }
+  assert.equal(data.pixelRadius, viewport === '1440' ? 9 : 5);
+  console.log(`PASS ${viewport}: ${data.revealVerification.length} saved Blender reveal samples, max error=${error.toExponential(3)}; 1001 finite and exact reverse curve/reveal samples; radius=${data.pixelRadius}px.`);
 }
-console.log(`PASS: ${spline.points.length} orthonormal exported frames; wrap ends at t=${spline.wrapEndT.toFixed(6)} <= .45; desktop and phone camera boundaries continuous; sphere crossing exactly at p=.67.`);
+// Independent interpolation cases prevent a serialized-value-only test.
+const keys = [
+  {p:0,value:0,left:[0,0],right:[.1,.8],interpolation:'BEZIER'},
+  {p:1,value:1,left:[.9,.2],right:[1,1],interpolation:'BEZIER'},
+];
+assert(Math.abs(sampleScalar(keys, .5) - .5) < 1e-6);
+assert(sampleScalar(keys, .1) > .2);
+keys[0].interpolation = 'CONSTANT';assert.equal(sampleScalar(keys, .5), 0);
+keys[0].interpolation = 'LINEAR';assert.equal(sampleScalar(keys, .5), .5);
+console.log('PASS: nonlinear time handles, constant and linear interpolation.');

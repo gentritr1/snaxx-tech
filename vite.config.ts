@@ -57,7 +57,12 @@ export default defineConfig(({ mode }) => ({
   preview: { port: 4300 },
   plugins: [
     threadPosterPlugin(),
-    mode === "development" && inspectAttr(),
+    mode === "development" && inspectAttr({
+      // R3F treats hyphenated inspector attributes as Three property paths.
+      predicate: (node) => node.type !== "JSXElement" ||
+        node.openingElement.name.type !== "JSXIdentifier" ||
+        !new Set(["Canvas", "ThreadCanvas", "Scene", "JourneyContactShadows", "primitive", "color", "hemisphereLight"]).has(node.openingElement.name.name),
+    }),
     react(),
   ].filter(Boolean),
   server: {

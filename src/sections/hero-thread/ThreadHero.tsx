@@ -10,21 +10,22 @@ import {
 } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { ThreadStill } from "./ThreadStill";
-import { actAt, clamp, type MotionDriver } from "./motion";
+import { actAt, clamp, copyPose, type CopyAct, type MotionDriver } from "./motion";
 import "./thread.css";
 
 const ThreadCanvas = lazy(() => import("./ThreadCanvas"));
 
 class CanvasBoundary extends Component<
-  { children: ReactNode; onFailure: () => void },
+  { children: ReactNode; onFailure: (reason?: string) => void },
   { failed: boolean }
 > {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
-  componentDidCatch() {
-    this.props.onFailure();
+  componentDidCatch(error: Error) {
+    console.error("Hero scene failed:", error);
+    this.props.onFailure(error.message);
   }
   render() {
     return this.state.failed ? null : this.props.children;
@@ -35,7 +36,7 @@ function ActActions({ act, visibleIn }: { act: string; visibleIn: string }) {
   return (
     <div
       className={`thread-actions thread-act-actions thread-actions-${act}`}
-      data-visible-in={visibleIn}
+      data-action-act={visibleIn}
     >
       <a className="thread-primary" href="#portfolio">
         See the apps <ArrowRight size={16} />
@@ -69,15 +70,13 @@ function CopyLayer() {
             live on the web today.
           </p>
         </div>
-        <p className="thread-studio">
-          Snaxx Tech turns small ideas into apps, games, and satisfying little
-          moments.
-        </p>
+        <ActActions act="word" visibleIn="word" />
       </div>
-      <div className="thread-copy thread-world" data-visible-in="world descent">
+      <div className="thread-copy thread-world" data-visible-in="world">
         <p className="thread-eyebrow">Act II · The World</p>
         <h2>Then, a world to get lost in.</h2>
         <p>Geo Guesser World 3D! drops you anywhere on Earth. Guess where.</p>
+        <ActActions act="world" visibleIn="world" />
       </div>
       <div className="thread-copy thread-descent" data-visible-in="descent">
         <p className="thread-eyebrow">Act II · dropping in</p>
@@ -94,10 +93,9 @@ function CopyLayer() {
           Arrows is a precision arcade game. Every launch gets attention until
           it feels just right.
         </p>
+        <ActActions act="arrow" visibleIn="arrow" />
       </div>
-      <ActActions act="word" visibleIn="word" />
-      <ActActions act="world" visibleIn="world descent" />
-      <ActActions act="arrow" visibleIn="arrow" />
+
       <div className="thread-whiteout" aria-hidden="true" />
       <div className="thread-rail" aria-hidden="true">
         <div className="thread-rail-fill" />
@@ -110,11 +108,7 @@ function CopyLayer() {
   );
 }
 
-export default function ThreadHero({
-  letters = "FJALË",
-}: {
-  letters?: string;
-}) {
+export default function ThreadHero() {
   const wrapper = useRef<HTMLElement>(null);
   const targetP = useRef(0);
   const driver = useRef<MotionDriver>({
@@ -125,15 +119,23 @@ export default function ThreadHero({
     present: () => {},
     reviewStill: false,
   });
+  const [phone, setPhone] = useState(() => matchMedia("(max-width: 767px)").matches);
   const [eligible, setEligible] = useState(false);
+  useEffect(() => {
+    const query = matchMedia("(max-width: 767px)");
+    const resize = () => setPhone(query.matches);
+    query.addEventListener("change", resize);
+    return () => query.removeEventListener("change", resize);
+  }, []);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const active = eligible && !failed;
   const showScene = active && ready;
   const loaded = useCallback(() => setReady(true), []);
-  const fail = useCallback(() => {
+  const fail = useCallback((reason?: string) => {
     const element = wrapper.current;
     if (element) {
+      element.dataset.failureReason = reason || "unknown";
       const rect = element.getBoundingClientRect();
       if (rect.top < 0 && rect.bottom > 0)
         window.scrollTo({ top: scrollY + rect.top, behavior: "instant" });
@@ -157,6 +159,7 @@ export default function ThreadHero({
     const check = () => {
       cancelAnimationFrame(first);
       cancelAnimationFrame(second);
+      if (wrapper.current) wrapper.current.dataset.reducedMotion = String(motion.matches);
       if (motion.matches) {
         setEligible(false);
         return;
@@ -214,21 +217,36 @@ export default function ThreadHero({
       );
       document.documentElement.dataset.threadNav =
         p > 0.2 ? "scrolled" : "clear";
+      for (const block of copy) {
+        const pose = copyPose(block.dataset.visibleIn as CopyAct, p);
+        const visible = !unpinned && pose.opacity > 0;
+        block.style.opacity = visible ? String(pose.opacity) : "0";
+        block.style.transform = `translateY(${pose.y}px)`;
+        block.inert = !visible;
+        block.setAttribute("aria-hidden", String(!visible));
+      }
       const act = unpinned ? "landed" : actAt(p);
       if (act !== previousAct) {
         previousAct = act;
         element.dataset.act = act;
-        for (const block of copy) {
-          const visible = block.dataset.visibleIn!.split(" ").includes(act);
-          block.inert = !visible;
-          block.setAttribute("aria-hidden", String(!visible));
-        }
+
       }
       for (const dot of dots)
         dot.dataset.passed = String(p >= Number(dot.dataset.seat));
     };
     const readScroll = () => {
       targetP.current = active ? clamp((scrollY - top) / distance) : 0;
+      element.dataset.targetProgress = targetP.current.toFixed(5);
+      // Clean up even when a single scroll jumps beyond the entire hero,
+      // where the render loop correctly stays asleep.
+      const unpinned = showScene && targetP.current >= 1;
+      element.dataset.unpinned = String(unpinned);
+      const stage = element.querySelector<HTMLElement>(".thread-stage");
+      if (stage) stage.inert = unpinned;
+      // Use the same measured scroll range as p. IntersectionObserver can
+      // report this oversized sticky section outside the viewport mid-journey.
+      state.inView = scrollY + innerHeight > top && scrollY < top + distance + innerHeight;
+      element.dataset.inView = String(state.inView);
       if (element.dataset.trace === "record")
         performance.mark("hero:scroll", {
           detail: { targetP: targetP.current },
@@ -242,11 +260,6 @@ export default function ThreadHero({
     };
     const resize = new ResizeObserver(measure);
     resize.observe(element);
-    const visibility = new IntersectionObserver(([entry]) => {
-      state.inView = entry.isIntersecting;
-      state.wake();
-    });
-    visibility.observe(element);
     document.documentElement.dataset.threadHero = "true";
     window.addEventListener("scroll", readScroll, { passive: true });
     window.addEventListener("resize", measure);
@@ -255,7 +268,6 @@ export default function ThreadHero({
     state.wake();
     return () => {
       resize.disconnect();
-      visibility.disconnect();
       window.removeEventListener("scroll", readScroll);
       window.removeEventListener("resize", measure);
       state.present = () => {};
@@ -271,6 +283,8 @@ export default function ThreadHero({
       ref={wrapper}
       className={`thread-hero ${active ? "thread-pinned" : ""}`}
       data-ready={showScene}
+      data-eligible={eligible}
+      data-failed={failed}
     >
       <div className="thread-stage">
         {!showScene && <ThreadStill />}
@@ -285,8 +299,9 @@ export default function ThreadHero({
             <CanvasBoundary onFailure={fail}>
               <Suspense fallback={null}>
                 <ThreadCanvas
+                  key={phone ? "390" : "1440"}
                   driver={driver}
-                  letters={letters}
+                  phone={phone}
                   onReady={loaded}
                   onFailure={fail}
                 />

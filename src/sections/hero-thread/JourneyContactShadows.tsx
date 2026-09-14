@@ -19,10 +19,8 @@ import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShade
 import type { MotionDriver } from "./motion";
 
 export function JourneyContactShadows({
-  moving,
   driver,
 }: {
-  moving: RefObject<boolean>;
   driver: RefObject<MotionDriver>;
 }) {
   const { gl, scene } = useThree();
@@ -40,12 +38,12 @@ export function JourneyContactShadows({
     });
     const floor = new Mesh(geometry, material);
     floor.rotation.x = -Math.PI / 2;
-    floor.position.set(4, -2.26, 0);
+    floor.position.set(18, -3, 0);
     group.add(floor);
     const camera = new OrthographicCamera(-12, 12, 8, -8, 0, 6);
-    camera.position.set(4, -2.25, 0);
+    camera.position.set(18, -2.99, 0);
     camera.up.set(0, 0, -1);
-    camera.lookAt(4, 2, 0);
+    camera.lookAt(18, 3, 0);
     camera.updateMatrixWorld();
     camera.layers.set(1);
     const depth = new MeshDepthMaterial();
@@ -72,6 +70,7 @@ export function JourneyContactShadows({
       blurPlane,
       blurCamera,
       painted: false,
+      lastP: -1,
     };
   }, []);
   useEffect(
@@ -89,8 +88,8 @@ export function JourneyContactShadows({
   );
   useFrame(() => {
     const state = driver.current;
-    shadow.group.visible = state.p > 0.2 && state.p < 0.64;
-    if (!state.inView || (!moving.current && shadow.painted) || state.p >= 0.64)
+    shadow.group.visible = state.p > 0.2 && state.p < 0.48;
+    if (!state.inView || (state.p === shadow.lastP && shadow.painted) || state.p >= 0.48 || state.p <= 0.2)
       return;
     const background = scene.background,
       override = scene.overrideMaterial,
@@ -120,6 +119,7 @@ export function JourneyContactShadows({
     scene.overrideMaterial = override;
     shadow.group.visible = state.p > 0.2;
     shadow.painted = true;
+    shadow.lastP = state.p;
   });
   return <primitive object={shadow.group} />;
 }

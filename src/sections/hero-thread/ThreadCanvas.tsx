@@ -1,438 +1,262 @@
-/* Three objects are deliberately mutable inside the renderer, never React state. */
+/* Renderer-owned mutable objects never enter React state. */
 /* eslint-disable react-hooks/immutability */
 import { useEffect, useMemo, useRef, type RefObject } from "react";
-import { dampProgress, type MotionDriver } from "./motion";
-import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
+import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
-import { EffectComposer, SMAA } from "@react-three/postprocessing";
-import { kitDecoder } from "./kit";
-import { JourneyContactShadows } from "./JourneyContactShadows";
 import {
-  Quaternion,
-  Object3D,
-  InstancedMesh,
-  PerspectiveCamera,
-  Group,
-  LineSegments,
-  Mesh,
-  MeshBasicMaterial,
-  MeshMatcapMaterial,
-  MeshPhysicalMaterial,
-  NoToneMapping,
-  SRGBColorSpace,
-  TextureLoader,
-  TubeGeometry,
-  Vector3,
-  Float32BufferAttribute,
-  InstancedBufferAttribute,
+  AnimationMixer, Box3, Color, DirectionalLight, Group, Object3D, PlaneGeometry, ShadowMaterial, Vector3, FileLoader, Float32BufferAttribute, LoopOnce, Mesh,
+  MeshBasicMaterial, MeshMatcapMaterial, MeshPhysicalMaterial, NoToneMapping,
+  PerspectiveCamera, SRGBColorSpace, TextureLoader, TubeGeometry,
+  VSMShadowMap, type Material, type Texture,
 } from "three";
-import {
-  clamp,
-  range,
-  sampleCamera,
-  sampleThread,
-  threadCurve,
-  tileClick,
-  sampleFrame,
-  tileParameter,
-  planeParameter,
-  globeCenter,
-  pinAnchor,
-  interiorStartT,
-  exteriorEndT,
-} from "./journey";
-
+import type { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { measureJourney } from "./review";
+import { JourneyContactShadows } from "./JourneyContactShadows";
+import { kitDecoder } from "./kit";
+import { dampProgress, type MotionDriver } from "./motion";
+import { createThreadCurve, sampleScalar, type JourneyData } from "./journey";
 import matcapUrl from "./assets/Matcap_Clay.png";
+import oceanUrl from "./assets/Matcap_Clay_Ocean.png";
+import landUrl from "./assets/Matcap_Clay_Land.png";
+import outsideUrl from "./assets/Matcap_Clay_Outside.png";
+import insideUrl from "./assets/Matcap_Clay_Inside.png";
 import aoUrl from "./assets/AO_Clay.png";
 
 type Props = {
   driver: RefObject<MotionDriver>;
-  letters: string;
+  phone: boolean;
   onReady: () => void;
-  onFailure: () => void;
+  onFailure: (reason?: string) => void;
 };
 
-function Scene({
-  driver,
-  onReady,
-  onFailure,
-  matcap,
-  ao,
-}: Props & { matcap: import("three").Texture; ao: import("three").Texture }) {
-  const { camera, gl, size, invalidate } = useThree();
-  const idleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
-    undefined,
-  );
-  const shadowMoving = useRef(true);
-  const kit = useGLTF("/models/red-thread-kit.glb", false, false, (loader) =>
-    loader.setDRACOLoader(kitDecoder()),
-  );
+function Scene({ driver, onReady, onFailure, kit, data, textures }: Props & {
+  kit: Pick<GLTF, "scene" | "animations">; data: JourneyData; textures: Texture[];
+}) {
+  const { gl, size, set, invalidate } = useThree();
   const scene = useMemo(() => {
-    matcap.colorSpace = SRGBColorSpace;
+    if (kit.animations.length !== 1 || kit.animations[0].name !== "Journey")
+      throw new Error("Expected exactly one baked Journey clip");
+    const [matcap, ocean, land, ao, outside, inside] = textures;
+    for (const texture of [matcap, ocean, land, outside, inside]) texture.colorSpace = SRGBColorSpace;
     ao.flipY = false;
-    const clay = new MeshMatcapMaterial({ matcap });
-    const occludedClay = clay.clone();
-    occludedClay.onBeforeCompile = (shader) => {
-      shader.uniforms.clayAO = { value: ao };
-      shader.vertexShader = "varying vec2 clayUV;\n" + shader.vertexShader;
-      shader.vertexShader = shader.vertexShader.replace(
-        "#include <begin_vertex>",
-        "#include <begin_vertex>\n clayUV = uv;",
-      );
-      shader.fragmentShader =
-        "varying vec2 clayUV; uniform sampler2D clayAO;\n" +
-        shader.fragmentShader;
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <opaque_fragment>",
-        "outgoingLight *= mix(1.0, texture2D(clayAO, clayUV).r, 0.9);\n#include <opaque_fragment>",
-      );
+    const root = kit.scene.clone(true);
+    const camera = root.getObjectByName("Camera");
+    if (!(camera instanceof PerspectiveCamera)) throw new Error("Journey camera missing");
+    const materials: Material[] = [];
+    // The staged camera-facing K0 receiver also occludes the route behind it.
+    const backdrop = new Group();
+    const backdropGeometry = new PlaneGeometry(200, 200);
+    const backdropMaterial = new MeshBasicMaterial({ color: "#FEFBF8" });
+    const shadowMaterial = new ShadowMaterial({ opacity: .32, depthWrite: false });
+    const backdropBase = new Mesh(backdropGeometry, backdropMaterial);
+    const backdropShadow = new Mesh(backdropGeometry, shadowMaterial);
+    backdropShadow.position.z = .001;backdropShadow.receiveShadow = true;
+    backdrop.add(backdropBase, backdropShadow);root.add(backdrop);
+    materials.push(backdropMaterial, shadowMaterial);
+    const sun = new DirectionalLight("#ffffff", 2);
+    const sunTarget = new Object3D();sun.target = sunTarget;
+    sun.shadow.mapSize.set(1024, 1024);sun.shadow.radius = 4;sun.shadow.blurSamples = 8;
+    Object.assign(sun.shadow.camera, { left: -50, right: 50, top: 50, bottom: -50, near: .1, far: 250 });
+    sun.shadow.normalBias = .02;sun.shadow.bias = -.0001;
+    root.add(sun, sunTarget);
+    const tile = root.getObjectByName("Tile_A")!;
+    const lightDirection = new Vector3(-10, 12, 12).normalize();
+    const tiles = root.children.filter(object => object.name.startsWith("Tile_"));
+    const offset = new Vector3();
+    const clayCache = new Map<string, MeshMatcapMaterial>();
+    const uniforms = {
+      start: { value: 0 }, end: { value: 0 }, radius: { value: data.pixelRadius },
+      height: { value: 900 }, width: { value: 1440 },
+      bufferHeight: { value: 900 }, bufferWidth: { value: 1440 },
     };
-    const group = new Group();
-    const kitMaterials = new Map<string, MeshMatcapMaterial>();
-    function object(name: string, aoEnabled = false) {
-      const source = kit.scene.getObjectByName(name);
-      if (!source) throw new Error(`Missing kit object: ${name}`);
-      const clone = source.clone(true);
-      clone.traverse((child) => {
-        if (child instanceof Mesh) {
-          child.geometry = child.geometry.clone();
-          if (
-            name.startsWith("Tile_") ||
-            ["Globe", "Graticule", "Pin", "Plane"].includes(name)
-          )
-            child.layers.enable(1);
-          const original = Array.isArray(child.material)
-            ? child.material[0]
-            : child.material;
-          const color =
-            "color" in original
-              ? (original.color as import("three").Color)
-              : clay.color;
-          const key = `${name}:${aoEnabled}:${color.getHexString()}`;
-          if (!kitMaterials.has(key)) {
-            const material = clay.clone();
-            material.color.copy(color);
-            if (aoEnabled)
-              material.onBeforeCompile = occludedClay.onBeforeCompile;
-            kitMaterials.set(key, material);
-          }
-          child.material = kitMaterials.get(key)!;
+    function clay(original: Material, name: string) {
+      const globe = name === "Globe";
+      const atlas = name.startsWith("Tile_") || name === "Plane";
+      const color = name === "Graticule" ? new Color("#E9E3DA")
+        : name.startsWith("Arrow") ? new Color("#EFEAE2")
+        : globe ? new Color("#ffffff")
+        : "color" in original ? (original.color as Color) : new Color("#ffffff");
+      const key = `${globe}:${atlas}:${color.getHexString()}`;
+      const cached = clayCache.get(key);
+      if (cached) return cached;
+      const material = new MeshMatcapMaterial({ matcap, color, vertexColors: globe });
+      material.customProgramCacheKey = () => key;
+      material.onBeforeCompile = (shader) => {
+        shader.fragmentShader = shader.fragmentShader.replace(
+          "vec4 matcapColor = texture2D( matcap, uv );",
+          "uv = (uv - 0.5) * (2.0 / 2.08) + 0.5;\nvec4 matcapColor = texture2D( matcap, uv );");
+        if (globe) {
+          shader.uniforms.landMatcap = { value: land };
+          shader.uniforms.oceanMatcap = { value: ocean };
+          shader.uniforms.landTint = { value: new Color("#FBF8F2") };
+          shader.uniforms.oceanTint = { value: new Color("#F3EDE4") };
+          shader.fragmentShader = "uniform sampler2D landMatcap; uniform sampler2D oceanMatcap; uniform vec3 landTint; uniform vec3 oceanTint;\n" + shader.fragmentShader;
+          shader.fragmentShader = shader.fragmentShader.replace("#include <color_fragment>", "");
+          shader.fragmentShader = shader.fragmentShader.replace(
+            "vec3 outgoingLight = diffuseColor.rgb * matcapColor.rgb;",
+            `float landWeight = clamp(vColor.r, 0.0, 1.0);
+             vec3 roughClay = mix(texture2D(oceanMatcap, uv).rgb, texture2D(landMatcap, uv).rgb, landWeight);
+             vec3 outgoingLight = diffuseColor.rgb * roughClay * mix(oceanTint, landTint, landWeight) * vColor.g;`);
+        } else if (atlas) {
+          shader.uniforms.clayAO = { value: ao };
+          shader.vertexShader = "varying vec2 clayUV;\n" + shader.vertexShader;
+          shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\nclayUV = uv;");
+          shader.fragmentShader = "varying vec2 clayUV; uniform sampler2D clayAO;\n" + shader.fragmentShader;
+          shader.fragmentShader = shader.fragmentShader.replace("#include <opaque_fragment>", "outgoingLight *= mix(1.0, texture2D(clayAO, clayUV).r, .55);\n#include <opaque_fragment>");
         }
-      });
-      return clone;
+      };
+      clayCache.set(key, material);materials.push(material);return material;
     }
-    const tiles = ["F", "J", "A", "L", "E"].map((letter) =>
-      object("Tile_" + letter, true),
-    );
-    group.add(...tiles);
-    const tube = new TubeGeometry(threadCurve, 512, 1, 24, false);
-    const centers = new Float32Array(tube.attributes.position.count * 3);
-    for (let i = 0; i <= 512; i++) {
-      const center = threadCurve.getPointAt(i / 512);
-      for (let j = 0; j <= 24; j++) center.toArray(centers, (i * 25 + j) * 3);
+    root.traverse((object) => {
+      if (!(object instanceof Mesh) || object.name === "Thread" || object === backdropBase || object === backdropShadow) return;
+      object.frustumCulled = false;
+      if (object.name !== "Globe_Inner") object.layers.enable(1);
+      object.castShadow = object.name.startsWith("Tile_");
+      if (object.name === "Globe_Inner") {
+        const material = new MeshBasicMaterial({ color: "#F9F4EE" });
+        material.onBeforeCompile = (shader) => {
+          shader.uniforms.viewportHeight = uniforms.bufferHeight;
+          shader.uniforms.viewportWidth = uniforms.bufferWidth;
+          shader.fragmentShader = "uniform float viewportHeight; uniform float viewportWidth;\n" + shader.fragmentShader;
+          shader.fragmentShader = shader.fragmentShader.replace("#include <opaque_fragment>",
+            `float x = gl_FragCoord.x / viewportWidth;
+             float y = gl_FragCoord.y / viewportHeight + .48 * (x - .5) * (x - .5);
+             outgoingLight *= mix(.94, 1.0, clamp(y / .2, 0.0, 1.0));\n#include <opaque_fragment>`);
+        };
+        object.material = material;materials.push(material);
+      } else {
+        object.material = Array.isArray(object.material)
+          ? object.material.map((material) => clay(material, object.name))
+          : clay(object.material, object.name);
+      }
+    });
+    const thread = root.getObjectByName("Thread");
+    if (!(thread instanceof Mesh)) throw new Error("Journey Thread mesh missing");
+    const curve = createThreadCurve(data);
+    const segments = data.points.length - 1, radial = 12;
+    const tube = new TubeGeometry(curve, segments, 1, radial, false);
+    const centres = new Float32Array(tube.attributes.position.count * 3);
+    for (let i = 0; i <= segments; i++) {
+      const centre = curve.getPointAt(i / segments);
+      for (let j = 0; j <= radial; j++) centre.toArray(centres, (i * (radial + 1) + j) * 3);
     }
-    tube.setAttribute("threadCenter", new Float32BufferAttribute(centers, 3));
-    const threadMaterial = new MeshPhysicalMaterial({
-      // Physical extends Standard: an unlit vermilion base with a clearcoat highlight.
-      // Interior lighting must never turn the story's cord black.
-      color: "#000000",
-      emissive: "#D73626",
-      emissiveIntensity: 1,
-      envMapIntensity: 0,
-      clearcoat: 1,
-      clearcoatRoughness: 0.12,
-      roughness: 0.3,
-      metalness: 0,
-    });
-    const pixelRadius = { value: 3 },
-      viewportHeight = { value: 900 },
-      interior = { value: 0 },
-      progress = { value: 0 };
-    // Tube stays 6 CSS px (4 on phones) through the full camera dolly.
-    threadMaterial.onBeforeCompile = (shader) => {
-      shader.uniforms.interior = interior;
-      shader.uniforms.uProgress = progress;
-      shader.uniforms.threadPixelRadius = pixelRadius;
-      shader.uniforms.threadViewportHeight = viewportHeight;
-      shader.vertexShader =
-        "varying float threadT; attribute vec3 threadCenter; uniform float threadPixelRadius; uniform float threadViewportHeight;\n" +
-        shader.vertexShader;
-      shader.vertexShader = shader.vertexShader.replace(
-        "#include <begin_vertex>",
-        `threadT = uv.x; float viewDepth = abs((modelViewMatrix * vec4(threadCenter, 1.0)).z);
-        float radius = threadPixelRadius * 2.0 * viewDepth / (projectionMatrix[1][1] * threadViewportHeight);
-        vec3 transformed = threadCenter + (position - threadCenter) * radius;
-`,
-      );
+    tube.setAttribute("threadCenter", new Float32BufferAttribute(centres, 3));
+    const cord = new MeshPhysicalMaterial({ color: "#D73626", emissive: "#D73626", emissiveIntensity: .32,
+      roughness: .28, clearcoat: .1, clearcoatRoughness: .3, metalness: 0, envMapIntensity: 0 });
+    cord.onBeforeCompile = (shader) => {
+      shader.uniforms.threadStart = uniforms.start;shader.uniforms.threadEnd = uniforms.end;
+      shader.uniforms.threadRadius = uniforms.radius;shader.uniforms.viewportHeight = uniforms.height;
+      shader.vertexShader = "attribute vec3 threadCenter; varying float threadT; uniform float threadRadius; uniform float viewportHeight;\n" + shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>",
+        `threadT = uv.x;
+         float depth = -(modelViewMatrix * vec4(threadCenter, 1.0)).z;
+         float radius = max(.0000055, threadRadius * 2.0 * depth / (projectionMatrix[1][1] * viewportHeight));
+         vec3 transformed = threadCenter + (position - threadCenter) * radius;`);
+      shader.fragmentShader = "varying float threadT; uniform float threadStart; uniform float threadEnd;\n" + shader.fragmentShader;
+      shader.fragmentShader = shader.fragmentShader.replace("#include <clipping_planes_fragment>",
+        "#include <clipping_planes_fragment>\nif (threadEnd <= 0.0 || threadT < threadStart || threadT > threadEnd) discard;");
     };
-    const compileThread = threadMaterial.onBeforeCompile;
-    threadMaterial.onBeforeCompile = (shader, renderer) => {
-      compileThread(shader, renderer);
-      shader.fragmentShader =
-        "varying float threadT; uniform float interior; uniform float uProgress;\n" +
-        shader.fragmentShader;
-      // The surface crossing occludes the exterior strand, without changing its draw length.
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <clipping_planes_fragment>",
-        `#include <clipping_planes_fragment>\n if (uProgress <= 0.0 || threadT > uProgress || (interior > .5 && threadT < ${interiorStartT.toFixed(8)}) || (interior <= .5 && threadT > ${exteriorEndT.toFixed(8)})) discard;`,
-      );
-    };
-    const thread = new Mesh(tube, threadMaterial);
-    thread.frustumCulled = false;
-    group.add(thread);
-    const globe = new Group();
-    globe.add(object("Globe", true), object("Graticule"));
-    globe.position.copy(globeCenter);
-    const pin = object("Pin");
-    pin.position.copy(pinAnchor).sub(globeCenter);
-    globe.add(pin);
-    const plane = object("Plane", true);
-    const horizon = object("Horizon");
-    horizon.scale.setScalar(5);
-    horizon.position.set(7, -12, -10);
-    group.add(horizon);
-    const arrow = object("Arrow");
-    let arrowMesh: Mesh | undefined;
-    arrow.traverse((child) => {
-      if (child instanceof Mesh) arrowMesh = child;
-    });
-    if (!arrowMesh) throw new Error("Arrow kit mesh is missing");
-    const arrowParameters = new InstancedBufferAttribute(
-      new Float32Array(70),
-      1,
-    );
-    arrowMesh.geometry.setAttribute("journeyParameter", arrowParameters);
-    const arrowMaterial = clay.clone();
-    arrowMaterial.onBeforeCompile = (shader) => {
-      shader.vertexShader =
-        "attribute float journeyParameter; varying float arrowT;\n" +
-        shader.vertexShader;
-      shader.vertexShader = shader.vertexShader.replace(
-        "#include <begin_vertex>",
-        "#include <begin_vertex>\n arrowT = journeyParameter;",
-      );
-      shader.fragmentShader = "varying float arrowT;\n" + shader.fragmentShader;
-      // Riders on the exterior strand are occluded by the crossed globe surface.
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <clipping_planes_fragment>",
-        `#include <clipping_planes_fragment>\n if (arrowT < ${interiorStartT.toFixed(8)}) discard;`,
-      );
-    };
-    const swarm = new InstancedMesh(arrowMesh.geometry, arrowMaterial, 70);
-    swarm.frustumCulled = false;
-    group.add(globe, plane, swarm);
-    return {
-      globe,
-      horizon,
-      pin,
-      plane,
-      swarm,
-      arrowParameters,
-      instance: new Object3D(),
-      frame: new Quaternion(),
-      tangent: new Vector3(),
-      nextTangent: new Vector3(),
-      group,
-      tiles,
-      tileFrames: tiles.map(() => new Quaternion()),
-      tube,
-      clay,
-      threadMaterial,
-      pixelRadius,
-      viewportHeight,
-      interior,
-      progress,
-      time: 0,
-      idleWeight: 0,
-      position: new Vector3(),
-      target: new Vector3(),
-      pinView: new Vector3(),
-    };
-  }, [kit, matcap, ao]);
-
+    thread.geometry = tube;thread.material = cord;thread.frustumCulled = false;materials.push(cord);
+    const mixer = new AnimationMixer(root);
+    const action = mixer.clipAction(kit.animations[0]);
+    action.setLoop(LoopOnce, 1);action.clampWhenFinished = true;action.play();
+    const horizontal = Math.tan(camera.fov * Math.PI / 360) * (data.referenceSize[0] / data.referenceSize[1]);
+    return { root, camera, mixer, action, horizontal, uniforms, tube, materials, backdrop, backdropGeometry, sun, sunTarget, tile, lightDirection, offset, clayCache, matcaps: [matcap, outside, inside], tiles, shadowFit: false };
+  }, [kit, data, textures]);
+  const ready = useRef(false);
   useEffect(() => {
+    gl.shadowMap.type = VSMShadowMap;
+    set({ camera: scene.camera });
+    scene.camera.aspect = size.width / size.height;
+    scene.camera.fov = 2 * Math.atan(scene.horizontal / scene.camera.aspect) * 180 / Math.PI;
+    scene.camera.updateProjectionMatrix();
+    scene.uniforms.height.value = size.height;
+    scene.uniforms.width.value = size.width;
+    scene.uniforms.bufferHeight.value = size.height * gl.getPixelRatio();
+    scene.uniforms.bufferWidth.value = size.width * gl.getPixelRatio();
     const state = driver.current;
-    state.wake = () => {
-      clearTimeout(idleTimer.current);
-      if (state.inView) invalidate();
+    state.wake = () => { if (state.inView) invalidate(); };
+    invalidate();
+    return () => { state.wake = () => {}; };
+  }, [scene, size, set, invalidate, driver, gl]);
+  useEffect(() => {
+    const hero = gl.domElement.closest<HTMLElement>("#hero");
+    const measure = () => {
+      if (hero) hero.dataset.geometryAudit = JSON.stringify(measureJourney(scene.root, scene.camera, data, driver.current.p, size.width, size.height));
     };
-    state.wake();
-    return () => {
-      clearTimeout(idleTimer.current);
-      state.wake = () => {};
-    };
-  }, [driver, size, invalidate]);
+    hero?.addEventListener("hero:measure", measure);
+    return () => hero?.removeEventListener("hero:measure", measure);
+  }, [gl, scene, data, driver, size]);
   useEffect(() => {
     const canvas = gl.domElement;
-    const lost = (event: Event) => {
-      event.preventDefault();
-      onFailure();
-    };
+    const lost = (event: Event) => { event.preventDefault();onFailure("WebGL context lost"); };
     canvas.addEventListener("webglcontextlost", lost);
     return () => canvas.removeEventListener("webglcontextlost", lost);
   }, [gl, onFailure]);
-  useEffect(() => {
-    onReady();
-  }, [onReady]);
-  useEffect(
-    () => () => {
-      const geometries = new Set<import("three").BufferGeometry>();
-      const materials = new Set<import("three").Material>();
-      scene.group.traverse((object) => {
-        if (object instanceof Mesh || object instanceof LineSegments) {
-          geometries.add(object.geometry);
-          for (const material of Array.isArray(object.material)
-            ? object.material
-            : [object.material])
-            materials.add(material);
-        }
-      });
-      geometries.forEach((geometry) => geometry.dispose());
-      materials.forEach((material) => {
-        if (material instanceof MeshBasicMaterial) material.map?.dispose();
-        material.dispose();
-      });
-    },
-    [scene],
-  );
-
+  useEffect(() => () => {
+    scene.mixer.stopAllAction();scene.mixer.uncacheRoot(scene.root);
+    scene.backdropGeometry.dispose();scene.sun.shadow.dispose();
+    scene.tube.dispose();scene.materials.forEach((material) => material.dispose());
+  }, [scene]);
   useFrame((_, dt) => {
     const state = driver.current;
     if (!state.inView) return;
     state.p = dampProgress(state.p, state.targetP.current, dt);
-    if (Math.abs(state.p - state.targetP.current) < 1e-7)
-      state.p = state.targetP.current;
+    if (Math.abs(state.p - state.targetP.current) < 1e-7) state.p = state.targetP.current;
     const p = state.p;
-    const moving = Math.abs(state.targetP.current - p) >= 0.0005;
+    scene.action.paused = false;
+    scene.mixer.setTime(p * data.duration);
+    scene.root.updateMatrixWorld(true);
+    scene.backdrop.visible = p <= .20;
+    scene.backdrop.quaternion.copy(scene.camera.quaternion);
+    scene.offset.set(0, 0, -scene.tile.scale.x * .195).applyQuaternion(scene.camera.quaternion);
+    scene.backdrop.position.copy(scene.tile.position).add(scene.offset);
+    scene.sun.intensity = p < .20 ? 2 : p < .67 ? 2.2 : 3.2;
+    for (const material of scene.clayCache.values()) material.matcap = scene.matcaps[p < .20 ? 0 : p < .67 ? 1 : 2];
+    scene.sun.castShadow = p <= .20;
+    scene.sunTarget.position.copy(scene.tile.position);
+    scene.offset.copy(scene.lightDirection).applyQuaternion(scene.camera.quaternion).multiplyScalar(100);
+    scene.sun.position.copy(scene.tile.position).add(scene.offset);
+    scene.root.updateMatrixWorld(true);
+    if (p <= .20 && !scene.shadowFit) {
+      // Fit the shadow map to the authored tile group, avoiding coarse texels
+      // in the phone scene. This changes the receiver resolution, not its pose.
+      scene.sun.shadow.updateMatrices(scene.sun);
+      const bounds = new Box3();
+      for (const tile of scene.tiles) bounds.union(new Box3().setFromObject(tile));
+      const lightBounds = new Box3();
+      for (const x of [bounds.min.x, bounds.max.x]) for (const y of [bounds.min.y, bounds.max.y]) for (const z of [bounds.min.z, bounds.max.z])
+        lightBounds.expandByPoint(new Vector3(x,y,z).applyMatrix4(scene.sun.shadow.camera.matrixWorldInverse));
+      Object.assign(scene.sun.shadow.camera, {left:lightBounds.min.x - 1, right:lightBounds.max.x + 1, bottom:lightBounds.min.y - 1, top:lightBounds.max.y + 1});
+      scene.sun.shadow.camera.updateProjectionMatrix();scene.shadowFit = true;
+    }
+    scene.uniforms.start.value = sampleScalar(data.reveal.start, p);
+    scene.uniforms.end.value = sampleScalar(data.reveal.end, p);
+    scene.root.visible = state.targetP.current < 1;
     state.present(p, dt);
-    // Native scroll can reach the un-pin before the damped playhead catches up.
-    // Stop drawing there; the scroll listener wakes us again on reversal.
-    scene.group.visible = state.targetP.current < 1;
-    if (!scene.group.visible) {
-      shadowMoving.current = false;
-      clearTimeout(idleTimer.current);
-      if (p < 1) invalidate();
-      return;
-    }
-    scene.time += dt;
-    scene.idleWeight +=
-      ((moving || state.reviewStill ? 0 : 1) - scene.idleWeight) *
-      (1 - Math.exp(-dt * 12));
-    shadowMoving.current = moving && p < 0.64;
-    if (moving) invalidate();
-    else idleTimer.current = setTimeout(invalidate, 1000 / 30);
-    sampleCamera(p, scene.position, scene.target, size.width <= 600);
-    if (camera instanceof PerspectiveCamera) {
-      camera.setViewOffset(
-        size.width,
-        size.height,
-        (size.width > 600 ? -230 : 110) * range(p, 0.67, 0.72),
-        (size.width > 600 ? 110 : 200) * (1 - range(p, 0.2, 0.3)) -
-          (size.width > 600 ? 0 : 140) *
-            range(p, 0.2, 0.3) *
-            (1 - range(p, 0.45, 0.55)) -
-          (size.width <= 600 ? 140 : 70) * range(p, 0.67, 0.72) -
-          (size.width <= 600 ? 220 : 0) *
-            range(p, 0.45, 0.55) *
-            (1 - range(p, 0.65, 0.67)),
-        size.width,
-        size.height,
-      );
-    }
-    camera.position.copy(scene.position);
-    camera.lookAt(scene.target);
-    camera.updateMatrixWorld();
-    scene.pixelRadius.value = size.width <= 600 ? 2 : 3;
-    scene.viewportHeight.value = size.height;
-    scene.progress.value = p;
-    scene.interior.value = range(p, 0.64, 0.67);
-    scene.horizon.visible = p > 0.665;
-    scene.globe.visible = p > 0.2 && p < 0.67;
-    scene.globe.traverse((object) => {
-      if (
-        object instanceof Mesh &&
-        object.material instanceof MeshMatcapMaterial
-      ) {
-        object.material.transparent = true;
-        object.material.opacity = range(p, 0.2, 0.28);
-      }
-    });
-    // Pin and plane arrive together with the globe; no delayed one-shot entry.
-    scene.pin.scale.setScalar(1);
-    scene.plane.visible = p > 0.2;
-    const flightT = planeParameter(p);
-    sampleThread(flightT, p, scene.plane.position);
-    sampleFrame(flightT, scene.frame);
-    scene.plane.quaternion.copy(scene.frame);
-    threadCurve.getTangentAt(flightT, scene.tangent);
-    threadCurve.getTangentAt(clamp(flightT + 0.003), scene.nextTangent);
-    const curvature = scene.tangent.cross(scene.nextTangent).y;
-    scene.plane.rotateX(
-      Math.max(-Math.PI / 10, Math.min(Math.PI / 10, curvature * 12)),
-    );
-    scene.plane.position.y +=
-      Math.sin(scene.time * Math.PI * 0.8) * 0.02 * scene.idleWeight;
-    scene.plane.scale.setScalar(1);
-    scene.swarm.visible = p >= 0.665;
-    for (let i = 0; i < 70; i++) {
-      const t = clamp(flightT - 0.012 * i);
-      scene.arrowParameters.setX(i, t);
-      sampleThread(t, p, scene.instance.position);
-      sampleFrame(t, scene.instance.quaternion);
-      scene.instance.translateY(Math.sin(i * 2.4) * 0.08);
-      scene.instance.scale.setScalar(0.35 + 0.65 * (1 - i / 70));
-      scene.instance.updateMatrix();
-      scene.swarm.setMatrixAt(i, scene.instance.matrix);
-    }
-    scene.swarm.instanceMatrix.needsUpdate = true;
-    scene.arrowParameters.needsUpdate = true;
-    scene.tiles.forEach((tile, i) => {
-      const t = tileParameter(p, i);
-      sampleThread(t, p, tile.position);
-      sampleFrame(t, scene.frame);
-      scene.tileFrames[i].slerp(scene.frame, 1 - Math.exp((-dt * 60) / 6));
-      tile.quaternion.copy(scene.tileFrames[i]);
-      tile.rotateX(
-        Math.sin(i * 1.7 + scene.time * Math.PI * 0.8) *
-          0.02618 *
-          scene.idleWeight,
-      );
-      tile.scale.setScalar(tileClick(p, i));
-      tile.visible = p < 0.6;
-    });
-  });
-
-  return (
-    <>
-      <color attach="background" args={["#F9F4EE"]} />
-      <hemisphereLight args={["#ffffff", "#e7ddd3", 0.65]} />
-      <directionalLight position={[-4, 7, 8]} intensity={3} />
-      <JourneyContactShadows moving={shadowMoving} driver={driver} />
-      <primitive object={scene.group} />
-      <EffectComposer multisampling={0}>
-        <SMAA />
-      </EffectComposer>
-    </>
-  );
+    if (!ready.current) { ready.current = true;onReady(); }
+    if (Math.abs(state.p - state.targetP.current) > 1e-7) invalidate();
+  }, -1);
+  return <>
+    <color attach="background" args={["#FEFBF8"]} />
+    {/* Constant world radiance .45 integrates to pi * .45 irradiance. */}
+    <hemisphereLight args={["#ffffff", "#ffffff", Math.PI * .45]} />
+    <primitive object={scene.root} />
+    <JourneyContactShadows driver={driver} />
+  </>;
 }
 
 export default function ThreadCanvas(props: Props) {
-  const [matcap, ao] = useLoader(TextureLoader, [matcapUrl, aoUrl]);
-  return (
-    <Canvas
-      aria-hidden="true"
-      dpr={[1, 2]}
-      frameloop="demand"
-      camera={{ position: [0, 0, 12], fov: 45, near: 0.02, far: 90 }}
-      gl={{
-        antialias: true,
-        alpha: false,
-        powerPreference: "high-performance",
-        toneMapping: NoToneMapping,
-        outputColorSpace: SRGBColorSpace,
-      }}
-    >
-      <Scene {...props} matcap={matcap} ao={ao} />
-    </Canvas>
-  );
+  // Resolve assets before mounting Canvas: suspending a live Canvas disposes
+  // its context and can race the resumed scene's context-loss listener.
+  const variant = props.phone ? "390" : "1440";
+  const kit = useGLTF(`/models/red-thread-kit-${variant}.glb`, false, false,
+    (loader) => loader.setDRACOLoader(kitDecoder()));
+  const json = useLoader(FileLoader, `/models/journey-spline-${variant}.json`);
+  const data = useMemo(() => JSON.parse(json as string) as JourneyData, [json]);
+  const textures = useLoader(TextureLoader, [matcapUrl, oceanUrl, landUrl, aoUrl, outsideUrl, insideUrl]);
+  return <Canvas shadows aria-hidden="true" dpr={[1, 2]} frameloop="demand"
+    gl={{ logarithmicDepthBuffer: true, antialias: true, alpha: false, powerPreference: "high-performance", toneMapping: NoToneMapping, outputColorSpace: SRGBColorSpace }}>
+    <Scene {...props} kit={kit} data={data} textures={textures} />
+  </Canvas>;
 }

@@ -7,7 +7,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
   // shadcn primitives are generated vendor code and are linted upstream.
-  globalIgnores(['dist', 'src/components/ui/**']),
+  globalIgnores(['dist', 'src/components/ui/**', 'apps/offday/**']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

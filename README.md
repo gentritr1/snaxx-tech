@@ -98,3 +98,25 @@ src/
   lib/
     utils.ts         # cn() utility for class merging
 ```
+
+## Offday PTO app
+
+The standalone Next.js PTO product lives in [`apps/offday`](apps/offday/README.md).
+It includes company workspaces, employee invitations and sign-in, profiles,
+manager approvals, PTO balances, and a team calendar.
+
+```sh
+cd apps/offday
+npm ci
+npm run dev
+```
+
+Offday keeps its own package manifest, lockfile, tests, and build. The root
+commands and Vercel configuration continue to serve the existing Vite site.
+The root ESLint configuration excludes Offday because its React Refresh rules
+are specific to Vite; run Offday's typecheck and tests from its directory.
+
+Deploy Offday separately on a Node.js server with persistent SQLite storage.
+Do not use the root Vercel SPA rewrites for this app or deploy its database
+on an ephemeral serverless filesystem. See its README for deployment details
+and the remaining work before a commercial launch.

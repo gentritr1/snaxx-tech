@@ -49,6 +49,7 @@ export interface HeroClip {
 }
 
 export interface HeroConfig {
+  variant: 'almanac' | 'thread';
   name: string;
   roles: string[];
   intro: string;
@@ -65,6 +66,7 @@ export interface HeroConfig {
 }
 
 export const heroConfig: HeroConfig = {
+  variant: 'almanac',
   name: "SNAXX",
   roles: ["Apps, games & useful little things", "Independent by design"],
   intro: "We turn small ideas into apps, games, and satisfying little moments.",
@@ -109,7 +111,7 @@ export const aboutConfig: AboutConfig = {
   experienceValue: "",
   experienceLabel: "",
   stats: [
-    { value: "4", label: "Products in our world" },
+    { value: "3", label: "Apps in our world" },
     { value: "2", label: "Platforms — Android & web" },
     { value: "100%", label: "Indie & independent" },
   ],
@@ -383,4 +385,19 @@ export const footerConfig: FooterConfig = {
   newsletterPlaceholder: "",
   copyright: "© 2026 Snaxx Tech. All rights reserved.",
   credit: "Made with care, coffee & code.",
+};
+
+/** Query override is review-only; production rollout stays explicit. */
+export function isThreadHero() {
+  return import.meta.env.VITE_HERO_VARIANT === 'thread' || heroConfig.variant === 'thread' || (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('hero') === 'thread');
+}
+
+// Red Thread page composition. Almanac retains its original project list and copy.
+export const threadPageConfig = {
+  logo: 'SNAXX',
+  projectTitles: ['Arrows', 'Geo Guesser World 3D!', 'FJALË'],
+  description: 'Three different sparks, one shared obsession: make the next tap feel obvious, useful, or unexpectedly fun.',
+  footerDescription: 'An independent studio crafting apps and games with care.',
+  contactLabel: 'Get in touch',
+  supportLabel: 'Support',
 };

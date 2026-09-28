@@ -8,6 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        thread: { porcelain: '#F9F4EE', surface: '#FEFBF8', line: '#DCD6CF', ink: '#2A2D38', muted: '#5F636F', vermilion: '#D73626', warmgrey: '#8D8579' },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

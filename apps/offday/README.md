@@ -56,6 +56,10 @@ npm run build
 
 Integration tests start an isolated server on port 3100 and a unique SQLite database in the OS temporary directory. They cover invitation activation, sign-in/out, role enforcement, tenant isolation, CSRF origin validation, overlaps, weekday calculations, balances, approvals, and demo isolation. Temporary test databases can be removed after testing.
 
+The dedicated `Offday production checks` GitHub Actions job installs the app’s locked dependencies on Node.js 24, typechecks, builds, and runs the integration suite against `next start`. CI uses an isolated temporary database and disables Secure cookies only for its local HTTP test server. Normal production deployments retain Secure cookies. To run the same production-server check locally, use `npm run build && CI=true npm test`.
+
+Additional integration coverage verifies invitation replacement invalidates the original link while preserving its assigned role, coworkers cannot read private leave notes, employees can cancel their pending requests, and logout revokes previously copied session cookies.
+
 ## Before a paid launch
 
 - Email delivery, verified ownership, password reset, and optional company SSO.

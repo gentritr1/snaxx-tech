@@ -271,3 +271,163 @@ test("demo sessions have independent workspaces", async () => {
     await b.dispose();
   }
 });
+
+test("renewed invitations invalidate old links and preserve the assigned role", async () => {
+  const manager = await api.newContext({ baseURL: "http://localhost:3100" });
+  const invited = await api.newContext({ baseURL: "http://localhost:3100" });
+  try {
+    expect(
+      (
+        await post(manager, {
+          action: "register",
+          name: "Invite Owner",
+          email: "invite-owner@example.test",
+          password,
+          organization: "Invitation Studio",
+        })
+      ).ok(),
+    ).toBeTruthy();
+    const created = await post(manager, {
+      action: "addEmployee",
+      name: "New Manager",
+      email: "new-manager@example.test",
+      department: "People",
+      title: "HR Manager",
+      allowance: 20,
+      role: "manager",
+    });
+    expect(created.ok()).toBeTruthy();
+    const original = await created.json();
+    const employeeId = original.workspace.employees.find(
+      (person: { email: string }) =>
+        person.email === "new-manager@example.test",
+    ).id;
+    const renewed = await post(manager, { action: "renewInvite", employeeId });
+    expect(renewed.ok()).toBeTruthy();
+    const replacement = (await renewed.json()).invitation;
+    expect(replacement).not.toBe(original.invitation);
+    expect(
+      (
+        await post(invited, {
+          action: "acceptInvite",
+          token: original.invitation,
+          password,
+        })
+      ).status(),
+    ).toBe(400);
+    const activated = await post(invited, {
+      action: "acceptInvite",
+      token: replacement,
+      password,
+    });
+    expect(activated.ok()).toBeTruthy();
+    expect((await activated.json()).workspace.user.role).toBe("manager");
+    expect(
+      (await post(manager, { action: "renewInvite", employeeId })).status(),
+    ).toBe(400);
+  } finally {
+    await manager.dispose();
+    await invited.dispose();
+  }
+});
+
+test("coworker notes stay private and logout revokes a copied session token", async () => {
+  const manager = await api.newContext({ baseURL: "http://localhost:3100" });
+  const employee = await api.newContext({ baseURL: "http://localhost:3100" });
+  let copiedSession: APIRequestContext | undefined;
+  try {
+    const registered = await post(manager, {
+      action: "register",
+      name: "Privacy Owner",
+      email: "privacy-owner@example.test",
+      password,
+      organization: "Privacy Studio",
+    });
+    expect(registered.ok()).toBeTruthy();
+    const managerId = (await registered.json()).workspace.user.employeeId;
+    const invitation = await post(manager, {
+      action: "addEmployee",
+      name: "Private Employee",
+      email: "private-employee@example.test",
+      department: "Design",
+      title: "Designer",
+      allowance: 20,
+      role: "employee",
+    });
+    expect(invitation.ok()).toBeTruthy();
+    const activated = await post(employee, {
+      action: "acceptInvite",
+      token: (await invitation.json()).invitation,
+      password,
+    });
+    expect(activated.ok()).toBeTruthy();
+    const employeeId = (await activated.json()).workspace.user.employeeId;
+    const managerRequest = await post(manager, {
+      action: "request",
+      employeeId: managerId,
+      type: "Personal",
+      start: "2027-04-05",
+      end: "2027-04-05",
+      note: "Manager private note",
+    });
+    expect(managerRequest.ok()).toBeTruthy();
+    const ownRequest = await post(employee, {
+      action: "request",
+      employeeId,
+      type: "Vacation",
+      start: "2027-04-06",
+      end: "2027-04-06",
+      note: "Employee private note",
+    });
+    expect(ownRequest.ok()).toBeTruthy();
+    const employeeState = (await ownRequest.json()).workspace;
+    expect(
+      employeeState.requests.find(
+        (r: { employeeId: string }) => r.employeeId === managerId,
+      ).note,
+    ).toBe("");
+    const ownLeave = employeeState.requests.find(
+      (r: { employeeId: string }) => r.employeeId === employeeId,
+    );
+    expect(ownLeave.note).toBe("Employee private note");
+    const managerState = await (await manager.get("/api/workspace")).json();
+    expect(
+      managerState.requests.find((r: { id: string }) => r.id === ownLeave.id)
+        .note,
+    ).toBe("Employee private note");
+    const canceled = await post(employee, {
+      action: "cancel",
+      id: ownLeave.id,
+    });
+    expect(canceled.ok()).toBeTruthy();
+    expect(
+      (await canceled.json()).workspace.requests.some(
+        (r: { id: string }) => r.id === ownLeave.id,
+      ),
+    ).toBe(false);
+    copiedSession = await api.newContext({
+      baseURL: "http://localhost:3100",
+      storageState: await employee.storageState(),
+    });
+    expect(
+      (await (await copiedSession.get("/api/workspace")).json()).authenticated,
+    ).toBe(true);
+    expect((await post(employee, { action: "logout" })).ok()).toBeTruthy();
+    expect(
+      (await (await copiedSession.get("/api/workspace")).json()).authenticated,
+    ).toBe(false);
+    expect(
+      (
+        await post(copiedSession, {
+          action: "profile",
+          name: "Replay",
+          title: "Replay",
+        })
+      ).status(),
+    ).toBe(401);
+  } finally {
+    await manager.dispose();
+    await employee.dispose();
+    await copiedSession?.dispose();
+  }
+});

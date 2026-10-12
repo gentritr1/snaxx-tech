@@ -1,5 +1,5 @@
-import { Suspense, useEffect, useMemo, useState, type RefObject } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { PerformanceMonitor, Preload } from '@react-three/drei';
 import { ACESFilmicToneMapping } from 'three';
 import { QUALITY, detectTier, prefersReducedMotion, webglAvailable } from './quality';
@@ -13,6 +13,12 @@ import { SoftwareHolo } from './scene/SoftwareHolo';
 import { Portal } from './scene/Portal';
 import { GamesWorld } from './scene/GamesWorld';
 import { Effects } from './scene/Effects';
+
+/** Reports rendered frames so the host can tell whether the stage is alive. */
+function FrameProbe({ onFrame }: { onFrame: () => void }) {
+  useFrame(onFrame);
+  return null;
+}
 
 interface ExperienceProps {
   /** Element whose pointer events drive the 3D raycaster (the page root). */
@@ -42,6 +48,27 @@ export default function Experience({ eventSource, onReady }: ExperienceProps) {
   useEffect(() => {
     if (lost) onReady();
   }, [lost, onReady]);
+
+  // Some embedded viewports report a zero-size container until a resize
+  // event arrives, which leaves the canvas unmeasured and the frameloop
+  // idle. If nothing has rendered shortly after mount, ask for a re-measure.
+  const frames = useRef(0);
+  const markFrame = useCallback(() => {
+    frames.current += 1;
+  }, []);
+  useEffect(() => {
+    if (lost) return;
+    let attempts = 0;
+    const id = window.setInterval(() => {
+      if (frames.current > 0 || attempts >= 4) {
+        window.clearInterval(id);
+        return;
+      }
+      attempts += 1;
+      window.dispatchEvent(new Event('resize'));
+    }, 1200);
+    return () => window.clearInterval(id);
+  }, [lost]);
 
   if (lost) {
     return <div className="experience-poster" aria-hidden="true" />;
@@ -75,6 +102,7 @@ export default function Experience({ eventSource, onReady }: ExperienceProps) {
           onIncline={() => setDpr((d) => Math.min(quality.dpr[1], d + 0.25))}
           onFallback={() => setDpr(quality.dpr[0])}
         />
+        <FrameProbe onFrame={markFrame} />
         <Suspense fallback={null}>
           <CameraRig />
           <Atmosphere />

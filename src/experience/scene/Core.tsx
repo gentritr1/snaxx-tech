@@ -419,8 +419,8 @@ function Plates({ count }: { count: number }) {
       metalness: 0.05,
       roughness: 0.3,
       clearcoat: 0.7,
-      clearcoatRoughness: 0.12,
-      envMapIntensity: 0.75,
+      clearcoatRoughness: 0.14,
+      envMapIntensity: 0.55,
     });
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uGlowColor = { value: EMBER };
@@ -430,7 +430,7 @@ function Plates({ count }: { count: number }) {
       );
       shader.fragmentShader = `varying float vGlow;\nuniform vec3 uGlowColor;\n${shader.fragmentShader}`.replace(
         '#include <emissivemap_fragment>',
-        '#include <emissivemap_fragment>\ntotalEmissiveRadiance += uGlowColor * vGlow * 2.2;',
+        '#include <emissivemap_fragment>\ntotalEmissiveRadiance += uGlowColor * vGlow * 1.6;',
       );
     };
     mat.customProgramCacheKey = () => 'plates-glow';

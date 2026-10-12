@@ -1,43 +1,56 @@
 ---
 name: Snaxx Tech
-description: A cinematic, playful showcase for an independent apps and games studio.
+description: A cinematic, real-time 3D brand experience for an independent software and games studio.
 colors:
-  ink: "#131313"
-  ink-soft: "#1D1D1D"
-  canvas: "#FFFFFF"
-  surface-muted: "#EAEAEA"
-  border-subtle: "#EFEFF2"
-  electric-blue: "#0082F3"
-  focus-blue: "#4D65FF"
-  arrows-blue: "#0082F3"
+  void: "#07080B"
+  graphite: "#111318"
+  steel: "#1B1E26"
+  steel-light: "#2A2E38"
+  mist: "#9AA1AE"
+  silver: "#E6E8EE"
+  white: "#FFFFFF"
+  ember: "#F2B35B"
+  ember-soft: "#F7CF8F"
+  paper: "#F5F4F0"
+  paper-deep: "#ECEAE4"
+  ink: "#0E0F12"
+  ink-soft: "#4E535E"
+  arrows-blue: "#2F8CFF"
   block-destroy-orange: "#FF7A29"
   fjale-gold: "#D08700"
+  geo-teal: "#14B8A6"
+  offday-mint: "#58D6A6"
 typography:
   display:
     fontFamily: "Geist, Arial, sans-serif"
-    fontSize: "clamp(3rem, 10vw, 6rem)"
-    fontWeight: 900
-    lineHeight: 0.85
-    letterSpacing: "-0.04em"
+    fontSize: "clamp(2.75rem, 7.2vw, 7rem)"
+    fontWeight: 500
+    lineHeight: 0.94
+    letterSpacing: "-0.045em"
   headline:
     fontFamily: "Geist, Arial, sans-serif"
-    fontSize: "clamp(2.5rem, 4rem, 4rem)"
-    fontWeight: 600
+    fontSize: "clamp(2rem, 4.4vw, 4.25rem)"
+    fontWeight: 500
     lineHeight: 1
     letterSpacing: "-0.04em"
+  title:
+    fontFamily: "Geist, Arial, sans-serif"
+    fontSize: "clamp(1.5rem, 2.4vw, 2.25rem)"
+    fontWeight: 500
+    lineHeight: 1.1
+    letterSpacing: "-0.03em"
   body:
     fontFamily: "Geist, Arial, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
-    lineHeight: 1.5
+    lineHeight: 1.55
   label:
     fontFamily: "GeistMono, Courier New, monospace"
-    fontSize: "0.75rem"
+    fontSize: "0.6875rem"
     fontWeight: 500
     lineHeight: 1.5
-    letterSpacing: "0.1em"
+    letterSpacing: "0.16em"
 rounded:
-  xs: "2px"
   sm: "4px"
   md: "6px"
   lg: "8px"
@@ -49,21 +62,27 @@ spacing:
   md: "16px"
   lg: "24px"
   xl: "32px"
-  section: "clamp(4rem, 8vw, 7.5rem)"
+  chapter: "100svh"
 components:
   button-primary:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.canvas}"
-    rounded: "{rounded.lg}"
-    padding: "12px 20px"
-  button-secondary:
-    backgroundColor: "{colors.canvas}"
+    backgroundColor: "{colors.silver}"
     textColor: "{colors.ink}"
     rounded: "{rounded.lg}"
     padding: "12px 20px"
-  chip-app:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink-soft}"
+  button-outline:
+    backgroundColor: "transparent"
+    textColor: "{colors.silver}"
+    border: "1px solid rgb(255 255 255 / 0.25)"
+    rounded: "{rounded.lg}"
+    padding: "12px 20px"
+  glass-panel:
+    backgroundColor: "rgb(255 255 255 / 0.05)"
+    border: "1px solid rgb(255 255 255 / 0.08)"
+    backdropFilter: "blur(14px) saturate(1.2)"
+    rounded: "{rounded.xl}"
+  chip-product:
+    backgroundColor: "transparent"
+    textColor: "{colors.mist}"
     typography: "{typography.label}"
     rounded: "{rounded.pill}"
     padding: "6px 12px"
@@ -73,132 +92,172 @@ components:
 
 ## Overview
 
-**Creative North Star: "The Kinetic Playroom"**
+**Creative North Star: "Precision Engine"**
 
-Snaxx Tech combines a dark, cinematic studio atmosphere with bright product-specific signals and precise, responsive interaction. The experience should feel like opening the door to a small team actively experimenting: polished enough to trust, lively enough to remember, and always centered on real things the studio has made.
+Snaxx Tech presents itself as an advanced, quietly playful machine. The
+website is one continuous, real-time 3D film: a levitating mechanical core
+awakens, opens to reveal its internal architecture, re-forms into a frame
+around the studio's software, becomes a portal, and gives way to a world of
+game exhibits. Every chapter is a cinematic scene; every transition is part
+of the same directed sequence.
 
-The system rejects stiff corporate seriousness, generic agency-template or repetitive card-grid AI styling, childish gimmicks, and motion overload. Playfulness comes from composition, product imagery, copy, and purposeful behavior rather than decorative clutter.
+The register is luxury technology: Apple reveal, AAA presentation,
+architectural visualisation. Luxury comes from restraint. Deep darks, real
+metal and glass, one accent light per scene, generous space and exact type.
+The playfulness the studio is known for lives in the products themselves
+(the paper dart, the igniting block row, the dotted globe, the flipping
+letter tiles) and in the copy, never in decoration.
 
-**Key Characteristics:**
+**Key characteristics**
 
-- Cinematic dark-to-light pacing anchored by real product assets.
-- Oversized Geist display type paired with compact Geist Mono labels.
-- Product accents used as orientation signals, not generic decoration.
-- Square and moderately rounded geometry, with full pills reserved for chips.
-- Motion that reveals relationships and responds to input while preserving a reduced-motion path.
+- A single fixed WebGL stage behind the page; the DOM carries every word.
+- Scroll is the camera: chapters are tall sections with sticky stages, and
+  the scene state is scrubbed by one scroll-bound timeline.
+- Three signature moments: the Awakening (load), the Transformation (plates
+  reorganise into a frame around holographic interfaces) and Enter the
+  Digital World (flight through a portal into the games).
+- Product accents stay attached to their products; ember is the studio's
+  only accent and is used sparingly.
+- Reduced motion is a first-class path: one still composition per chapter.
 
 ## Colors
 
-The palette is nearly monochrome at the studio level, allowing electric blue, Block Destroy orange, and FJALË gold to announce product identity.
+The palette is near-monochrome: void, graphite and steel surfaces, silver
+and mist text, with ember (derived from the wordmark's bitten-cookie gold)
+as the energy of the core. The legal documents flip to a light reading
+surface (paper and ink).
 
 ### Primary
 
-- **Studio Ink:** The default text, navigation, button, and dark-surface anchor.
-- **Clean Canvas:** The reading surface for long copy and product information.
+- **Void:** Page and scene background; the stage everything else sits on.
+- **Silver:** Primary text on dark and the primary button fill.
 
 ### Secondary
 
-- **Electric Blue:** The studio's technical spark and Arrows identifier.
-- **Block Destroy Orange:** A warm product-specific accent for Block Destroy.
+- **Ember:** Core energy, active navigation, focus rings on dark, one
+  highlight per section. Never a background fill for text blocks.
+- **Mist:** Secondary text, labels, metadata.
 
-### Tertiary
+### Product signals
 
-- **FJALË Gold:** A restrained identifier for the word game and its warm artwork.
-- **Focus Blue:** The shared accessible focus indicator; it must remain visible on light and dark contexts.
+- **Arrows Blue**, **Block Destroy Orange**, **FJALË Gold**, **Geo Teal**,
+  **Offday Mint**: each identifies its product, in the DOM card ring and dot
+  and in the 3D exhibit light.
 
 ### Neutral
 
-- **Soft Ink:** Secondary dark surfaces and high-emphasis muted text.
-- **Muted Surface:** Quiet section bands and restrained hover feedback.
-- **Subtle Border:** Dividers and structural boundaries without artificial depth.
+- **Graphite / Steel:** Raised surfaces, hairlines, panel fills.
+- **Paper / Ink:** The reading surface for privacy, terms and support.
 
-### Named Rules
+### Named rules
 
-**The Product Signal Rule.** Use a product accent to identify its product, not as an interchangeable decoration across unrelated sections.
+**The Product Signal Rule.** A product accent identifies that product and
+nothing else.
+
+**The One Light Rule.** Each scene has one dominant accent light. Bloom is
+reserved for emissive energy (the heart, filaments, moving plates, the
+portal), never for metal or text.
 
 ## Typography
 
-**Display Font:** Geist (with Arial and sans-serif fallback)  
-**Body Font:** Geist (with Arial and sans-serif fallback)  
-**Label/Mono Font:** GeistMono (with Courier New and monospace fallback)
+**Display and body:** Geist (self-hosted 400 and 500).
+**Label:** Geist Mono 500, tracked uppercase.
 
-**Character:** Geist provides clean, contemporary shapes that let product imagery and motion lead. Geist Mono adds a compact maker-studio cadence to short metadata, never to long reading text.
+Geist at weight 500 with tight negative tracking gives the display type an
+engineered, Apple-grade calm. Weight 900 and serif display faces are retired.
 
 ### Hierarchy
 
-- **Display** (900, fluid up to 6rem, 0.85 line-height): Hero naming and rare signature moments only.
-- **Headline** (600, fluid up to 4rem, 1 line-height): Major section and legal-document titles.
-- **Title** (500–600, 1.25–2.5rem, 1.1–1.3 line-height): Product and content-section headings.
-- **Body** (400, 1rem, 1.5–1.75 line-height): Explanations and legal copy, capped near 70 characters per line.
-- **Label** (500, 0.75rem, tracked uppercase): Short metadata, navigation cues, and status labels only.
+- **Display** (500, fluid to 7rem, 0.94 line-height): hero naming, the
+  portal line, nothing else.
+- **Headline** (500, fluid to 4.25rem): chapter titles and legal document
+  titles.
+- **Title** (500, 1.5–2.25rem): product and game names, principle headings.
+- **Body** (400, 1rem, 1.55): copy, capped near 65–70 characters.
+- **Lead** (400, 1.06–1.25rem, mist): chapter introductions.
+- **Label** (mono 500, 0.6875rem, 0.16em): chapter numbers, status,
+  readouts, navigation counters.
 
-### Named Rules
+### Named rules
 
-**The Readable Document Rule.** Legal and support copy uses body type with generous leading and a 65–75ch measure; display behavior never competes with comprehension.
+**The Chapter Index Rule.** Every chapter opens with an ember index, a
+hairline and a label (`03 — Software`). Nothing else uses that pattern.
+
+**The Readable Document Rule.** Legal and support copy uses body type on
+paper with a 65–75ch measure; the 3D stage never loads on those routes.
 
 ## Elevation
 
-The system is flat by default. Depth is created through full-bleed photography, tonal layering, sticky positioning, borders, and limited backdrop blur. The only established shadow is a compact `0 1px 2px rgb(0 0 0 / 0.05)` navigation lift; broad decorative shadows do not belong.
+Depth is rendered, not faked. Surfaces are flat; the only layered element
+is the glass panel (8–12% white fill, 1px hairline, 14px blur), used for
+cards that sit over the scene so copy stays legible against bloom. No drop
+shadows beyond the glass panel's own long, dark falloff.
 
-### Shadow Vocabulary
+### Named rules
 
-- **Navigation Lift** (`0 1px 2px rgb(0 0 0 / 0.05)`): Used only when navigation separates from scrolled content.
+**The Glass Rule.** Glass exists only where text sits over the 3D scene.
+It is never decorative and never stacked.
 
-### Named Rules
+## Motion
 
-**The Flat-at-Rest Rule.** Surfaces remain flat until hierarchy or interactive state requires separation.
+- **Scroll choreography:** one GSAP timeline scrubbed across the page with
+  0.9s smoothing. Camera keyframes use `power2.inOut`; linear only for
+  tracking shots.
+- **Awakening:** 3.4s power-up on load; copy enters in a 150–1100ms stagger.
+- **Interaction:** spring-damped pointer parallax on the camera, hover glow
+  and lift on 3D exhibits mirrored to their DOM cards, magnetic contact
+  button.
+- **UI easing:** `ease-out-quart` 200–350ms for state changes.
+- **Reduced motion:** no camera flight; each chapter shows a still. Copy
+  is always visible. Loops stop.
 
 ## Components
 
 ### Buttons
 
-- **Shape:** Compact rounded rectangle using the 8px large radius; pill shapes are reserved for chips.
-- **Primary:** Studio Ink with white text, medium weight, and 12px × 20px padding.
-- **Hover / Focus:** Text, arrow, or background movement follows the established 200–350ms ease-out curves; `:focus-visible` uses Focus Blue and never relies on motion alone.
-- **Secondary / Ghost:** White or transparent surfaces with a clear full border; never pair a wide soft shadow with a 1px decorative border.
+- **Primary:** Silver fill, ink text, 8px radius, 12×20 padding, label
+  rolls on hover.
+- **Outline:** 1px 25% white border, silver text; hover to 70%.
+- **Outline (paper):** 1px ink border, ink text; hover fills ink.
+- **Focus:** 2px ember ring on dark, 2px blue ring on paper.
+
+### Product cards
+
+Glass panel, product dot, mono status, title, category, description and
+actions. The ring takes the product accent on hover, focus and when the 3D
+exhibit is hovered.
 
 ### Chips
 
-- **Style:** White pill, subtle full border, mono label, and one small product-color marker.
-- **State:** Chips identify context; they are not presented as filters unless they actually change content.
-
-### Cards / Containers
-
-- **Corner Style:** Square imagery or restrained 8–12px rounding.
-- **Background:** Clean Canvas, Studio Ink, or a product-led image.
-- **Shadow Strategy:** Flat by default; rely on contrast and composition.
-- **Border:** Subtle Border when separation is necessary.
-- **Internal Padding:** 16–32px, scaling with the content hierarchy.
-
-### Inputs / Fields
-
-- **Style:** White-on-dark or dark-on-light, 8px radius, clear label, and full border.
-- **Focus:** Visible Focus Blue outline or border shift with no layout movement.
-- **Error / Disabled:** Use explicit copy and state styling; never communicate status by opacity or color alone.
+Mono label in a hairline pill. Chips identify context, never filter.
 
 ### Navigation
 
-Navigation is transparent over the cinematic hero and becomes a near-opaque white bar after scrolling. Links use readable Geist body type, visible hover/focus feedback, and a full-screen mobile menu with a predictable close control and preserved browser navigation.
+Transparent over the hero; glass-strong after 40px. Links in mist with an
+ember underline for the active chapter; a mono chapter counter; a chapter
+rail on the right (desktop) with one hairline per chapter.
 
-### Legal Document
+### Legal document
 
-Legal pages use a sticky studio bar, a muted document header, app-specific chip, sibling-document links, desktop table of contents, and a narrow reading column. Page and section headings remain semantic, anchor targets clear the sticky header, and the footer exposes every app-specific legal URL.
+Light reading surface, sticky paper bar, mono app chip with the product
+dot, headline title, sibling-document buttons, narrow reading column,
+mini footer with every published legal URL.
 
 ## Do's and Don'ts
 
-### Do:
+### Do
 
-- **Do** use real Arrows, Block Destroy, and FJALË assets as the primary source of personality.
-- **Do** keep product accents attached to their named product.
-- **Do** keep legal and support copy on Clean Canvas with a readable 65–75ch measure.
-- **Do** provide visible keyboard focus, 44px touch targets, and reduced-motion alternatives.
-- **Do** use the established ease-out curves and transform/opacity-based motion for interactive feedback.
+- **Do** let the 3D scene carry the identity; keep the DOM quiet around it.
+- **Do** keep product accents on their products.
+- **Do** keep copy on glass or a scrim when it sits over bright scene areas.
+- **Do** provide 44px targets, visible focus and the reduced-motion path.
+- **Do** keep every legal URL unchanged: Play Console depends on them.
 
-### Don't:
+### Don't
 
-- **Don't** make the site feel like stiff corporate seriousness.
-- **Don't** introduce generic agency-template or repetitive card-grid AI styling.
-- **Don't** use childish gimmicks or motion overload that blocks content.
-- **Don't** use gradient text, decorative glassmorphism, oversized corner radii, or colored side-stripe accents.
-- **Don't** repeat tiny tracked uppercase eyebrows as default scaffolding for every section.
-- **Don't** replace product imagery with abstract placeholder panels or hand-drawn sketch SVGs.
+- **Don't** add neon, random particle backgrounds or spinning props without
+  narrative purpose.
+- **Don't** bloom metal, text or UI panels.
+- **Don't** stack glass or use gradient text.
+- **Don't** bring back the serif display face or the paper-illustration art.
+- **Don't** put copy only in the canvas; the DOM is the source of truth.

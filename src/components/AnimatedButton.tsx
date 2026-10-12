@@ -1,18 +1,20 @@
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
 
 interface AnimatedButtonProps {
   children: ReactNode;
-  onClick?: () => void;
+  onClick?: (event: MouseEvent<HTMLElement>) => void;
   href?: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'outline-white';
+  variant?: 'primary' | 'secondary' | 'outline' | 'outline-dark';
   size?: 'sm' | 'md' | 'lg';
   showIcon?: boolean;
   className?: string;
   style?: CSSProperties;
+  external?: boolean;
 }
 
+/** Studio button: the label rolls on hover, the arrow nudges. */
 export function AnimatedButton({
   children,
   onClick,
@@ -22,50 +24,43 @@ export function AnimatedButton({
   showIcon = false,
   className,
   style,
+  external,
 }: AnimatedButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const baseStyles = cn(
-    'relative overflow-hidden font-geist-mono inline-flex items-center justify-center gap-2',
-    'transition-colors duration-300 ease-out-quad',
+    'pressable relative inline-flex min-h-11 items-center justify-center gap-2 overflow-hidden rounded-lg font-geist text-sm font-medium tracking-[-0.01em]',
+    'transition-[background-color,border-color,color,box-shadow] duration-300 ease-out-quad focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember focus-visible:ring-offset-2 focus-visible:ring-offset-void',
     {
-      'bg-almanac-ink-strong text-almanac-paper hover:bg-almanac-ink': variant === 'primary',
-      'bg-almanac-paper-card text-almanac-ink border border-almanac-ink-faint hover:border-almanac-ink': variant === 'secondary',
-      'bg-transparent text-almanac-ink border border-almanac-ink hover:bg-almanac-ink-strong hover:text-almanac-paper': variant === 'outline',
-      'bg-transparent text-almanac-paper border border-almanac-paper/60 hover:bg-almanac-paper hover:text-almanac-ink-strong': variant === 'outline-white',
+      'bg-silver text-ink hover:bg-white': variant === 'primary',
+      'glass text-silver hover:border-white/25': variant === 'secondary',
+      'border border-white/25 bg-transparent text-silver hover:border-white/70': variant === 'outline',
+      'border border-ink/40 bg-transparent text-ink hover:bg-ink hover:text-paper focus-visible:ring-[#2F6BFF] focus-visible:ring-offset-paper':
+        variant === 'outline-dark',
       'px-4 py-2 text-xs': size === 'sm',
-      'px-6 py-3 text-sm': size === 'md',
-      'px-8 py-4 text-base': size === 'lg',
+      'px-5 py-3': size === 'md',
+      'px-7 py-4 text-base': size === 'lg',
     },
-    className
+    className,
   );
 
   const content = (
     <>
-      <span className="relative overflow-hidden h-5 flex items-center">
-        <span
-          className={cn(
-            'block transition-transform duration-350 ease-out-quad',
-            isHovered ? '-translate-y-[150%]' : 'translate-y-0'
-          )}
-        >
+      <span className="relative flex h-5 items-center overflow-hidden">
+        <span className={cn('block transition-transform duration-350 ease-out-quad', isHovered ? '-translate-y-[150%]' : 'translate-y-0')}>
           {children}
         </span>
         <span
-          className={cn(
-            'absolute inset-0 flex items-center transition-transform duration-350 ease-out-quad',
-            isHovered ? 'translate-y-0' : 'translate-y-[150%]'
-          )}
+          aria-hidden="true"
+          className={cn('absolute inset-0 flex items-center transition-transform duration-350 ease-out-quad', isHovered ? 'translate-y-0' : 'translate-y-[150%]')}
         >
           {children}
         </span>
       </span>
       {showIcon && (
         <ArrowRight
-          className={cn(
-            'w-4 h-4 transition-transform duration-300 ease-out-quad',
-            isHovered ? 'translate-x-1' : 'translate-x-0'
-          )}
+          aria-hidden="true"
+          className={cn('h-4 w-4 transition-transform duration-300 ease-out-quad', isHovered ? 'translate-x-1' : 'translate-x-0')}
         />
       )}
     </>
@@ -78,6 +73,8 @@ export function AnimatedButton({
         className={baseStyles}
         style={style}
         onClick={onClick}
+        target={external ? '_blank' : undefined}
+        rel={external ? 'noopener noreferrer' : undefined}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -88,6 +85,7 @@ export function AnimatedButton({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       className={baseStyles}
       style={style}

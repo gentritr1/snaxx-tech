@@ -41,48 +41,43 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        exvia: {
-          black: '#131313',
-          white: '#FFFFFF',
-          'base-black': '#1D1D1D',
-          subtle: '#EAEAEA',
-          border: '#EFEFF2',
-          blue: '#0082F3',
-          focus: '#4D65FF',
+        /* Precision Engine brand tokens — see DESIGN.md.
+           Text-safe on void: silver (15.6:1), mist (7.1:1), ember (10.2:1).
+           Text-safe on paper: ink (18.4:1), ink-soft (7.4:1). */
+        void: '#07080B',
+        graphite: '#111318',
+        steel: '#1B1E26',
+        'steel-light': '#2A2E38',
+        mist: '#9AA1AE',
+        silver: '#E6E8EE',
+        ember: {
+          DEFAULT: '#F2B35B',
+          soft: '#F7CF8F',
+          deep: '#C9842B',
         },
-        /* Almanac theme — sampled from the hero illustration.
-           Text-safe on paper: ink (11.4:1), ink-strong (14.1:1),
-           ink-soft (5.1:1), olive (5.7:1), blue (4.4:1 — large text/focus
-           only). rust and ink-mid are DECORATIVE ONLY (fail 4.5:1). */
-        almanac: {
-          paper: '#F4EBD7',
-          'paper-deep': '#EADDC0',
-          'paper-card': '#F8F1E1',
-          ink: '#3C2B19',
-          'ink-strong': '#291B0D',
-          'ink-soft': '#75603F',
-          'ink-mid': '#8C714F',
-          'ink-faint': '#C8B58F',
-          blue: '#4D7094',
-          rust: '#BD9161',
-          olive: '#6D5844',
-          gold: '#C9A86A',
+        paper: {
+          DEFAULT: '#F5F4F0',
+          deep: '#ECEAE4',
+          card: '#FFFFFF',
+        },
+        ink: {
+          DEFAULT: '#0E0F12',
+          soft: '#4E535E',
+          faint: '#C9CCD3',
+        },
+        product: {
+          arrows: '#2F8CFF',
+          block: '#FF7A29',
+          fjale: '#D08700',
+          geo: '#14B8A6',
+          offday: '#58D6A6',
+          lab: '#F2B35B',
         },
       },
       fontFamily: {
         geist: ['Geist', 'Arial', 'sans-serif'],
         'geist-mono': ['GeistMono', 'Courier New', 'monospace'],
-        display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
-      },
-      fontSize: {
-        'h1': ['clamp(3rem, 21vw, 21vw)', { lineHeight: '1', letterSpacing: '-0.04em' }],
-        'h2': ['4rem', { lineHeight: '1', letterSpacing: '-0.04em' }],
-        'h3': ['2.5rem', { lineHeight: '1.2', letterSpacing: '-0.04em' }],
-        'h4': ['2.5rem', { lineHeight: '1.1' }],
-        'h5': ['1.5rem', { lineHeight: '1.2' }],
-        'h6': ['1.25rem', { lineHeight: '1.3' }],
-        'small': ['0.875rem', { lineHeight: '1.5' }],
-        'xs': ['0.75rem', { lineHeight: '1.5' }],
+        display: ['Geist', 'Arial', 'sans-serif'],
       },
       spacing: {
         '18': '4.5rem',
@@ -98,6 +93,7 @@ module.exports = {
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        glass: "0 0 0 1px rgb(255 255 255 / 0.06) inset, 0 24px 60px -30px rgb(0 0 0 / 0.8)",
       },
       keyframes: {
         "accordion-down": {

@@ -2,10 +2,16 @@
    inside useFrame on purpose; they never enter React state. */
 /* eslint-disable react-hooks/immutability */
 import { useLayoutEffect, useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { Color, Group, InstancedMesh, Matrix4, MeshPhysicalMaterial, Quaternion, Vector3 } from 'three';
 import { damp3 } from 'maath/easing';
 import { mulberry32, sceneState } from '../sceneState';
+
+function smoothstep(edge0: number, edge1: number, dx: number, dy: number, dz: number) {
+  const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  const t = Math.min(1, Math.max(0, (d - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
 
 interface Shard {
   radius: number;
@@ -17,7 +23,7 @@ interface Shard {
   spin: Vector3;
 }
 
-const SPRINKLES = ['#F2B35B', '#2F8CFF', '#FF7A29', '#14B8A6', '#58D6A6', '#F6ECDC', '#3D2416', '#E85D75'];
+const SPRINKLES = ['#F2B35B', '#2F8CFF', '#FF7A29', '#14B8A6', '#58D6A6', '#E85D75', '#3D2416', '#7C4DFF'];
 
 /**
  * Floating sprinkles that orbit whatever the camera is looking at.
@@ -27,6 +33,7 @@ const SPRINKLES = ['#F2B35B', '#2F8CFF', '#FF7A29', '#14B8A6', '#58D6A6', '#F6EC
 export function Fragments({ count }: { count: number }) {
   const mesh = useRef<InstancedMesh>(null);
   const group = useRef<Group>(null);
+  const camera = useThree((st) => st.camera);
   const shards = useMemo<Shard[]>(() => {
     const rnd = mulberry32(99);
     return Array.from({ length: count }, () => ({
@@ -82,7 +89,10 @@ export function Fragments({ count }: { count: number }) {
       p.y += Math.sin(a) * sh.radius * Math.sin(sh.tilt);
       e.set(sh.spin.x * t, sh.spin.y * t, sh.spin.z * t);
       q.setFromEuler(new EulerLike(e.x, e.y, e.z));
-      scratch.s.set(sh.scale * 0.55, sh.scale * (0.8 + s.energy * 0.2), sh.scale * 0.55);
+      // Shrink sprinkles that drift too close to the lens.
+      const near = smoothstep(0.8, 3.2, p.x + g.position.x - camera.position.x, p.y + g.position.y - camera.position.y, p.z + g.position.z - camera.position.z);
+      const sc = sh.scale * near;
+      scratch.s.set(sc * 0.55, sc * (0.8 + s.energy * 0.2), sc * 0.55);
       m.compose(p, q, scratch.s);
       inst.setMatrixAt(i, m);
     }

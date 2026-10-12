@@ -30,45 +30,45 @@
 @layer base {
   :root {
     /* Confectionery Engine — brand tokens (mirrored in tailwind.config.js) */
-    --void: #0A0705;
-    --graphite: #15100B;
-    --steel: #241B13;
-    --steel-light: #362A1F;
-    --mist: #B3A48F;
-    --silver: #F1E7D8;
+    --void: #F7F0E4;
+    --graphite: #EFE5D5;
+    --steel: #E2D4C0;
+    --steel-light: #D3C1A8;
+    --mist: #7A6753;
+    --silver: #2B1D12;
     --cocoa: #3D2416;
     --caramel: #C9842B;
-    --cream: #F6ECDC;
-    --ember: #F2B35B;
-    --ember-soft: #F7CF8F;
+    --cream: #FFFBF5;
+    --ember: #9E5E14;
+    --ember-soft: #F2B35B;
     --paper: #FAF4EA;
     --paper-deep: #EFE5D5;
     --ink: #1A110A;
     --ink-soft: #5B4A3A;
     --ink-faint: #D7CAB7;
-    --focus-dark: #F2B35B;
+    --focus-dark: #2F6BFF;
     --focus-light: #2F6BFF;
 
     /* shadcn tokens mapped to the dark brand */
-    --background: 24 33% 3%;
-    --foreground: 36 47% 89%;
-    --card: 30 31% 6%;
-    --card-foreground: 36 47% 89%;
-    --popover: 30 31% 6%;
-    --popover-foreground: 36 47% 89%;
-    --primary: 36 47% 89%;
-    --primary-foreground: 24 33% 3%;
-    --secondary: 28 31% 11%;
-    --secondary-foreground: 36 47% 89%;
-    --muted: 28 31% 11%;
-    --muted-foreground: 35 17% 63%;
-    --accent: 28 31% 11%;
-    --accent-foreground: 36 47% 89%;
+    --background: 38 54% 93%;
+    --foreground: 26 41% 12%;
+    --card: 38 45% 95%;
+    --card-foreground: 26 41% 12%;
+    --popover: 38 45% 95%;
+    --popover-foreground: 26 41% 12%;
+    --primary: 26 41% 12%;
+    --primary-foreground: 38 54% 93%;
+    --secondary: 36 37% 82%;
+    --secondary-foreground: 26 41% 12%;
+    --muted: 36 37% 82%;
+    --muted-foreground: 31 19% 40%;
+    --accent: 36 37% 82%;
+    --accent-foreground: 26 41% 12%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 28 31% 11%;
-    --input: 28 31% 11%;
-    --ring: 36 85% 65%;
+    --border: 36 37% 82%;
+    --input: 36 37% 82%;
+    --ring: 222 100% 59%;
     --radius: 0.5rem;
 
     /* Animation Easings */
@@ -211,25 +211,25 @@
     margin-right: auto;
   }
 
-  /* Glass panel over the 3D scene: enough fill to keep text readable
-     against bright bloom, little enough to feel like part of the scene. */
+  /* Frosted panel over the 3D scene: enough fill to keep cocoa text
+     readable against the bright world, little enough to stay airy. */
   .glass {
-    background: linear-gradient(180deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.03));
-    border: 1px solid rgb(255 255 255 / 0.08);
-    backdrop-filter: blur(14px) saturate(1.2);
-    -webkit-backdrop-filter: blur(14px) saturate(1.2);
-    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.3) inset, 0 30px 80px -40px rgb(0 0 0 / 0.9);
+    background: linear-gradient(180deg, rgb(255 251 245 / 0.78), rgb(255 251 245 / 0.62));
+    border: 1px solid rgb(61 36 22 / 0.1);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.5) inset, 0 24px 60px -32px rgb(61 36 22 / 0.35);
   }
 
   .glass-strong {
-    background: linear-gradient(180deg, rgb(21 16 11 / 0.8), rgb(10 7 5 / 0.72));
-    border: 1px solid rgb(255 255 255 / 0.08);
-    backdrop-filter: blur(18px) saturate(1.2);
-    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    background: linear-gradient(180deg, rgb(251 246 238 / 0.9), rgb(247 240 228 / 0.84));
+    border: 1px solid rgb(61 36 22 / 0.1);
+    backdrop-filter: blur(18px) saturate(1.1);
+    -webkit-backdrop-filter: blur(18px) saturate(1.1);
   }
 
   .hairline {
-    border-color: rgb(255 255 255 / 0.1);
+    border-color: rgb(61 36 22 / 0.12);
   }
 
   /* Reading scrim behind chapter copy so it stays legible over bloom. */
@@ -242,7 +242,7 @@
     inset: -2.5rem -3rem;
     z-index: -1;
     border-radius: 2rem;
-    background: radial-gradient(closest-side, rgb(10 7 5 / 0.8), rgb(10 7 5 / 0.38) 70%, transparent);
+    background: radial-gradient(closest-side, rgb(247 240 228 / 0.88), rgb(247 240 228 / 0.5) 70%, transparent);
     pointer-events: none;
   }
 }
@@ -281,8 +281,8 @@
   z-index: 70;
   transform: translateY(-160%);
   border-radius: 0.5rem;
-  background: var(--silver);
-  color: var(--ink);
+  background: var(--ink);
+  color: var(--cream);
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -376,9 +376,9 @@
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(60% 50% at 50% 42%, rgb(242 179 91 / 0.22), transparent 70%),
-    radial-gradient(40% 30% at 50% 46%, rgb(201 132 43 / 0.4), transparent 70%),
-    linear-gradient(180deg, #16100A, #0A0705 60%);
+    radial-gradient(60% 50% at 50% 42%, rgb(242 179 91 / 0.35), transparent 70%),
+    radial-gradient(40% 30% at 50% 46%, rgb(201 132 43 / 0.45), transparent 70%),
+    linear-gradient(180deg, #FFFBF5, #F7F0E4 60%);
 }
 
 /* Respect reduced motion — kill loops/scroll-linked motion, keep fades */
@@ -422,7 +422,7 @@
 
 /* Selection styling */
 ::selection {
-  background: var(--ember);
+  background: var(--ember-soft);
   color: var(--ink);
 }
 

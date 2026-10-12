@@ -10,7 +10,7 @@ import { prefersReducedMotion } from '@/experience/quality';
 
 function GameCard({ game, index, active }: { game: GameItem; index: number; active: boolean }) {
   const linkClass =
-    'pressable inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/[0.12] px-3.5 text-sm font-medium text-silver transition-colors hover:border-white/30 hover:text-white';
+    'pressable inline-flex min-h-11 items-center gap-2 rounded-lg border border-ink/15 px-3.5 text-sm font-medium text-ink transition-colors hover:border-ink/40 hover:text-ink';
   return (
     <article
       className="product-accent product-ring glass w-full max-w-md rounded-xl p-6 transition-[border-color,box-shadow] duration-300 ease-out-quart lg:p-7"
@@ -29,14 +29,14 @@ function GameCard({ game, index, active }: { game: GameItem; index: number; acti
           {String(index + 1).padStart(2, '0')} / {String(gamesConfig.games.length).padStart(2, '0')}
         </span>
       </div>
-      <h3 id={`game-${game.id}-title`} className="font-display type-title mt-5 text-white">
+      <h3 id={`game-${game.id}-title`} className="font-display type-title mt-5 text-ink">
         {game.name}
       </h3>
-      <p className="mt-1 text-sm text-silver/80">{game.category}</p>
+      <p className="mt-1 text-sm text-ink/75">{game.category}</p>
       <p className="mt-4 text-sm leading-relaxed text-mist">{game.description}</p>
       <div className="mt-6 flex flex-wrap gap-2">
         {game.href && (
-          <a href={game.href} target="_blank" rel="noopener noreferrer" className={cn(linkClass, 'bg-silver text-ink hover:bg-white hover:text-ink')}>
+          <a href={game.href} target="_blank" rel="noopener noreferrer" className={cn(linkClass, 'bg-ink text-cream hover:bg-cocoa hover:text-cream')}>
             {game.actionLabel ?? 'Open'}
             <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
           </a>
@@ -97,10 +97,10 @@ export function GamesChapter() {
           <div ref={header} className="chapter-copy absolute left-6 top-20 max-w-sm sm:top-24 lg:left-12 lg:top-28">
             <p className="label-mono flex items-center gap-3 text-mist">
               <span className="text-ember">{gamesConfig.index}</span>
-              <span className="h-px w-6 bg-white/20" aria-hidden="true" />
+              <span className="h-px w-6 bg-ink/20" aria-hidden="true" />
               <span>{gamesConfig.label}</span>
             </p>
-            <h2 className="font-display type-title mt-3 text-white sm:mt-4">{gamesConfig.heading}</h2>
+            <h2 className="font-display type-title mt-3 text-ink sm:mt-4">{gamesConfig.heading}</h2>
             <p className="mt-3 hidden text-sm leading-relaxed text-mist lg:block">{gamesConfig.description}</p>
           </div>
 

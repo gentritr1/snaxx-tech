@@ -21,14 +21,14 @@ export function Effects({ quality }: { quality: Quality }) {
 
   return (
     <EffectComposer multisampling={quality.multisampling} enableNormalPass={false}>
-      <Bloom mipmapBlur intensity={0.9} luminanceThreshold={1} luminanceSmoothing={0.3} radius={0.65} />
+      <Bloom mipmapBlur intensity={0.45} luminanceThreshold={1} luminanceSmoothing={0.3} radius={0.6} />
       {quality.dof ? (
         <DepthOfField ref={dof} focalLength={0.04} bokehScale={2.4} worldFocusRange={16} />
       ) : (
         <></>
       )}
-      <Vignette eskil={false} offset={0.22} darkness={0.72} />
-      <Noise premultiply opacity={0.06} />
+      <Vignette eskil={false} offset={0.1} darkness={0.22} />
+      <Noise premultiply opacity={0.03} />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
     </EffectComposer>
   );

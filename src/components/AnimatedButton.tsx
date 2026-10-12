@@ -32,9 +32,9 @@ export function AnimatedButton({
     'pressable relative inline-flex min-h-11 items-center justify-center gap-2 overflow-hidden rounded-lg font-geist text-sm font-medium tracking-[-0.01em]',
     'transition-[background-color,border-color,color,box-shadow] duration-300 ease-out-quad focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember focus-visible:ring-offset-2 focus-visible:ring-offset-void',
     {
-      'bg-silver text-ink hover:bg-white': variant === 'primary',
-      'glass text-silver hover:border-white/25': variant === 'secondary',
-      'border border-white/25 bg-transparent text-silver hover:border-white/70': variant === 'outline',
+      'bg-ink text-cream hover:bg-cocoa': variant === 'primary',
+      'glass text-ink hover:border-ink/30': variant === 'secondary',
+      'border border-ink/25 bg-transparent text-ink hover:border-ink/60': variant === 'outline',
       'border border-ink/40 bg-transparent text-ink hover:bg-ink hover:text-paper focus-visible:ring-[#2F6BFF] focus-visible:ring-offset-paper':
         variant === 'outline-dark',
       'px-4 py-2 text-xs': size === 'sm',

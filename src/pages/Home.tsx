@@ -94,7 +94,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div ref={rootRef} id="home-root" className="relative min-h-screen bg-void text-silver">
+    <div ref={rootRef} id="home-root" className="relative min-h-screen bg-void text-ink">
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>

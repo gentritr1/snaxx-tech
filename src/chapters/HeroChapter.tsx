@@ -39,9 +39,9 @@ export function HeroChapter({ awake }: { awake: boolean }) {
                 <span className="product-dot" style={{ '--accent': 'var(--ember)' } as React.CSSProperties} aria-hidden="true" />
                 {heroConfig.eyebrow}
               </p>
-              <h1 className={cn('font-display type-display mt-6 text-white', reveal(350))} style={{ transitionDelay: '350ms' }}>
+              <h1 className={cn('font-display type-display mt-6 text-ink', reveal(350))} style={{ transitionDelay: '350ms' }}>
                 <span className="block">{heroConfig.headline[0]}</span>
-                <span className="block text-silver/85">{heroConfig.headline[1]}</span>
+                <span className="block text-ink/60">{heroConfig.headline[1]}</span>
               </h1>
               <p className={cn('type-lead mt-7 max-w-lg', reveal(600))} style={{ transitionDelay: '600ms' }}>
                 {heroConfig.intro}
@@ -57,7 +57,7 @@ export function HeroChapter({ awake }: { awake: boolean }) {
               <ul className={cn('mt-12 hidden items-center gap-8 sm:flex', reveal(1100))} style={{ transitionDelay: '1100ms' }} aria-hidden="true">
                 {heroConfig.readouts.map((r, i) => (
                   <li key={r} className="label-mono flex items-center gap-2 text-[0.625rem] text-mist">
-                    <span className={cn('h-1.5 w-1.5 rounded-full transition-colors duration-500', tick === i ? 'bg-ember' : 'bg-white/20')} />
+                    <span className={cn('h-1.5 w-1.5 rounded-full transition-colors duration-500', tick === i ? 'bg-ember' : 'bg-ink/20')} />
                     {r}
                   </li>
                 ))}

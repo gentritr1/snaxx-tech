@@ -31,9 +31,9 @@ const EMBER = new Color('#F2B35B');
 
 /** Glossy porcelain: the serving-ware of the confectionery engine. */
 export const PORCELAIN = new MeshPhysicalMaterial({
-  color: '#F3E9D8',
+  color: '#EADBC3',
   metalness: 0,
-  roughness: 0.2,
+  roughness: 0.18,
   clearcoat: 1,
   clearcoatRoughness: 0.08,
   envMapIntensity: 1.1,

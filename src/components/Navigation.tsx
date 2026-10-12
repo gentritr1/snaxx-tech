@@ -84,7 +84,7 @@ export function Navigation() {
       <nav
         className={cn(
           'fixed left-0 right-0 top-0 z-50 transition-[background-color,border-color,box-shadow] duration-500 ease-out-circ',
-          isScrolled || isMenuOpen ? 'glass-strong border-b border-white/[0.06]' : 'border-b border-transparent bg-transparent',
+          isScrolled || isMenuOpen ? 'glass-strong border-b border-ink/10' : 'border-b border-transparent bg-transparent',
         )}
         aria-label="Primary"
       >
@@ -98,7 +98,7 @@ export function Navigation() {
                 aria-label="Snaxx Tech home"
               >
                 <img src="/images/wordmark/letter-5.webp" alt="" draggable={false} className="h-6 w-auto select-none" />
-                <span className="font-display text-lg font-medium tracking-[-0.02em] text-silver">{navigationConfig.logo}</span>
+                <span className="font-display text-lg font-medium tracking-[-0.02em] text-ink">{navigationConfig.logo}</span>
               </a>
             )}
 
@@ -112,7 +112,7 @@ export function Navigation() {
                     aria-current={linkIsActive(link.href) ? 'true' : undefined}
                     className={cn(
                       'group relative min-h-11 py-3 text-sm transition-colors duration-200',
-                      linkIsActive(link.href) ? 'text-silver' : 'text-mist hover:text-silver',
+                      linkIsActive(link.href) ? 'text-ink' : 'text-mist hover:text-ink',
                     )}
                   >
                     {link.label}
@@ -149,9 +149,9 @@ export function Navigation() {
                   aria-expanded={isMenuOpen}
                   aria-controls="mobile-navigation"
                 >
-                  <span className={cn('h-px w-6 bg-silver transition-[opacity,transform] duration-300 ease-out-quad', isMenuOpen && 'translate-y-[7px] rotate-45')} />
-                  <span className={cn('h-px w-6 bg-silver transition-[opacity,transform] duration-300 ease-out-quad', isMenuOpen && 'scale-x-0 opacity-0')} />
-                  <span className={cn('h-px w-6 bg-silver transition-[opacity,transform] duration-300 ease-out-quad', isMenuOpen && '-translate-y-[7px] -rotate-45')} />
+                  <span className={cn('h-px w-6 bg-ink transition-[opacity,transform] duration-300 ease-out-quad', isMenuOpen && 'translate-y-[7px] rotate-45')} />
+                  <span className={cn('h-px w-6 bg-ink transition-[opacity,transform] duration-300 ease-out-quad', isMenuOpen && 'scale-x-0 opacity-0')} />
+                  <span className={cn('h-px w-6 bg-ink transition-[opacity,transform] duration-300 ease-out-quad', isMenuOpen && '-translate-y-[7px] -rotate-45')} />
                 </button>
               )}
             </div>
@@ -172,7 +172,7 @@ export function Navigation() {
             <span
               className={cn(
                 'label-mono text-[0.625rem] transition-[opacity,transform] duration-300 ease-out-quart',
-                active === c.id ? 'translate-x-0 text-silver opacity-100' : 'translate-x-2 text-mist opacity-0 group-hover:translate-x-0 group-hover:opacity-100',
+                active === c.id ? 'translate-x-0 text-ink opacity-100' : 'translate-x-2 text-mist opacity-0 group-hover:translate-x-0 group-hover:opacity-100',
               )}
             >
               {c.label}
@@ -180,7 +180,7 @@ export function Navigation() {
             <span
               className={cn(
                 'block h-px transition-[width,background-color] duration-300 ease-out-quart',
-                active === c.id ? 'w-7 bg-ember' : i < activeIndex ? 'w-4 bg-silver/60' : 'w-4 bg-white/25 group-hover:bg-white/60',
+                active === c.id ? 'w-7 bg-ember' : i < activeIndex ? 'w-4 bg-ink/50' : 'w-4 bg-ink/25 group-hover:bg-ink/60',
               )}
             />
           </a>
@@ -205,7 +205,7 @@ export function Navigation() {
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
                 className={cn(
-                  'font-display text-4xl font-medium tracking-[-0.03em] text-silver transition-[opacity,transform] duration-400 ease-out-quart',
+                  'font-display text-4xl font-medium tracking-[-0.03em] text-ink transition-[opacity,transform] duration-400 ease-out-quart',
                   isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0',
                 )}
                 style={{ transitionDelay: isMenuOpen ? `${index * 60}ms` : '0ms' }}

@@ -11,7 +11,7 @@ const PORTAL_Z = -22;
 const MAJOR = 3.45;
 const MINOR = 0.34;
 const SPRINKLES = 140;
-const SPRINKLE_COLORS = ['#F2B35B', '#2F8CFF', '#FF7A29', '#14B8A6', '#58D6A6', '#F6ECDC', '#E85D75'];
+const SPRINKLE_COLORS = ['#F2B35B', '#2F8CFF', '#FF7A29', '#14B8A6', '#58D6A6', '#E85D75', '#7C4DFF'];
 
 /** Soft shortbread dough. */
 const DOUGH = new MeshPhysicalMaterial({ color: '#E8B974', roughness: 0.62, metalness: 0, clearcoat: 0.08, envMapIntensity: 0.9 });
@@ -113,7 +113,7 @@ export function Portal() {
         <planeGeometry args={[6.4, 6.4]} />
       </mesh>
       <pointLight ref={light} position={[0, 0, 0.5]} color="#F2B35B" intensity={0} distance={18} decay={2} />
-      <pointLight position={[3, 4, 5]} color="#FFE2BF" intensity={40} distance={20} decay={2} />
+      <pointLight position={[3, 4, 5]} color="#FFF4E6" intensity={60} distance={20} decay={2} />
     </group>
   );
 }

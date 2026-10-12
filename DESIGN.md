@@ -2,18 +2,18 @@
 name: Snaxx Tech
 description: A cinematic, real-time 3D brand experience for an independent studio that makes bite-sized software and games.
 colors:
-  void: "#0A0705"
-  graphite: "#15100B"
-  steel: "#241B13"
-  steel-light: "#362A1F"
-  mist: "#B3A48F"
-  silver: "#F1E7D8"
+  void: "#F7F0E4"
+  graphite: "#EFE5D5"
+  steel: "#E2D4C0"
+  steel-light: "#D3C1A8"
+  mist: "#7A6753"
+  silver: "#2B1D12"
   white: "#FFFFFF"
-  ember: "#F2B35B"
-  ember-soft: "#F7CF8F"
+  ember: "#9E5E14"
+  ember-soft: "#F2B35B"
   caramel: "#C9842B"
   cocoa: "#3D2416"
-  cream: "#F6ECDC"
+  cream: "#FFFBF5"
   paper: "#FAF4EA"
   paper-deep: "#EFE5D5"
   ink: "#1A110A"
@@ -107,12 +107,13 @@ of game exhibits served on porcelain plates. Every chapter is a cinematic
 scene; every transition is part of the same directed sequence.
 
 The register is luxury technology applied to food: Apple reveal, AAA
-presentation, a premium chocolate commercial. Luxury comes from restraint.
-Warm cocoa darks, real gloss (chocolate, glaze, caramel, porcelain), one
-accent light per scene, generous space and exact type. Playfulness lives in
-the snacks themselves (sprinkles, a chocolate bar that caramelises row by
-row, a candy planet, biscuit letter tiles) and in the copy's appetite, never
-in decoration.
+presentation, a premium chocolate commercial shot in daylight. The world is
+bright and airy: a vanilla-cream studio with soft white light and cream fog,
+never dark space. Luxury comes from restraint. Real gloss (chocolate,
+glaze, caramel, porcelain) on cream, one accent light per scene, generous
+space and exact type. Playfulness lives in the snacks themselves (pastel
+sprinkles, a chocolate bar that caramelises row by row, a candy planet,
+biscuit letter tiles) and in the copy's appetite, never in decoration.
 
 **Key characteristics**
 
@@ -128,20 +129,23 @@ in decoration.
 
 ## Colors
 
-The palette is edible and near-monochrome: cocoa-dark surfaces (void,
-graphite, steel), cream and warm-grey text (silver, mist), with ember, the
-caramel of the wordmark's bitten cookie, as the energy of the centre. The
-legal documents flip to a cream reading surface (paper and ink).
+The palette is edible and light: vanilla-cream surfaces (`void` is the page
+cream, graphite and steel are warmer creams), cocoa text (`silver` is the
+cocoa ink, mist the warm grey), with ember, the caramel of the wordmark's
+bitten cookie, as the accent. The 3D world shares the same cream in its
+background and fog so the page and the scene are one space.
 
 ### Primary
 
-- **Void:** Page and scene background; the stage everything else sits on.
-- **Silver:** Primary text on dark and the primary button fill.
+- **Void (vanilla cream):** Page and scene background; the stage everything
+  else sits on.
+- **Silver (cocoa ink):** Primary text and the primary button fill.
 
 ### Secondary
 
-- **Ember (caramel):** The centre's energy, active navigation, focus rings
-  on dark, one highlight per section. Never a background fill for text.
+- **Ember (caramel):** Chapter indexes, active navigation, one highlight per
+  section; `ember-soft` is the decorative caramel used in 3D and selection.
+  Never a background fill for text.
 - **Mist:** Secondary text, labels, metadata.
 
 ### Product signals
@@ -152,7 +156,7 @@ legal documents flip to a cream reading surface (paper and ink).
 
 ### Neutral
 
-- **Graphite / Steel:** Raised cocoa surfaces, hairlines, panel fills.
+- **Graphite / Steel:** Raised cream surfaces, hairlines, panel fills.
 - **Cocoa / Cream / Caramel:** The 3D materials (tempered chocolate,
   porcelain and shortbread, molten centre) referenced in UI only as tints.
 - **Paper / Ink:** The cream reading surface for privacy, terms and support.
@@ -204,9 +208,9 @@ paper with a 65–75ch measure; the 3D stage never loads on those routes.
 ## Elevation
 
 Depth is rendered, not faked. Surfaces are flat; the only layered element
-is the glass panel (8–12% white fill, 1px hairline, 14px blur), used for
-cards that sit over the scene so copy stays legible against bloom. No drop
-shadows beyond the glass panel's own long, dark falloff.
+is the frosted panel (62–78% white fill, 1px cocoa hairline at 10%, 14px
+blur), used for cards that sit over the scene so copy stays legible. No
+drop shadows beyond the panel's own soft, warm falloff.
 
 ### Named rules
 
@@ -230,11 +234,11 @@ It is never decorative and never stacked.
 
 ### Buttons
 
-- **Primary:** Silver fill, ink text, 8px radius, 12×20 padding, label
+- **Primary:** Ink fill, cream text, 8px radius, 12×20 padding, label
   rolls on hover.
-- **Outline:** 1px 25% white border, silver text; hover to 70%.
-- **Outline (paper):** 1px ink border, ink text; hover fills ink.
-- **Focus:** 2px ember ring on dark, 2px blue ring on paper.
+- **Outline:** 1px 25% ink border, ink text; hover to 60%.
+- **Focus:** 2px blue ring everywhere (ember has too little contrast on
+  cream for a focus indicator).
 
 ### Product cards
 
@@ -248,7 +252,7 @@ Mono label in a hairline pill. Chips identify context, never filter.
 
 ### Navigation
 
-Transparent over the hero; glass-strong after 40px. Links in mist with an
+Transparent over the hero; frosted cream after 40px. Links in mist with an
 ember underline for the active chapter; a mono chapter counter; a chapter
 rail on the right (desktop) with one hairline per chapter.
 
@@ -274,7 +278,9 @@ mini footer with every published legal URL.
 
 - **Don't** add neon, random particle backgrounds or spinning props without
   narrative purpose.
-- **Don't** bloom metal, text or UI panels.
+- **Don't** go dark: no black space, no vignette-heavy frames, no sci-fi
+  grids in cold blue. The world is daylight on cream.
+- **Don't** bloom chocolate, porcelain, text or UI panels.
 - **Don't** stack glass or use gradient text.
 - **Don't** bring back the serif display face or the paper-illustration art.
 - **Don't** let the food theme turn cartoonish: no mascots, no drips of

@@ -1,10 +1,10 @@
 # Snaxx Tech — cinematic 3D brand site
 
 The studio website for Snaxx Tech, themed around snacking: one continuous,
-scroll-directed 3D film (React Three Fiber + GSAP ScrollTrigger) in which a
-confectionery core (caramel centre, chocolate shell, porcelain rings) opens
-into the studio's software and a pantry of games, plus light-weight legal
-and support pages for each app. Built with React 19, TypeScript, Tailwind
+scroll-directed 3D film (React Three Fiber + GSAP ScrollTrigger) in a bright
+vanilla-cream studio, in which a confectionery core (caramel centre,
+chocolate shell, porcelain rings) opens into the studio's software and a
+pantry of games, plus light-weight legal and support pages for each app. Built with React 19, TypeScript, Tailwind
 CSS and Vite.
 
 ## Experience

@@ -8,8 +8,8 @@ import { Color, Fog, PointLight, SpotLight } from 'three';
 import { sceneState, smoothstep } from '../sceneState';
 import { createGridMaterial, createHorizonMaterial } from '../shaders/materials';
 
-const FOG_STUDIO = new Color('#0A0705');
-const FOG_WORLD = new Color('#140B06');
+const FOG_STUDIO = new Color('#F7F0E4');
+const FOG_WORLD = new Color('#F4E4CF');
 
 /**
  * Lighting, environment reflections, fog and the two world backdrops (the
@@ -35,16 +35,16 @@ export function Atmosphere() {
     if (fog.current) {
       fogColor.copy(FOG_STUDIO).lerp(FOG_WORLD, s.world);
       fog.current.color.copy(fogColor);
-      fog.current.near = 10 - s.flow * 6;
-      fog.current.far = 40 - s.flow * 14 + s.world * 10;
+      fog.current.near = 24 - s.flow * 14;
+      fog.current.far = 64 - s.flow * 20 + s.world * 10;
     }
     if (key.current) {
       key.current.position.x = 6 + s.pointer.x * 2.5;
       key.current.position.y = 9 + s.pointer.y * 1.5;
-      key.current.intensity = 90 + s.energy * 50 - s.world * 50;
+      key.current.intensity = 150 + s.energy * 40;
     }
     if (rim.current) {
-      rim.current.intensity = 30 + s.world * 40;
+      rim.current.intensity = 40 + s.world * 20;
     }
     if (core.current) {
       const fade = 1 - smoothstep(0.5, 1, s.flow);
@@ -56,29 +56,30 @@ export function Atmosphere() {
 
   return (
     <>
-      <color attach="background" args={['#0A0705']} />
-      <fog ref={fog} attach="fog" args={['#0A0705', 10, 40]} />
-      <ambientLight intensity={0.16} />
-      <hemisphereLight args={['#4A3324', '#0A0705', 0.3]} />
+      <color attach="background" args={['#F7F0E4']} />
+      <fog ref={fog} attach="fog" args={['#F7F0E4', 24, 64]} />
+      <ambientLight intensity={0.55} />
+      <hemisphereLight args={['#FFFFFF', '#E6D3B8', 0.9]} />
       <spotLight
         ref={key}
         position={[6, 9, 7]}
         angle={0.55}
         penumbra={0.85}
-        intensity={110}
-        color="#FFE2BF"
+        intensity={150}
+        color="#FFF4E6"
         decay={2}
         distance={60}
       />
-      <pointLight ref={rim} position={[-7, 3, -5]} intensity={24} color="#FFB37A" decay={2} distance={40} />
+      <pointLight ref={rim} position={[-7, 3, -5]} intensity={40} color="#FFD9B0" decay={2} distance={40} />
       <pointLight ref={core} position={[0, 0, 0]} intensity={0} color="#FFD9A0" decay={2} distance={9} />
 
       <Environment resolution={256} frames={1} background={false}>
-        <Lightformer form="rect" intensity={5} color="#FFFFFF" position={[0, 6, -4]} scale={[14, 1.6, 1]} rotation-x={Math.PI / 2.4} />
-        <Lightformer form="rect" intensity={2.6} color="#FFE9D2" position={[-8, 2, 2]} scale={[6, 4, 1]} rotation-y={Math.PI / 2} />
-        <Lightformer form="rect" intensity={2} color="#FFD9A8" position={[8, 1, 2]} scale={[4, 3, 1]} rotation-y={-Math.PI / 2} />
-        <Lightformer form="ring" intensity={1.4} color="#FFFFFF" position={[0, -7, 0]} scale={8} rotation-x={Math.PI / 2} />
-        <Lightformer form="rect" intensity={1.2} color="#FFD2A6" position={[0, 3, 9]} scale={[8, 2, 1]} />
+        <color attach="background" args={['#F1E6D4']} />
+        <Lightformer form="rect" intensity={6} color="#FFFFFF" position={[0, 6, -4]} scale={[14, 1.6, 1]} rotation-x={Math.PI / 2.4} />
+        <Lightformer form="rect" intensity={3.2} color="#FFF3E6" position={[-8, 2, 2]} scale={[6, 4, 1]} rotation-y={Math.PI / 2} />
+        <Lightformer form="rect" intensity={2.6} color="#FFE5C4" position={[8, 1, 2]} scale={[4, 3, 1]} rotation-y={-Math.PI / 2} />
+        <Lightformer form="ring" intensity={1.8} color="#FFFFFF" position={[0, -7, 0]} scale={8} rotation-x={Math.PI / 2} />
+        <Lightformer form="rect" intensity={1.6} color="#FFE9D0" position={[0, 3, 9]} scale={[8, 2, 1]} />
       </Environment>
 
       {/* Counter grid — fades in once the camera has passed through the centre. */}

@@ -1,11 +1,11 @@
-import { AdditiveBlending, Color, DoubleSide, NormalBlending, ShaderMaterial, Texture, Vector3 } from 'three';
+import { Color, DoubleSide, NormalBlending, ShaderMaterial, Texture, Vector3 } from 'three';
 import { simplex3 } from './noise.glsl';
 
 const EMBER = new Color('#F2B35B');
 const EMBER_DEEP = new Color('#8A4A12');
-const SILVER = new Color('#FFF1DC');
-const BLUE = new Color('#FFC98A');
-const CHOCOLATE = new Color('#3A1F12');
+const SILVER = new Color('#C9A27A');
+const BLUE = new Color('#E08E6B');
+const CHOCOLATE = new Color('#4A2614');
 
 /** The molten caramel centre inside the glass shell: slow swirl with a fresnel rim. */
 export function createPlasmaMaterial() {
@@ -58,7 +58,7 @@ export function createFilamentMaterial() {
   return new ShaderMaterial({
     transparent: true,
     depthWrite: false,
-    blending: AdditiveBlending,
+    blending: NormalBlending,
     uniforms: {
       uTime: { value: 0 },
       uEnergy: { value: 0 },
@@ -86,9 +86,9 @@ export function createFilamentMaterial() {
         float flow = fract(vUv.x * 2.0 - uTime * (0.35 + vSeed * 0.4) - vSeed);
         float pulse = smoothstep(0.72, 1.0, flow);
         float base = 0.08 + pulse * 1.0;
-        vec3 col = mix(uColor, uWhite, pulse * 0.6) * base * (0.3 + uEnergy * 3.4);
+        vec3 col = mix(uColor * 0.55, uWhite, pulse * 0.8) * (0.6 + base * (0.3 + uEnergy * 1.6));
         float ends = smoothstep(0.0, 0.08, vUv.x) * smoothstep(1.0, 0.92, vUv.x);
-        gl_FragColor = vec4(col, (0.25 + pulse) * ends * uEnergy);
+        gl_FragColor = vec4(col, (0.55 + pulse * 0.45) * ends * min(uEnergy, 1.0));
       }
     `,
   });
@@ -99,7 +99,7 @@ export function createParticleMaterial() {
   return new ShaderMaterial({
     transparent: true,
     depthWrite: false,
-    blending: AdditiveBlending,
+    blending: NormalBlending,
     uniforms: {
       uTime: { value: 0 },
       uFlow: { value: 0 },
@@ -153,8 +153,8 @@ export function createParticleMaterial() {
         float disc = smoothstep(0.5, 0.08, d);
         vec3 accent = mix(uEmber, uBlue, uWorld);
         vec3 col = mix(uSilver, accent, step(0.72, vTint));
-        float a = disc * vFade * (0.18 + 0.5 * uEnergy);
-        gl_FragColor = vec4(col * (0.6 + 0.9 * step(0.72, vTint)), a);
+        float a = disc * vFade * (0.3 + 0.35 * min(uEnergy, 1.0));
+        gl_FragColor = vec4(col, a);
       }
     `,
   });
@@ -169,8 +169,8 @@ export function createGridMaterial() {
       uTime: { value: 0 },
       uWorld: { value: 0 },
       uPortal: { value: new Vector3(0, 0, -22) },
-      uLine: { value: new Color('#8C6A45') },
-      uAccent: { value: new Color('#F2B35B') },
+      uLine: { value: new Color('#A8865E') },
+      uAccent: { value: new Color('#D98A2B') },
     },
     vertexShader: /* glsl */ `
       varying vec3 vPos;
@@ -200,7 +200,7 @@ export function createGridMaterial() {
         float fade = 1.0 - smoothstep(14.0, 46.0, d);
         float line = max(minor, major);
         vec3 col = uLine * line + uAccent * pulse * 0.35 * line;
-        float a = (line * 0.42 + pulse * 0.12 * line) * fade * uWorld;
+        float a = (line * 0.3 + pulse * 0.1 * line) * fade * uWorld;
         gl_FragColor = vec4(col, a);
       }
     `,
@@ -244,11 +244,11 @@ export function createHoloMaterial(map: Texture, accent: string) {
         float slide = (1.0 - mask) * 0.0;
         float edge = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
         float border = 1.0 - smoothstep(0.0, 0.012, edge);
-        float scan = 0.96 + 0.04 * sin(vUv.y * 420.0 + uTime * 3.0);
+        float scan = 0.985 + 0.015 * sin(vUv.y * 420.0 + uTime * 3.0);
         float sweepPos = fract(uTime * 0.11) * 1.6 - 0.3;
         float sweep = exp(-pow((vUv.x - sweepPos) * 9.0, 2.0)) * 0.18;
-        vec3 col = tex.rgb * scan + uAccent * border * (1.4 + uHover * 1.2) + vec3(sweep);
-        float alpha = (tex.a * (0.9 + uHover * 0.08) + border) * mask;
+        vec3 col = mix(tex.rgb * scan, uAccent * (1.1 + uHover * 0.6), border) + vec3(sweep * 0.6);
+        float alpha = (tex.a * (0.94 + uHover * 0.06) + border) * mask;
         gl_FragColor = vec4(col + slide, alpha);
       }
     `,
@@ -261,12 +261,12 @@ export function createPortalMaterial() {
     transparent: true,
     depthWrite: false,
     side: DoubleSide,
-    blending: AdditiveBlending,
+    blending: NormalBlending,
     uniforms: {
       uTime: { value: 0 },
       uOpen: { value: 0 },
       uColorA: { value: CHOCOLATE.clone() },
-      uColorB: { value: EMBER.clone() },
+      uColorB: { value: new Color('#E3A24C') },
     },
     vertexShader: /* glsl */ `
       varying vec2 vUv;
@@ -290,9 +290,9 @@ export function createPortalMaterial() {
         float band = smoothstep(iris - 0.06, iris + 0.04, r) * (1.0 - smoothstep(0.93, 1.0, r));
         float inner = smoothstep(iris + 0.2, iris, r) * 1.6;
         float n = smoothstep(-0.2, 0.8, swirl);
-        vec3 col = mix(uColorA, uColorB, n * 0.75 + inner * 0.25);
-        float glow = (0.45 + n * 1.0 + inner) * (0.5 + uOpen * 1.3);
-        float alpha = band * (0.75 + n * 0.25);
+        vec3 col = mix(uColorA, uColorB, n * 0.8 + inner * 0.2);
+        float glow = 0.75 + inner * 0.6 * uOpen;
+        float alpha = band * (0.85 + n * 0.15);
         gl_FragColor = vec4(col * glow, alpha);
       }
     `,
@@ -306,8 +306,8 @@ export function createHorizonMaterial() {
     depthWrite: false,
     uniforms: {
       uWorld: { value: 0 },
-      uTop: { value: new Color('#0A0705') },
-      uGlow: { value: new Color('#4A2A14') },
+      uTop: { value: new Color('#F7F0E4') },
+      uGlow: { value: new Color('#F5D7B0') },
     },
     vertexShader: /* glsl */ `
       varying vec2 vUv;
@@ -367,7 +367,7 @@ export function createGlobeDotsMaterial(accent: string) {
         if (vLand < 0.5) discard;
         vec2 c = gl_PointCoord - 0.5;
         float disc = smoothstep(0.5, 0.2, length(c));
-        gl_FragColor = vec4(uColor * (0.9 + uFocus * 1.8) * vLight, disc * 0.95);
+        gl_FragColor = vec4(uColor * (1.1 + uFocus * 1.4) * vLight, disc * 0.95);
       }
     `,
   });

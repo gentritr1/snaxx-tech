@@ -6,9 +6,9 @@ import { CanvasTexture, LinearFilter, SRGBColorSpace } from 'three';
 
 const FONT = '"Geist", Arial, sans-serif';
 const MONO = '"GeistMono", "Courier New", monospace';
-const SILVER = '#E6E8EE';
-const MIST = '#9AA1AE';
-const STEEL = 'rgba(255,255,255,0.10)';
+const SILVER = '#1A110A';
+const MIST = '#7A6753';
+const STEEL = 'rgba(26,17,10,0.12)';
 
 type Draw = (ctx: CanvasRenderingContext2D, w: number, h: number) => void;
 
@@ -31,11 +31,11 @@ function panel(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.clearRect(0, 0, w, h);
   roundRect(ctx, 1, 1, w - 2, h - 2, 22);
   const g = ctx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0, 'rgba(22,25,32,0.92)');
-  g.addColorStop(1, 'rgba(10,11,15,0.90)');
+  g.addColorStop(0, 'rgba(255,252,247,0.96)');
+  g.addColorStop(1, 'rgba(250,244,236,0.94)');
   ctx.fillStyle = g;
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+  ctx.strokeStyle = 'rgba(26,17,10,0.14)';
   ctx.lineWidth = 2;
   ctx.stroke();
 }
@@ -60,7 +60,7 @@ function pill(ctx: CanvasRenderingContext2D, value: string, x: number, y: number
   ctx.font = `500 13px ${MONO}`;
   const w = ctx.measureText(value.toUpperCase()).width + 28 + value.length * 1.6;
   roundRect(ctx, x, y, w, 30, 15);
-  ctx.fillStyle = filled ? accent : 'rgba(255,255,255,0.05)';
+  ctx.fillStyle = filled ? accent : 'rgba(26,17,10,0.04)';
   ctx.fill();
   ctx.strokeStyle = filled ? accent : STEEL;
   ctx.lineWidth = 1.5;
@@ -72,9 +72,9 @@ function pill(ctx: CanvasRenderingContext2D, value: string, x: number, y: number
 function avatar(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, hue: number) {
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fillStyle = `hsl(${hue} 30% 38%)`;
+  ctx.fillStyle = `hsl(${hue} 38% 62%)`;
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.strokeStyle = 'rgba(26,17,10,0.15)';
   ctx.lineWidth = 1.5;
   ctx.stroke();
 }
@@ -130,7 +130,7 @@ export function createDashboardTexture(accent: string) {
     // Ring
     const cx = 128, cy = 300, r = 58;
     ctx.lineWidth = 10;
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.strokeStyle = 'rgba(26,17,10,0.08)';
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.stroke();
@@ -181,7 +181,7 @@ export function createDashboardTexture(accent: string) {
           ctx.stroke();
           ctx.setLineDash([]);
         }
-        text(ctx, String(day), x + 14, y + 28, 16, approved ? '#0E0F12' : weekend ? 'rgba(154,161,174,0.5)' : SILVER, approved ? 500 : 400);
+        text(ctx, String(day), x + 14, y + 28, 16, approved ? '#0E0F12' : weekend ? 'rgba(122,103,83,0.5)' : SILVER, approved ? 500 : 400);
         day++;
       }
     }
@@ -220,7 +220,7 @@ export function createCalendarTexture(accent: string) {
       const x = left + c * colW;
       const weekend = c % 7 >= 5;
       if (weekend) {
-        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        ctx.fillStyle = 'rgba(26,17,10,0.03)';
         ctx.fillRect(x, top - 10, colW, h - top - 40);
       }
       label(ctx, String(5 + c), x + colW / 2 - 8, top, MIST, 11);
@@ -244,7 +244,7 @@ export function createCalendarTexture(accent: string) {
       ctx.stroke();
       bars.forEach(([start, len], b) => {
         roundRect(ctx, left + start * colW + 3, y - 12, len * colW - 6, 24, 6);
-        ctx.fillStyle = b === 0 && i < 3 ? accent : 'rgba(255,255,255,0.16)';
+        ctx.fillStyle = b === 0 && i < 3 ? accent : 'rgba(26,17,10,0.16)';
         ctx.fill();
       });
     });
@@ -266,7 +266,7 @@ export function createApprovalsTexture(accent: string) {
     items.forEach(([n, d, k, hue], i) => {
       const y = 110 + i * 92;
       roundRect(ctx, 28, y - 30, w - 56, 76, 14);
-      ctx.fillStyle = 'rgba(255,255,255,0.035)';
+      ctx.fillStyle = 'rgba(26,17,10,0.03)';
       ctx.fill();
       ctx.strokeStyle = STEEL;
       ctx.lineWidth = 1;
@@ -292,7 +292,7 @@ export function createStripTexture(accent: string) {
     items.forEach((t, i) => {
       ctx.beginPath();
       ctx.arc(x, h / 2, 5, 0, Math.PI * 2);
-      ctx.fillStyle = i === 1 ? accent : 'rgba(255,255,255,0.35)';
+      ctx.fillStyle = i === 1 ? accent : 'rgba(26,17,10,0.3)';
       ctx.fill();
       label(ctx, t, x + 18, h / 2 + 6, i === 1 ? SILVER : MIST, 15);
       ctx.font = `500 15px ${MONO}`;
@@ -313,7 +313,7 @@ export function createLabTexture(accent: string) {
       text(ctx, n, 36, y, 18);
       label(ctx, `${Math.round(p * 100)}%`, w - 90, y, MIST, 13);
       roundRect(ctx, 36, y + 22, w - 72, 10, 5);
-      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.fillStyle = 'rgba(26,17,10,0.08)';
       ctx.fill();
       roundRect(ctx, 36, y + 22, (w - 72) * p, 10, 5);
       ctx.fillStyle = accent;

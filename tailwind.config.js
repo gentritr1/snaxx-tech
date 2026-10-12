@@ -42,21 +42,21 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
         /* Confectionery Engine brand tokens — see DESIGN.md.
-           Warm cocoa darks and cream lights; text-safe on void: silver (16:1),
-           mist (8.6:1), ember (10.5:1). Text-safe on paper: ink (17:1), ink-soft (6.8:1). */
-        void: '#0A0705',
-        graphite: '#15100B',
-        steel: '#241B13',
-        'steel-light': '#362A1F',
-        mist: '#B3A48F',
-        silver: '#F1E7D8',
+           A bright vanilla-cream studio: `void` is the page cream, `silver` the
+           cocoa text. Text-safe on void: silver (13.5:1), mist (5.4:1), ember (4.9:1). */
+        void: '#F7F0E4',
+        graphite: '#EFE5D5',
+        steel: '#E2D4C0',
+        'steel-light': '#D3C1A8',
+        mist: '#7A6753',
+        silver: '#2B1D12',
         cocoa: '#3D2416',
         caramel: '#C9842B',
-        cream: '#F6ECDC',
+        cream: '#FFFBF5',
         ember: {
-          DEFAULT: '#F2B35B',
-          soft: '#F7CF8F',
-          deep: '#C9842B',
+          DEFAULT: '#9E5E14',
+          soft: '#F2B35B',
+          deep: '#7F4A0E',
         },
         paper: {
           DEFAULT: '#FAF4EA',

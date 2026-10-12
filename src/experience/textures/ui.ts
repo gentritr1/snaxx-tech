@@ -323,18 +323,18 @@ export function createLabTexture(accent: string) {
   });
 }
 
-/** FJALË letter tile face. */
+/** FJALË biscuit tile face: shortbread, or gold-glazed when the letter is right. */
 export function createLetterTexture(letter: string, accent: string, highlight: boolean) {
   return makeTexture(256, 256, (ctx, w, h) => {
     ctx.clearRect(0, 0, w, h);
     roundRect(ctx, 6, 6, w - 12, h - 12, 26);
-    ctx.fillStyle = highlight ? accent : '#15181F';
+    ctx.fillStyle = highlight ? accent : '#D9A25A';
     ctx.fill();
-    ctx.strokeStyle = highlight ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.14)';
+    ctx.strokeStyle = 'rgba(58,31,18,0.35)';
     ctx.lineWidth = 3;
     ctx.stroke();
     ctx.font = `500 150px ${FONT}`;
-    ctx.fillStyle = highlight ? '#0E0F12' : SILVER;
+    ctx.fillStyle = '#3A1F12';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(letter, w / 2, h / 2 + 8);

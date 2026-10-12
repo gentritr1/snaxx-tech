@@ -26,7 +26,7 @@ import { clamp01, sceneState, setHover, smoothstep } from '../sceneState';
 import { createGlobeDotsMaterial } from '../shaders/materials';
 import { createLetterTexture } from '../textures/ui';
 import { gamesConfig, type GameItem } from '@/config';
-import { GUNMETAL, METAL } from './Core';
+import { CHOCOLATE, GOLD, PORCELAIN } from './Core';
 import { scrollToGame } from '@/lib/scroll';
 
 const GAMES_Z = -38;
@@ -89,11 +89,14 @@ function Exhibit({ game, index, children }: { game: GameItem; index: number; chi
 
   return (
     <group ref={group} position={[GAMES_X[index], GAMES_Y, GAMES_Z]}>
-      {/* Pedestal */}
-      <mesh material={GUNMETAL} position={[0, 0, 0]}>
-        <cylinderGeometry args={[1.5, 1.6, 0.16, 64]} />
+      {/* Serving plate */}
+      <mesh material={PORCELAIN} position={[0, 0, 0]}>
+        <cylinderGeometry args={[1.5, 1.62, 0.16, 64]} />
       </mesh>
-      <mesh material={METAL} position={[0, -0.14, 0]}>
+      <mesh material={GOLD} position={[0, 0.02, 0]} rotation-x={-Math.PI / 2}>
+        <torusGeometry args={[1.66, 0.03, 12, 96]} />
+      </mesh>
+      <mesh material={CHOCOLATE} position={[0, -0.14, 0]}>
         <cylinderGeometry args={[1.75, 1.8, 0.12, 64]} />
       </mesh>
       <mesh material={ringMaterial} position={[0, 0.09, 0]} rotation-x={-Math.PI / 2}>
@@ -112,7 +115,7 @@ function Exhibit({ game, index, children }: { game: GameItem; index: number; chi
 }
 
 // ---------------------------------------------------------------------------
-// Arrows: a glossy paper dart with a stream of arrow glyphs behind it.
+// Arrows: a glossy blue candy dart with a stream of sugar glyphs behind it.
 
 function dartGeometry() {
   const g = new BufferGeometry();
@@ -138,11 +141,11 @@ function ArrowsExhibit({ accent }: { accent: string }) {
   const COUNT = 48;
   const geometry = useMemo(() => dartGeometry(), []);
   const material = useMemo(
-    () => new MeshPhysicalMaterial({ color: accent, metalness: 0.35, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.15, envMapIntensity: 1.4 }),
+    () => new MeshPhysicalMaterial({ color: accent, metalness: 0.05, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1.4 }),
     [accent],
   );
   const glyphMaterial = useMemo(
-    () => new MeshPhysicalMaterial({ color: '#AEB8CC', metalness: 0.8, roughness: 0.35, emissive: new Color(accent), emissiveIntensity: 0.4 }),
+    () => new MeshPhysicalMaterial({ color: '#F6ECDC', metalness: 0, roughness: 0.35, clearcoat: 0.8, emissive: new Color(accent), emissiveIntensity: 0.3 }),
     [accent],
   );
   const curve = useMemo(
@@ -195,7 +198,7 @@ function ArrowsExhibit({ accent }: { accent: string }) {
 }
 
 // ---------------------------------------------------------------------------
-// Block Destroy: a grid of machined blocks; one row ignites and clears.
+// Block Destroy: a bar of chocolate squares; one row caramelises and clears.
 
 function BlocksExhibit({ accent }: { accent: string }) {
   const SIZE = 6;
@@ -207,7 +210,7 @@ function BlocksExhibit({ accent }: { accent: string }) {
     return g;
   }, [COUNT]);
   const material = useMemo(() => {
-    const mat = new MeshPhysicalMaterial({ color: '#4A505C', metalness: 0.9, roughness: 0.4, clearcoat: 0.4 });
+    const mat = new MeshPhysicalMaterial({ color: '#3D2416', metalness: 0.02, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.12 });
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uHeatColor = { value: new Color(accent) };
       shader.vertexShader = `attribute float aHeat;\nvarying float vHeat;\n${shader.vertexShader}`.replace(
@@ -256,13 +259,17 @@ function BlocksExhibit({ accent }: { accent: string }) {
 
   return (
     <group rotation={[0.25, -0.35, 0]}>
+      {/* The bar's base slab */}
+      <mesh material={CHOCOLATE} position={[0, 0, -0.26]}>
+        <boxGeometry args={[2.78, 2.78, 0.14]} />
+      </mesh>
       <instancedMesh ref={mesh} args={[geometry, material, COUNT]} frustumCulled={false} />
     </group>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Geo Guesser: a dotted globe with procedural continents and a dropping pin.
+// Geo Guesser: a candy planet, continents in teal sprinkles, with a dropping pin.
 
 function fibonacciSphere(n: number, r: number) {
   const out = new Float32Array(n * 3);
@@ -345,11 +352,11 @@ function GlobeExhibit({ accent, index }: { accent: string; index: number }) {
       <group ref={globe}>
         <mesh>
           <sphereGeometry args={[R, 48, 48]} />
-          <meshPhysicalMaterial color="#0B1628" roughness={0.55} metalness={0.25} clearcoat={0.3} />
+          <meshPhysicalMaterial color="#2E1A10" roughness={0.3} metalness={0} clearcoat={0.9} clearcoatRoughness={0.12} />
         </mesh>
         <points geometry={dots} material={dotsMaterial} />
         <lineSegments geometry={lines}>
-          <lineBasicMaterial color="#2B3B58" transparent opacity={0.5} />
+          <lineBasicMaterial color="#6B4A2C" transparent opacity={0.45} />
         </lineSegments>
         {/* Pin on the surface, carried round by the globe. */}
         <group rotation={[0.4, 0.6, 0]}>
@@ -371,13 +378,13 @@ function GlobeExhibit({ accent, index }: { accent: string; index: number }) {
 }
 
 // ---------------------------------------------------------------------------
-// FJALË: five letter tiles flipping to reveal the day's word.
+// FJALË: five biscuit tiles flipping to reveal the day's word.
 
 function Tile({ letter, accent, index, highlight }: { letter: string; accent: string; index: number; highlight: boolean }) {
   const group = useRef<Group>(null);
   const face = useMemo(() => createLetterTexture(letter, accent, highlight), [letter, accent, highlight]);
   const edgeMaterial = useMemo(
-    () => new MeshPhysicalMaterial({ color: highlight ? accent : '#1B1E26', metalness: highlight ? 0.3 : 0.8, roughness: 0.4, emissive: new Color(accent), emissiveIntensity: 0 }),
+    () => new MeshPhysicalMaterial({ color: highlight ? accent : '#D9A25A', metalness: 0, roughness: highlight ? 0.3 : 0.65, clearcoat: highlight ? 0.8 : 0.1, emissive: new Color(accent), emissiveIntensity: 0 }),
     [accent, highlight],
   );
   const spacing = 0.82;

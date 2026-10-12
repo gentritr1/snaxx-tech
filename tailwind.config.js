@@ -41,29 +41,32 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        /* Precision Engine brand tokens — see DESIGN.md.
-           Text-safe on void: silver (15.6:1), mist (7.1:1), ember (10.2:1).
-           Text-safe on paper: ink (18.4:1), ink-soft (7.4:1). */
-        void: '#07080B',
-        graphite: '#111318',
-        steel: '#1B1E26',
-        'steel-light': '#2A2E38',
-        mist: '#9AA1AE',
-        silver: '#E6E8EE',
+        /* Confectionery Engine brand tokens — see DESIGN.md.
+           Warm cocoa darks and cream lights; text-safe on void: silver (16:1),
+           mist (8.6:1), ember (10.5:1). Text-safe on paper: ink (17:1), ink-soft (6.8:1). */
+        void: '#0A0705',
+        graphite: '#15100B',
+        steel: '#241B13',
+        'steel-light': '#362A1F',
+        mist: '#B3A48F',
+        silver: '#F1E7D8',
+        cocoa: '#3D2416',
+        caramel: '#C9842B',
+        cream: '#F6ECDC',
         ember: {
           DEFAULT: '#F2B35B',
           soft: '#F7CF8F',
           deep: '#C9842B',
         },
         paper: {
-          DEFAULT: '#F5F4F0',
-          deep: '#ECEAE4',
+          DEFAULT: '#FAF4EA',
+          deep: '#EFE5D5',
           card: '#FFFFFF',
         },
         ink: {
-          DEFAULT: '#0E0F12',
-          soft: '#4E535E',
-          faint: '#C9CCD3',
+          DEFAULT: '#1A110A',
+          soft: '#5B4A3A',
+          faint: '#D7CAB7',
         },
         product: {
           arrows: '#2F8CFF',

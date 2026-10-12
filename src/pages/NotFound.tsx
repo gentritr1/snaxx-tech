@@ -7,7 +7,7 @@ export default function NotFound() {
     document.title = 'Page Not Found — Snaxx Tech';
     document.documentElement.dataset.surface = 'void';
     return () => {
-      document.title = 'Snaxx Tech — Precision-built apps & games';
+      document.title = 'Snaxx Tech — Bite-sized apps & games';
       delete document.documentElement.dataset.surface;
     };
   }, []);
@@ -22,8 +22,8 @@ export default function NotFound() {
 
       <div className="relative z-10 flex flex-col items-center">
         <p className="label-mono text-ember">Error 404</p>
-        <h1 className="font-display type-headline mt-5 text-white">This part of the machine does not exist.</h1>
-        <p className="type-lead mt-5 max-w-md">The page you asked for is not here. The rest of the studio is.</p>
+        <h1 className="font-display type-headline mt-5 text-white">This shelf of the pantry is empty.</h1>
+        <p className="type-lead mt-5 max-w-md">The page you asked for is not here. The rest of the snacks are.</p>
         <Link
           to="/"
           className="pressable group mt-10 inline-flex min-h-11 items-center gap-2 rounded-lg bg-silver px-6 py-3 text-sm font-medium text-ink transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember focus-visible:ring-offset-2 focus-visible:ring-offset-void"

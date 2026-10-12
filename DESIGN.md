@@ -1,20 +1,23 @@
 ---
 name: Snaxx Tech
-description: A cinematic, real-time 3D brand experience for an independent software and games studio.
+description: A cinematic, real-time 3D brand experience for an independent studio that makes bite-sized software and games.
 colors:
-  void: "#07080B"
-  graphite: "#111318"
-  steel: "#1B1E26"
-  steel-light: "#2A2E38"
-  mist: "#9AA1AE"
-  silver: "#E6E8EE"
+  void: "#0A0705"
+  graphite: "#15100B"
+  steel: "#241B13"
+  steel-light: "#362A1F"
+  mist: "#B3A48F"
+  silver: "#F1E7D8"
   white: "#FFFFFF"
   ember: "#F2B35B"
   ember-soft: "#F7CF8F"
-  paper: "#F5F4F0"
-  paper-deep: "#ECEAE4"
-  ink: "#0E0F12"
-  ink-soft: "#4E535E"
+  caramel: "#C9842B"
+  cocoa: "#3D2416"
+  cream: "#F6ECDC"
+  paper: "#FAF4EA"
+  paper-deep: "#EFE5D5"
+  ink: "#1A110A"
+  ink-soft: "#5B4A3A"
   arrows-blue: "#2F8CFF"
   block-destroy-orange: "#FF7A29"
   fjale-gold: "#D08700"
@@ -92,40 +95,43 @@ components:
 
 ## Overview
 
-**Creative North Star: "Precision Engine"**
+**Creative North Star: "The Confectionery Engine"**
 
-Snaxx Tech presents itself as an advanced, quietly playful machine. The
-website is one continuous, real-time 3D film: a levitating mechanical core
-awakens, opens to reveal its internal architecture, re-forms into a frame
-around the studio's software, becomes a portal, and gives way to a world of
-game exhibits. Every chapter is a cinematic scene; every transition is part
-of the same directed sequence.
+Snaxx Tech makes snacks for your screen, and the brand treats snacking the
+way a luxury chocolatier treats a bonbon. The website is one continuous,
+real-time 3D film: a levitating confection awakens (a molten caramel centre
+inside a glass shell, wrapped in tempered-chocolate pieces and porcelain
+rings), cracks open to reveal its centre, re-forms into a frame around the
+studio's software, becomes a glazed donut portal, and gives way to a pantry
+of game exhibits served on porcelain plates. Every chapter is a cinematic
+scene; every transition is part of the same directed sequence.
 
-The register is luxury technology: Apple reveal, AAA presentation,
-architectural visualisation. Luxury comes from restraint. Deep darks, real
-metal and glass, one accent light per scene, generous space and exact type.
-The playfulness the studio is known for lives in the products themselves
-(the paper dart, the igniting block row, the dotted globe, the flipping
-letter tiles) and in the copy, never in decoration.
+The register is luxury technology applied to food: Apple reveal, AAA
+presentation, a premium chocolate commercial. Luxury comes from restraint.
+Warm cocoa darks, real gloss (chocolate, glaze, caramel, porcelain), one
+accent light per scene, generous space and exact type. Playfulness lives in
+the snacks themselves (sprinkles, a chocolate bar that caramelises row by
+row, a candy planet, biscuit letter tiles) and in the copy's appetite, never
+in decoration.
 
 **Key characteristics**
 
 - A single fixed WebGL stage behind the page; the DOM carries every word.
 - Scroll is the camera: chapters are tall sections with sticky stages, and
   the scene state is scrubbed by one scroll-bound timeline.
-- Three signature moments: the Awakening (load), the Transformation (plates
-  reorganise into a frame around holographic interfaces) and Enter the
-  Digital World (flight through a portal into the games).
-- Product accents stay attached to their products; ember is the studio's
-  only accent and is used sparingly.
+- Three signature moments: the Awakening (load), the Transformation
+  (chocolate pieces reorganise into a frame around holographic interfaces)
+  and Enter the Pantry (flight through a glazed donut into the games).
+- Product accents are flavours and stay attached to their products; ember,
+  the caramel, is the studio's only accent and is used sparingly.
 - Reduced motion is a first-class path: one still composition per chapter.
 
 ## Colors
 
-The palette is near-monochrome: void, graphite and steel surfaces, silver
-and mist text, with ember (derived from the wordmark's bitten-cookie gold)
-as the energy of the core. The legal documents flip to a light reading
-surface (paper and ink).
+The palette is edible and near-monochrome: cocoa-dark surfaces (void,
+graphite, steel), cream and warm-grey text (silver, mist), with ember, the
+caramel of the wordmark's bitten cookie, as the energy of the centre. The
+legal documents flip to a cream reading surface (paper and ink).
 
 ### Primary
 
@@ -134,20 +140,22 @@ surface (paper and ink).
 
 ### Secondary
 
-- **Ember:** Core energy, active navigation, focus rings on dark, one
-  highlight per section. Never a background fill for text blocks.
+- **Ember (caramel):** The centre's energy, active navigation, focus rings
+  on dark, one highlight per section. Never a background fill for text.
 - **Mist:** Secondary text, labels, metadata.
 
 ### Product signals
 
 - **Arrows Blue**, **Block Destroy Orange**, **FJALË Gold**, **Geo Teal**,
-  **Offday Mint**: each identifies its product, in the DOM card ring and dot
-  and in the 3D exhibit light.
+  **Offday Mint**: the flavours. Each identifies its product, in the DOM
+  card ring and dot, in the 3D exhibit light, and among the sprinkles.
 
 ### Neutral
 
-- **Graphite / Steel:** Raised surfaces, hairlines, panel fills.
-- **Paper / Ink:** The reading surface for privacy, terms and support.
+- **Graphite / Steel:** Raised cocoa surfaces, hairlines, panel fills.
+- **Cocoa / Cream / Caramel:** The 3D materials (tempered chocolate,
+  porcelain and shortbread, molten centre) referenced in UI only as tints.
+- **Paper / Ink:** The cream reading surface for privacy, terms and support.
 
 ### Named rules
 
@@ -155,8 +163,11 @@ surface (paper and ink).
 nothing else.
 
 **The One Light Rule.** Each scene has one dominant accent light. Bloom is
-reserved for emissive energy (the heart, filaments, moving plates, the
-portal), never for metal or text.
+reserved for emissive energy (the caramel centre, filaments, moving pieces,
+the portal iris), never for chocolate, porcelain or text.
+
+**The Edible Rule.** Everything rendered in 3D is something you could eat
+or serve food on. No bare metal machinery; gold appears only as foil trim.
 
 ## Typography
 
@@ -183,6 +194,10 @@ engineered, Apple-grade calm. Weight 900 and serif display faces are retired.
 **The Chapter Index Rule.** Every chapter opens with an ember index, a
 hairline and a label (`03 — Software`). Nothing else uses that pattern.
 
+**The Appetite Rule.** Copy may taste of food (bites, centres, flavours,
+the pantry, the kitchen) but never jokes at the product's expense; every
+line still says what the product does.
+
 **The Readable Document Rule.** Legal and support copy uses body type on
 paper with a 65–75ch measure; the 3D stage never loads on those routes.
 
@@ -206,7 +221,7 @@ It is never decorative and never stacked.
 - **Awakening:** 3.4s power-up on load; copy enters in a 150–1100ms stagger.
 - **Interaction:** spring-damped pointer parallax on the camera, hover glow
   and lift on 3D exhibits mirrored to their DOM cards, magnetic contact
-  button.
+  button. Sprinkles trail the camera's focus through the whole film.
 - **UI easing:** `ease-out-quart` 200–350ms for state changes.
 - **Reduced motion:** no camera flight; each chapter shows a still. Copy
   is always visible. Loops stop.
@@ -248,6 +263,8 @@ mini footer with every published legal URL.
 ### Do
 
 - **Do** let the 3D scene carry the identity; keep the DOM quiet around it.
+- **Do** keep every 3D material edible: chocolate, caramel, glaze, biscuit,
+  porcelain, sugar.
 - **Do** keep product accents on their products.
 - **Do** keep copy on glass or a scrim when it sits over bright scene areas.
 - **Do** provide 44px targets, visible focus and the reduced-motion path.
@@ -260,4 +277,6 @@ mini footer with every published legal URL.
 - **Don't** bloom metal, text or UI panels.
 - **Don't** stack glass or use gradient text.
 - **Don't** bring back the serif display face or the paper-illustration art.
+- **Don't** let the food theme turn cartoonish: no mascots, no drips of
+  cheese, no cereal-box type. The reference is a chocolatier, not a diner.
 - **Don't** put copy only in the canvas; the DOM is the source of truth.

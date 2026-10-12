@@ -42,7 +42,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
     canonicalLink.href = window.location.href.split(/[?#]/)[0];
 
     return () => {
-      document.title = 'Snaxx Tech — Precision-built apps & games';
+      document.title = 'Snaxx Tech — Bite-sized apps & games';
       if (description && previousDescription) description.content = previousDescription;
       if (canonical && previousCanonical) canonical.href = previousCanonical;
       if (!canonical) canonicalLink.remove();

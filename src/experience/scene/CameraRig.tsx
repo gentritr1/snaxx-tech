@@ -55,6 +55,9 @@ export function CameraRig() {
       camera.position.copy(goal);
       look.copy(lookGoal);
       primed.current = true;
+      if (import.meta.env.DEV) {
+        (window as unknown as { __snaxx?: unknown }).__snaxx = { sceneState: s, camera, look };
+      }
     } else {
       damp3(camera.position, goal, 0.28, dt);
       damp3(look, lookGoal, 0.3, dt);

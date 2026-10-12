@@ -1,4 +1,4 @@
-// Site configuration — Snaxx Tech ("Precision Engine" rebrand).
+// Site configuration — Snaxx Tech ("Confectionery Engine" rebrand: snacks, served with industrial care).
 // Every word on the home page lives here; the 3D experience reads the
 // product data below so the scene and the DOM always agree.
 
@@ -10,9 +10,9 @@ export interface SiteConfig {
 
 export const siteConfig: SiteConfig = {
   language: "en",
-  title: "Snaxx Tech — Precision-built apps & games",
+  title: "Snaxx Tech — Bite-sized apps & games",
   description:
-    "Snaxx Tech is an independent studio engineering software and games with industrial care: Offday for teams, and the games Arrows, Block Destroy, Geo Guesser World 3D! and the daily Albanian word game FJALË.",
+    "Snaxx Tech is an independent studio making bite-sized software and games with industrial care: Offday for teams, and the games Arrows, Block Destroy, Geo Guesser World 3D! and the daily Albanian word game FJALË.",
 };
 
 // Navigation
@@ -50,13 +50,13 @@ export interface HeroConfig {
 }
 
 export const heroConfig: HeroConfig = {
-  eyebrow: "Independent studio · Apps, games & useful little things",
-  headline: ["Small ideas.", "Engineered large."],
+  eyebrow: "Independent studio · Snacks for your screen",
+  headline: ["Small bites.", "Big craving."],
   intro:
-    "We build software and games the way a watchmaker builds a movement: every part machined, every motion tuned, nothing decorative.",
+    "We make apps and games the way a chocolatier makes a bonbon: a glossy shell, a surprising centre, and nothing you can stop at one of.",
   primaryCta: { label: "Explore the work", href: "#software" },
   secondaryCta: { label: "Play FJALË", href: "https://xn--fjal-opa.com" },
-  readouts: ["CORE // ONLINE", "RINGS // 3", "COMPONENTS // 900"],
+  readouts: ["CENTRE // CARAMEL", "SHELL // 900 PIECES", "FRESHNESS // 100%"],
 };
 
 // Story chapters between the hero and the products
@@ -73,19 +73,19 @@ export const storyChapters: ChapterCopy[] = [
   {
     id: "core",
     index: "01",
-    label: "The core",
-    heading: "Every product starts as a machine we can take apart.",
+    label: "The bite",
+    heading: "Every product starts as something we can crack open.",
     body:
-      "Before a feature ships, we open it up. Components come off, the structure underneath gets inspected, and what stays is only what earns its place.",
+      "Before a feature ships, we bite into it. The shell comes off, the centre gets tasted, and only what is genuinely delicious stays on the menu.",
     align: "left",
   },
   {
     id: "inside",
     index: "02",
-    label: "Inside",
-    heading: "Nothing in here is decorative.",
+    label: "The centre",
+    heading: "Nothing in here is filler.",
     body:
-      "Interaction timing, loading paths, offline behaviour, the weight of a tap. The craft is in the parts you never see, so the parts you do feel effortless.",
+      "Interaction timing, loading paths, offline behaviour, the weight of a tap. The craft is in the centre you never see, so the first bite feels effortless.",
     align: "center",
   },
 ];
@@ -119,7 +119,7 @@ export interface SoftwareConfig {
 export const softwareConfig: SoftwareConfig = {
   index: "03",
   label: "Software",
-  heading: "Tools that feel engineered, not assembled.",
+  heading: "Tools that taste freshly made, not reheated.",
   description:
     "Working software for small teams: fast, legible and respectful of the people who use it every day.",
   products: [
@@ -143,10 +143,10 @@ export const softwareConfig: SoftwareConfig = {
     {
       id: "lab",
       name: "The Lab",
-      tagline: "Useful little things, in motion.",
+      tagline: "Useful little things, still in the oven.",
       description:
-        "Small utilities and prototypes we build to scratch our own itches. Some graduate into products; the rest make the products better.",
-      status: "3 prototypes running",
+        "Small utilities and prototypes we bake to satisfy our own cravings. Some graduate into products; the rest make the products better.",
+      status: "3 prototypes baking",
       accent: "#F2B35B",
       features: [
         { title: "Offline first", body: "Everything works without a signal." },
@@ -185,11 +185,11 @@ export interface GamesConfig {
 export const gamesConfig: GamesConfig = {
   index: "04",
   label: "Games",
-  heading: "Worlds built to be replayed.",
+  heading: "Flavours built to be replayed.",
   description:
-    "Four games, four different sparks: precision, calm, curiosity and language. One shared obsession with the next tap feeling right.",
-  portalLabel: "Enter the worlds",
-  portalHeading: "Beyond the work, the worlds we play in.",
+    "Four games, four flavours: precision, calm, curiosity and language. One shared obsession with the next bite feeling right.",
+  portalLabel: "Enter the pantry",
+  portalHeading: "Beyond the work, the flavours we play in.",
   games: [
     {
       id: "arrows",
@@ -208,7 +208,7 @@ export const gamesConfig: GamesConfig = {
       name: "Block Destroy",
       category: "Offline block puzzle",
       description:
-        "Place, clear, breathe. A quiet puzzle with no timer, no account and no signal required.",
+        "Place, clear, breathe. A quiet puzzle, one square at a time, with no timer, no account and no signal required.",
       status: "Coming to Android",
       accent: "#FF7A29",
       image: "/images/app-block-destroy.webp",
@@ -266,11 +266,11 @@ export interface StudioConfig {
 export const studioConfig: StudioConfig = {
   index: "05",
   label: "Studio",
-  heading: "Small team. Industrial standards.",
+  heading: "Small kitchen. Industrial standards.",
   description:
-    "Snaxx Tech is an independent studio. We keep the team small so every product gets the same hands from first sketch to long-term support.",
+    "Snaxx Tech is an independent studio. We keep the kitchen small so every product gets the same hands from first sketch to long-term support.",
   stats: [
-    { value: "5", label: "Products in the world" },
+    { value: "5", label: "Products on the menu" },
     { value: "2", label: "Platforms: Android & web" },
     { value: "100%", label: "Independent" },
   ],
@@ -329,7 +329,7 @@ export interface FooterConfig {
 export const footerConfig: FooterConfig = {
   logo: "Snaxx Tech",
   description:
-    "An independent studio engineering software and games with care. Home of Offday, Arrows, Block Destroy, Geo Guesser World 3D! and FJALË.",
+    "An independent studio making bite-sized software and games with care. Home of Offday, Arrows, Block Destroy, Geo Guesser World 3D! and FJALË.",
   columns: [
     {
       title: "Products",
@@ -362,5 +362,5 @@ export const footerConfig: FooterConfig = {
     },
   ],
   copyright: "© 2026 Snaxx Tech. All rights reserved.",
-  credit: "Engineered with care, coffee & code.",
+  credit: "Made with care, coffee & crumbs.",
 };

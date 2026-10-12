@@ -2,11 +2,12 @@ import { AdditiveBlending, Color, DoubleSide, NormalBlending, ShaderMaterial, Te
 import { simplex3 } from './noise.glsl';
 
 const EMBER = new Color('#F2B35B');
-const EMBER_DEEP = new Color('#C9842B');
-const SILVER = new Color('#E6E8EE');
-const BLUE = new Color('#2F8CFF');
+const EMBER_DEEP = new Color('#8A4A12');
+const SILVER = new Color('#FFF1DC');
+const BLUE = new Color('#FFC98A');
+const CHOCOLATE = new Color('#3A1F12');
 
-/** The energy heart inside the glass: slow plasma with a fresnel rim. */
+/** The molten caramel centre inside the glass shell: slow swirl with a fresnel rim. */
 export function createPlasmaMaterial() {
   return new ShaderMaterial({
     uniforms: {
@@ -93,7 +94,7 @@ export function createFilamentMaterial() {
   });
 }
 
-/** GPU particle field: drift, fly-through streaming, portal pull and calm. */
+/** GPU sugar-dust field: drift, fly-through streaming, portal pull and calm. */
 export function createParticleMaterial() {
   return new ShaderMaterial({
     transparent: true,
@@ -168,8 +169,8 @@ export function createGridMaterial() {
       uTime: { value: 0 },
       uWorld: { value: 0 },
       uPortal: { value: new Vector3(0, 0, -22) },
-      uLine: { value: new Color('#6E7A92') },
-      uAccent: { value: BLUE.clone() },
+      uLine: { value: new Color('#8C6A45') },
+      uAccent: { value: new Color('#F2B35B') },
     },
     vertexShader: /* glsl */ `
       varying vec3 vPos;
@@ -254,7 +255,7 @@ export function createHoloMaterial(map: Texture, accent: string) {
   });
 }
 
-/** Portal iris: swirling energy band that opens from the centre. */
+/** Portal iris: swirling chocolate and caramel that opens from the centre. */
 export function createPortalMaterial() {
   return new ShaderMaterial({
     transparent: true,
@@ -264,7 +265,7 @@ export function createPortalMaterial() {
     uniforms: {
       uTime: { value: 0 },
       uOpen: { value: 0 },
-      uColorA: { value: new Color('#1B3A7A') },
+      uColorA: { value: CHOCOLATE.clone() },
       uColorB: { value: EMBER.clone() },
     },
     vertexShader: /* glsl */ `
@@ -290,7 +291,7 @@ export function createPortalMaterial() {
         float inner = smoothstep(iris + 0.2, iris, r) * 1.6;
         float n = smoothstep(-0.2, 0.8, swirl);
         vec3 col = mix(uColorA, uColorB, n * 0.75 + inner * 0.25);
-        float glow = (0.5 + n * 1.1 + inner) * (0.7 + uOpen * 1.9);
+        float glow = (0.45 + n * 1.0 + inner) * (0.5 + uOpen * 1.3);
         float alpha = band * (0.75 + n * 0.25);
         gl_FragColor = vec4(col * glow, alpha);
       }
@@ -305,8 +306,8 @@ export function createHorizonMaterial() {
     depthWrite: false,
     uniforms: {
       uWorld: { value: 0 },
-      uTop: { value: new Color('#07080B') },
-      uGlow: { value: new Color('#17305B') },
+      uTop: { value: new Color('#0A0705') },
+      uGlow: { value: new Color('#4A2A14') },
     },
     vertexShader: /* glsl */ `
       varying vec2 vUv;

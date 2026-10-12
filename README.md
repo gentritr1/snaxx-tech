@@ -1,18 +1,20 @@
 # Snaxx Tech — cinematic 3D brand site
 
-The studio website for Snaxx Tech: one continuous, scroll-directed 3D film
-(React Three Fiber + GSAP ScrollTrigger) with the studio's software and
-games emerging from the scene, plus light-weight legal and support pages
-for each app. Built with React 19, TypeScript, Tailwind CSS and Vite.
+The studio website for Snaxx Tech, themed around snacking: one continuous,
+scroll-directed 3D film (React Three Fiber + GSAP ScrollTrigger) in which a
+confectionery core (caramel centre, chocolate shell, porcelain rings) opens
+into the studio's software and a pantry of games, plus light-weight legal
+and support pages for each app. Built with React 19, TypeScript, Tailwind
+CSS and Vite.
 
 ## Experience
 
-- **Awakening** on load: the mechanical core powers up and the camera reveals it.
-- **Approach and reveal**: hundreds of instanced shell plates peel off and expose the rings, glass heart and energy filaments.
-- **Fly-through**: the camera passes through the heart into a digital world.
-- **Transformation**: the plates re-form into a frame around holographic Offday interfaces.
-- **Portal**: the plates become a ring; the camera flies through into the games world.
-- **Games**: four exhibits (Arrows, Block Destroy, Geo Guesser World 3D!, FJALË) with a tracking shot and synced cards.
+- **Awakening** on load: the caramel centre lights up and the camera reveals the confection.
+- **Approach and reveal**: hundreds of instanced chocolate pieces peel off and expose the porcelain rings, glass shell and caramel threads.
+- **Fly-through**: the camera passes through the centre into a warm digital pantry.
+- **Transformation**: the pieces re-form into a frame around holographic Offday interfaces.
+- **Portal**: the pieces halo a glazed, sprinkled donut; the camera flies through its caramel iris into the games.
+- **Games**: four exhibits on porcelain plates (a candy dart, a chocolate bar, a candy planet, biscuit tiles) with a tracking shot and synced cards.
 - **Studio and contact**: a calm overview and the studio inbox.
 
 The scene is decorative for assistive tech: every word lives in the DOM.
@@ -58,7 +60,7 @@ src/
   legal/content.ts          Legal content per app
 ```
 
-See `DESIGN.md` for the brand system ("Precision Engine") and
+See `DESIGN.md` for the brand system ("The Confectionery Engine") and
 `docs/superpowers/specs/` for the design spec.
 
 ## Offday PTO app

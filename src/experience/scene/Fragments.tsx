@@ -17,9 +17,11 @@ interface Shard {
   spin: Vector3;
 }
 
+const SPRINKLES = ['#F2B35B', '#2F8CFF', '#FF7A29', '#14B8A6', '#58D6A6', '#F6ECDC', '#3D2416', '#E85D75'];
+
 /**
- * Floating geometric shards that orbit whatever the camera is looking at.
- * The group trails the scroll target so the same fragments accompany the
+ * Floating sprinkles that orbit whatever the camera is looking at.
+ * The group trails the scroll target so the same sprinkles accompany the
  * visitor from the core through the portal to the games.
  */
 export function Fragments({ count }: { count: number }) {
@@ -33,18 +35,19 @@ export function Fragments({ count }: { count: number }) {
       phase: rnd() * Math.PI * 2,
       tilt: (rnd() - 0.5) * 1.4,
       lift: (rnd() - 0.5) * 2.6,
-      scale: 0.035 + rnd() * 0.1,
+      scale: 0.05 + rnd() * 0.11,
       spin: new Vector3(rnd(), rnd(), rnd()).multiplyScalar(0.8),
     }));
   }, [count]);
   const material = useMemo(
     () =>
       new MeshPhysicalMaterial({
-        color: '#8A93A6',
-        metalness: 0.9,
-        roughness: 0.22,
-        clearcoat: 0.6,
-        envMapIntensity: 1.4,
+        color: '#FFFFFF',
+        metalness: 0,
+        roughness: 0.25,
+        clearcoat: 1,
+        clearcoatRoughness: 0.1,
+        envMapIntensity: 1.2,
       }),
     [],
   );
@@ -58,8 +61,7 @@ export function Fragments({ count }: { count: number }) {
     if (!inst) return;
     const rnd = mulberry32(5);
     shards.forEach((_, i) => {
-      const ember = rnd() > 0.82;
-      scratch.color.set(ember ? '#F2B35B' : '#B9C1D1');
+      scratch.color.set(SPRINKLES[Math.floor(rnd() * SPRINKLES.length)]);
       inst.setColorAt(i, scratch.color);
     });
     if (inst.instanceColor) inst.instanceColor.needsUpdate = true;
@@ -80,7 +82,7 @@ export function Fragments({ count }: { count: number }) {
       p.y += Math.sin(a) * sh.radius * Math.sin(sh.tilt);
       e.set(sh.spin.x * t, sh.spin.y * t, sh.spin.z * t);
       q.setFromEuler(new EulerLike(e.x, e.y, e.z));
-      scratch.s.setScalar(sh.scale * (0.8 + s.energy * 0.2));
+      scratch.s.set(sh.scale * 0.55, sh.scale * (0.8 + s.energy * 0.2), sh.scale * 0.55);
       m.compose(p, q, scratch.s);
       inst.setMatrixAt(i, m);
     }
@@ -90,7 +92,7 @@ export function Fragments({ count }: { count: number }) {
   return (
     <group ref={group}>
       <instancedMesh ref={mesh} args={[undefined, undefined, count]} material={material} frustumCulled={false}>
-        <octahedronGeometry args={[1, 0]} />
+        <capsuleGeometry args={[0.42, 1.5, 4, 10]} />
       </instancedMesh>
     </group>
   );

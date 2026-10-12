@@ -34,21 +34,28 @@ Assumed (my calls, since the user is away):
   is procedural or self-hosted: no HDRI downloads, no DRACO workers, no CDN
   fonts.
 
-## 2. Brand identity: "Precision Engine"
+## 2. Brand identity: "The Confectionery Engine"
 
-North star: *an advanced, quietly playful machine*. The studio is small, but
-the craft is industrial-grade. Luxury comes from restraint: deep darks, real
-metal and glass, one accent light per scene, generous whitespace, exact type.
+Update (same day): the user asked for the whole site to be themed around
+snacks and snacking. North star: *a luxury chocolatier's machine*. The
+studio makes snacks for your screen; the craft is industrial-grade. Luxury
+comes from restraint: warm cocoa darks, real gloss (chocolate, caramel,
+glaze, porcelain), one accent light per scene, generous whitespace, exact
+type. In 3D everything is edible or serves food: the core is a caramel
+centre in a glass shell wrapped in tempered-chocolate pieces and porcelain
+rings; fragments are sprinkles; particles are sugar dust; the portal is a
+glazed donut; the game exhibits sit on porcelain plates (a candy dart, a
+chocolate bar, a candy planet, biscuit letter tiles).
 
 ### Palette
 
 | Token | Hex | Role |
 | --- | --- | --- |
-| `void` | `#07080B` | Page and scene background |
-| `graphite` | `#111318` | Raised dark surfaces |
-| `steel` | `#1B1E26` | Borders on dark, panel fills |
-| `mist` | `#9AA1AE` | Secondary text on dark |
-| `silver` | `#E6E8EE` | Primary text on dark |
+| `void` | `#0A0705` | Page and scene background (dark cocoa) |
+| `graphite` | `#15100B` | Raised dark surfaces |
+| `steel` | `#241B13` | Borders on dark, panel fills |
+| `mist` | `#B3A48F` | Secondary text on dark |
+| `silver` | `#F1E7D8` | Primary text on dark (cream) |
 | `white` | `#FFFFFF` | Display headlines |
 | `ember` | `#F2B35B` | Brand accent (energy core, highlights, focus on dark). Derived from the wordmark's bitten-cookie gold. |
 | `arrows-blue` | `#2F8CFF` | Arrows product signal |
@@ -56,8 +63,8 @@ metal and glass, one accent light per scene, generous whitespace, exact type.
 | `fjale-gold` | `#D08700` | FJALË product signal |
 | `geo-teal` | `#14B8A6` | Geo Guesser product signal |
 | `offday-mint` | `#58D6A6` | Offday product signal |
-| `paper` | `#F5F4F0` | Light reading surface (legal documents) |
-| `ink` | `#0E0F12` | Text on light |
+| `paper` | `#FAF4EA` | Cream reading surface (legal documents) |
+| `ink` | `#1A110A` | Text on light |
 
 Rules: The Product Signal Rule survives (accent belongs to its product). Ember
 is the only studio-level accent and is used sparingly: the core's energy,

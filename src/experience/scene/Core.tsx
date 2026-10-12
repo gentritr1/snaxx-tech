@@ -29,24 +29,36 @@ import type { Quality } from '../quality';
 
 const EMBER = new Color('#F2B35B');
 
-export const METAL = new MeshPhysicalMaterial({
-  color: '#C8CDD7',
-  metalness: 1,
-  roughness: 0.26,
-  clearcoat: 0.5,
-  clearcoatRoughness: 0.25,
-  envMapIntensity: 1.3,
+/** Glossy porcelain: the serving-ware of the confectionery engine. */
+export const PORCELAIN = new MeshPhysicalMaterial({
+  color: '#F3E9D8',
+  metalness: 0,
+  roughness: 0.2,
+  clearcoat: 1,
+  clearcoatRoughness: 0.08,
+  envMapIntensity: 1.1,
 });
 
-export const GUNMETAL = new MeshPhysicalMaterial({
-  color: '#3A3F4B',
-  metalness: 1,
-  roughness: 0.42,
+/** Tempered dark chocolate: deep, glossy, slightly warm. */
+export const CHOCOLATE = new MeshPhysicalMaterial({
+  color: '#2E1A10',
+  metalness: 0,
+  roughness: 0.3,
+  clearcoat: 0.9,
+  clearcoatRoughness: 0.14,
   envMapIntensity: 1,
 });
 
+/** Gold foil for rims and trims. */
+export const GOLD = new MeshPhysicalMaterial({
+  color: '#E2BF7A',
+  metalness: 1,
+  roughness: 0.24,
+  envMapIntensity: 1.3,
+});
+
 // ---------------------------------------------------------------------------
-// Heart: glass sphere around a plasma core. Dissolves during the fly-through.
+// Centre: a glass shell around molten caramel. Dissolves during the fly-through.
 
 function Heart({ quality }: { quality: Quality }) {
   const plasma = useMemo(() => createPlasmaMaterial(), []);
@@ -91,12 +103,12 @@ function Heart({ quality }: { quality: Quality }) {
             distortion={0.18}
             distortionScale={0.5}
             temporalDistortion={0.08}
-            color="#E3EAF4"
-            attenuationColor="#F2B35B"
-            attenuationDistance={2.2}
+            color="#F7E6C8"
+            attenuationColor="#D98A2B"
+            attenuationDistance={1.6}
           />
         ) : (
-          <meshPhysicalMaterial transparent opacity={0.32} roughness={0.08} metalness={0} clearcoat={1} color="#A9B8CF" />
+          <meshPhysicalMaterial transparent opacity={0.55} roughness={0.08} metalness={0} clearcoat={1} color="#E0A24D" />
         )}
       </mesh>
       <mesh ref={inner} material={plasma}>
@@ -107,7 +119,7 @@ function Heart({ quality }: { quality: Quality }) {
 }
 
 // ---------------------------------------------------------------------------
-// Filaments: energy conduits inside the shell, merged into one draw call.
+// Filaments: caramel threads inside the shell, merged into one draw call.
 
 function Filaments() {
   const geometry = useMemo(() => {
@@ -154,7 +166,7 @@ function Filaments() {
 }
 
 // ---------------------------------------------------------------------------
-// Rings: three machined gyroscopic rings with notches and an inner light track.
+// Rings: three porcelain gyroscopic rings with chocolate studs and a caramel light track.
 
 interface RingSpec {
   radius: number;
@@ -246,11 +258,11 @@ function Ring({ spec, index }: { spec: RingSpec; index: number }) {
   return (
     <group ref={outer} rotation={spec.tilt}>
       <group ref={spin}>
-        <mesh geometry={geometry} material={METAL} />
+        <mesh geometry={geometry} material={PORCELAIN} />
         <mesh ref={track} material={trackMaterial} rotation-x={Math.PI / 2}>
           <torusGeometry args={[spec.radius - spec.width / 2 - 0.01, 0.012, 8, 160]} />
         </mesh>
-        <instancedMesh ref={teeth} args={[undefined, undefined, spec.teeth]} material={GUNMETAL}>
+        <instancedMesh ref={teeth} args={[undefined, undefined, spec.teeth]} material={CHOCOLATE}>
           <boxGeometry args={[0.07, spec.thickness * 1.5, 0.12]} />
         </instancedMesh>
       </group>
@@ -269,7 +281,7 @@ function Rings() {
 }
 
 // ---------------------------------------------------------------------------
-// Plates: hundreds of instanced shell segments with five formations.
+// Plates: hundreds of instanced chocolate shell pieces with five formations.
 
 const FORMATIONS = 5;
 const FRAME_CENTER = new Vector3(0, 0.1, -14.9);
@@ -376,7 +388,7 @@ function buildPlateLayout(n: number): PlateLayout {
     // 3 — portal ring.
     const ringLayer = i % 4;
     const angle = (i / n) * Math.PI * 2 * 7 + rnd() * 0.3;
-    const rr = 3.25 + ringLayer * 0.22 + (rnd() - 0.5) * 0.1;
+    const rr = 4.05 + ringLayer * 0.2 + (rnd() - 0.5) * 0.1;
     pos.set(Math.cos(angle) * rr, Math.sin(angle) * rr, (rnd() - 0.5) * 0.5 - ringLayer * 0.12).add(RING_CENTER);
     q.setFromAxisAngle(new Vector3(0, 0, 1), angle + Math.PI / 2);
     write(3, i);
@@ -385,7 +397,7 @@ function buildPlateLayout(n: number): PlateLayout {
     const sy = rnd() * 2 - 1;
     const sr = Math.sqrt(1 - sy * sy);
     const st = rnd() * Math.PI * 2;
-    pos.set(Math.cos(st) * sr, Math.abs(sy) * 0.8 + 0.1, Math.sin(st) * sr).multiplyScalar(16 + rnd() * 14).add(SKY_CENTER);
+    pos.set(Math.cos(st) * sr, Math.abs(sy) * 0.8 + 0.1, Math.sin(st) * sr).multiplyScalar(24 + rnd() * 18).add(SKY_CENTER);
     axis.set(rnd() - 0.5, rnd() - 0.5, rnd() - 0.5).normalize();
     q.setFromAxisAngle(axis, rnd() * Math.PI * 2);
     write(4, i);
@@ -397,18 +409,18 @@ function Plates({ count }: { count: number }) {
   const mesh = useRef<InstancedMesh>(null);
   const layout = useMemo(() => buildPlateLayout(count), [count]);
   const geometry = useMemo(() => {
-    const g = new RoundedBoxGeometry(0.36, 0.2, 0.045, 2, 0.018);
+    const g = new RoundedBoxGeometry(0.32, 0.18, 0.05, 2, 0.02);
     g.setAttribute('aGlow', new InstancedBufferAttribute(new Float32Array(count), 1));
     return g;
   }, [count]);
   const material = useMemo(() => {
     const mat = new MeshPhysicalMaterial({
-      color: '#4D535E',
-      metalness: 0.95,
-      roughness: 0.4,
-      clearcoat: 0.3,
-      clearcoatRoughness: 0.3,
-      envMapIntensity: 1.1,
+      color: '#3D2416',
+      metalness: 0.05,
+      roughness: 0.3,
+      clearcoat: 0.7,
+      clearcoatRoughness: 0.12,
+      envMapIntensity: 0.75,
     });
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uGlowColor = { value: EMBER };
@@ -447,8 +459,9 @@ function Plates({ count }: { count: number }) {
     const inst = mesh.current;
     if (!inst) return;
     for (let i = 0; i < count; i++) {
-      const tone = 0.55 + layout.seeds[i] * 0.45;
-      scratch.color.setRGB(tone * 0.34, tone * 0.37, tone * 0.44);
+      // Milk to dark chocolate across the shell.
+      const tone = 0.45 + layout.seeds[i] * 0.5;
+      scratch.color.setRGB(tone * 0.48, tone * 0.28, tone * 0.15);
       inst.setColorAt(i, scratch.color);
     }
     if (inst.instanceColor) inst.instanceColor.needsUpdate = true;

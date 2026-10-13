@@ -1,6 +1,6 @@
-// Site configuration — Snaxx Tech
-// Studio landing page showcasing Arrows (game) and Block Destroy,
-// with links to per-app Privacy Policy and Terms of Service pages.
+// Site configuration — Snaxx Tech ("Confectionery Engine" rebrand: snacks, served with industrial care).
+// Every word on the home page lives here; the 3D experience reads the
+// product data below so the scene and the DOM always agree.
 
 export interface SiteConfig {
   language: string;
@@ -10,12 +10,12 @@ export interface SiteConfig {
 
 export const siteConfig: SiteConfig = {
   language: "en",
-  title: "Snaxx Tech — Indie Apps & Games Studio",
+  title: "Snaxx Tech — Bite-sized apps & games",
   description:
-    "Snaxx Tech is an independent studio crafting playful apps and games, from Arrows, Block Destroy, and Geo Guesser World 3D! coming to Android to the daily Albanian word game FJALË on the web.",
+    "Snaxx Tech is an independent studio making bite-sized software and games with industrial care: Offday for teams, and the games Arrows, Block Destroy, Geo Guesser World 3D! and the daily Albanian word game FJALË.",
 };
 
-// Navigation configuration
+// Navigation
 export interface NavLink {
   label: string;
   href: string;
@@ -31,311 +31,299 @@ export interface NavigationConfig {
 export const navigationConfig: NavigationConfig = {
   logo: "Snaxx Tech",
   links: [
-    { label: "Apps", href: "#portfolio" },
-    { label: "Studio", href: "#about" },
-    { label: "What We Do", href: "#services" },
+    { label: "Software", href: "#software" },
+    { label: "Games", href: "#games" },
+    { label: "Studio", href: "#studio" },
   ],
-  contactLabel: "Get in Touch",
+  contactLabel: "Get in touch",
   contactHref: "#contact",
 };
 
-// Hero section configuration
-export interface HeroClip {
-  src: string;
-  /** This clip's exact first frame — no pose jump when playback starts. */
-  poster: string;
-  /** Relative pick probability. Rare "easter egg" clips get a low weight. */
-  weight: number;
-}
-
+// Hero
 export interface HeroConfig {
-  name: string;
-  roles: string[];
+  eyebrow: string;
+  headline: [string, string];
   intro: string;
-  releaseNote: string;
-  /**
-   * Pool of ambient "Snaxx Almanac" clips (silent). Each clip is a baked
-   * SELF-LOOP: cut at phase-matched frames with the blend inside the file,
-   * so `<video loop>` wraps invisibly and motion never stops. One clip is
-   * picked per visit — variety lives between visits, transitions nowhere.
-   */
-  clips: HeroClip[];
-  /** Generic still — reduced-motion and error fallback. */
-  posterSrc: string;
+  primaryCta: NavLink;
+  secondaryCta: NavLink;
+  readouts: string[];
 }
 
 export const heroConfig: HeroConfig = {
-  name: "SNAXX",
-  roles: ["Apps, games & useful little things", "Independent by design"],
-  intro: "We turn small ideas into apps, games, and satisfying little moments.",
-  releaseNote: "Arrows, Block Destroy + Geo Guesser · coming to Android",
-  clips: [
-    // Single clip for now: the steadiest take (12s calm generation), cut to
-    // its best window and played forward-then-back, so the loop wrap has no
-    // positional jump. The other takes can return once each meets that bar.
-    // Filename carries a content hash so /videos/* can be cached immutably;
-    // regenerate the hash whenever the file changes.
-    { src: "/videos/almanac-e.99b1c015.mp4", poster: "/images/almanac-poster-e.jpg", weight: 1 },
-  ],
-  posterSrc: "/images/hero-almanac-poster.jpg",
+  eyebrow: "Independent studio · Snacks for your screen",
+  headline: ["Small bites.", "Big craving."],
+  intro:
+    "We make apps and games the way a chocolatier makes a bonbon: a glossy shell, a surprising centre, and nothing you can stop at one of.",
+  primaryCta: { label: "Explore the work", href: "#software" },
+  secondaryCta: { label: "Play FJALË", href: "https://xn--fjal-opa.com" },
+  readouts: ["CENTRE // CARAMEL", "SHELL // 900 PIECES", "FRESHNESS // 100%"],
 };
 
-// About section configuration
-export interface AboutStat {
-  value: string;
-  label: string;
-}
-
-export interface AboutImage {
-  src: string;
-  alt: string;
-}
-
-export interface AboutConfig {
+// Story chapters between the hero and the products
+export interface ChapterCopy {
+  id: string;
+  index: string;
   label: string;
   heading: string;
-  description: string;
-  experienceValue: string;
-  experienceLabel: string;
-  stats: AboutStat[];
-  images: AboutImage[];
+  body: string;
+  align?: "left" | "right" | "center";
 }
 
-export const aboutConfig: AboutConfig = {
-  label: "The Studio",
-  heading: "Small team. Big curiosity.",
-  description:
-    "We make software with a pulse — from the precision arcade action of Arrows to the quiet focus of Block Destroy and the daily Albanian word game FJALË. Every tap, swipe, and transition gets attention until it feels just right.",
-  experienceValue: "",
-  experienceLabel: "",
-  stats: [
-    { value: "4", label: "Products in our world" },
-    { value: "2", label: "Platforms — Android & web" },
-    { value: "100%", label: "Indie & independent" },
-  ],
-  images: [
-    { src: "/images/about-1.webp", alt: "Hand-drawn arcade cabinet standing on a storybook hillside" },
-    { src: "/images/about-2.webp", alt: "App wireframe sketches on a wooden workshop desk" },
-    { src: "/images/about-3.webp", alt: "Inside the apps workshop, shelves of tiny tools and gadgets" },
-    { src: "/images/about-4.webp", alt: "The indie studio cabin at dusk, lamp and laptop by a round window" },
-  ],
-};
+export const storyChapters: ChapterCopy[] = [
+  {
+    id: "core",
+    index: "01",
+    label: "The bite",
+    heading: "Every product starts as something we can crack open.",
+    body:
+      "Before a feature ships, we bite into it. The shell comes off, the centre gets tasted, and only what is genuinely delicious stays on the menu.",
+    align: "left",
+  },
+  {
+    id: "inside",
+    index: "02",
+    label: "The centre",
+    heading: "Nothing in here is filler.",
+    body:
+      "Interaction timing, loading paths, offline behaviour, the weight of a tap. The craft is in the centre you never see, so the first bite feels effortless.",
+    align: "center",
+  },
+];
 
-// Services section configuration
-export interface ServiceItem {
-  iconName: string;
+// Software
+export interface ProductFeature {
   title: string;
+  body: string;
+}
+
+export interface SoftwareProduct {
+  id: string;
+  name: string;
+  tagline: string;
   description: string;
-  image: string;
-}
-
-export interface ServicesConfig {
-  label: string;
-  heading: string;
-  services: ServiceItem[];
-}
-
-export const servicesConfig: ServicesConfig = {
-  label: "What We Do",
-  heading: "Built with care. Tested with thumbs.",
-  services: [
-    {
-      iconName: "Gamepad2",
-      title: "Game Development",
-      description:
-        "We design and build tight, replayable arcade experiences like Arrows — simple to pick up, hard to put down.",
-      image: "/images/about-1.webp",
-    },
-    {
-      iconName: "Smartphone",
-      title: "App Design & Engineering",
-      description:
-        "From first sketch to release, we craft fast, thoughtful apps and games like Block Destroy that feel effortless in the hand.",
-      image: "/images/about-2.webp",
-    },
-    {
-      iconName: "ShieldCheck",
-      title: "Privacy-First by Default",
-      description:
-        "No accounts, no clutter. Your progress stays on your device, ads are clearly disclosed, and our policies are written in plain language you can actually read.",
-      image: "/images/cta-bg.webp",
-    },
-    {
-      iconName: "HeartHandshake",
-      title: "Support That Answers",
-      description:
-        "Real humans, real replies. We keep maintaining our apps long after launch and listen to the people who use them.",
-      image: "/images/support-card.webp",
-    },
-  ],
-};
-
-// Portfolio section configuration
-export interface ProjectItem {
-  title: string;
-  category: string;
   status: string;
-  action?: string;
-  year: string;
-  image: string;
-  featured?: boolean;
+  accent: string;
+  features: ProductFeature[];
   href?: string;
+  actionLabel?: string;
+}
+
+export interface SoftwareConfig {
+  index: string;
+  label: string;
+  heading: string;
+  description: string;
+  products: SoftwareProduct[];
+}
+
+export const softwareConfig: SoftwareConfig = {
+  index: "03",
+  label: "Software",
+  heading: "Tools that taste freshly made, not reheated.",
+  description:
+    "Working software for small teams: fast, legible and respectful of the people who use it every day.",
+  products: [
+    {
+      id: "offday",
+      name: "Offday",
+      tagline: "Time off that approves itself.",
+      description:
+        "A paid-time-off system for companies: employee accounts, manager approvals, balances and a team calendar in one calm workspace.",
+      status: "Private beta",
+      accent: "#58D6A6",
+      features: [
+        { title: "Company workspaces", body: "Invite your team, set policies, done." },
+        { title: "Manager approvals", body: "One tap, with context, from anywhere." },
+        { title: "Live balances", body: "Accruals and carry-over, always current." },
+        { title: "Team calendar", body: "See who is out before you plan the week." },
+      ],
+      actionLabel: "Request access",
+      href: "#contact",
+    },
+    {
+      id: "lab",
+      name: "The Lab",
+      tagline: "Useful little things, still in the oven.",
+      description:
+        "Small utilities and prototypes we bake to satisfy our own cravings. Some graduate into products; the rest make the products better.",
+      status: "3 prototypes baking",
+      accent: "#F2B35B",
+      features: [
+        { title: "Offline first", body: "Everything works without a signal." },
+        { title: "No accounts", body: "Your data stays on your device." },
+      ],
+    },
+  ],
+};
+
+// Games
+export interface GameItem {
+  id: "arrows" | "block-destroy" | "geo-guesser" | "fjale";
+  name: string;
+  category: string;
+  description: string;
+  status: string;
+  accent: string;
+  image: string;
+  href?: string;
+  actionLabel?: string;
   privacyHref?: string;
   termsHref?: string;
-  accent?: string;
-  /** Promo artwork includes its own footer, which the current card action replaces. */
-  hasEmbeddedPromoFooter?: boolean;
+  supportHref?: string;
 }
 
-export interface PortfolioCTA {
-  label: string;
-  heading: string;
-  linkText: string;
-  linkHref: string;
-}
-
-export interface PortfolioConfig {
+export interface GamesConfig {
+  index: string;
   label: string;
   heading: string;
   description: string;
-  projects: ProjectItem[];
-  cta: PortfolioCTA;
-  viewAllLabel: string;
+  portalLabel: string;
+  portalHeading: string;
+  games: GameItem[];
 }
 
-export const portfolioConfig: PortfolioConfig = {
-  label: "Our Apps",
-  heading: "Meet the ideas that escaped the notes app.",
+export const gamesConfig: GamesConfig = {
+  index: "04",
+  label: "Games",
+  heading: "Flavours built to be replayed.",
   description:
-    "Four different sparks, one shared obsession: make the next tap feel obvious, useful, or unexpectedly fun.",
-  projects: [
+    "Four games, four flavours: precision, calm, curiosity and language. One shared obsession with the next bite feeling right.",
+  portalLabel: "Enter the pantry",
+  portalHeading: "Beyond the work, the flavours we play in.",
+  games: [
     {
-      title: "Arrows",
-      category: "Precision arcade game",
+      id: "arrows",
+      name: "Arrows",
+      category: "Precision arcade",
+      description:
+        "Fly a paper arrow through a sky of hazards. Simple to pick up, hard to put down, and tuned to the frame.",
       status: "Coming to Android",
-      action: "Release in progress",
-      year: "2026",
+      accent: "#2F8CFF",
       image: "/images/app-arrows.webp",
-      featured: true,
-      accent: "#0082F3",
       privacyHref: "/privacy/arrows",
       termsHref: "/terms/arrows",
     },
     {
-      title: "Block Destroy",
-      category: "An offline block puzzle",
+      id: "block-destroy",
+      name: "Block Destroy",
+      category: "Offline block puzzle",
+      description:
+        "Place, clear, breathe. A quiet puzzle, one square at a time, with no timer, no account and no signal required.",
       status: "Coming to Android",
-      action: "Release in progress",
-      year: "2026",
-      image: "/images/app-block-destroy.webp",
       accent: "#FF7A29",
+      image: "/images/app-block-destroy.webp",
       privacyHref: "/block-destroy/privacy",
       termsHref: "/block-destroy/terms",
+      supportHref: "/block-destroy/support",
     },
     {
-      title: "FJALË",
-      category: "The daily Albanian word game",
-      status: "Live on the web",
-      action: "Play FJALË online",
-      year: "2026",
-      image: "/images/app-fjale.webp",
-      href: "https://xn--fjal-opa.com",
-      accent: "#D08700",
-    },
-    {
-      title: "Geo Guesser World 3D!",
-      category: "Dropped anywhere on Earth — guess where",
-      status: "Coming to Android",
-      action: "Release in progress",
-      year: "2026",
-      image: "/images/app-geo-guesser.webp",
+      id: "geo-guesser",
+      name: "Geo Guesser World 3D!",
+      category: "Explore and guess",
+      description:
+        "Dropped anywhere on Earth in 3D. Look around, read the clues, and pin where you think you are.",
+      status: "Live on Android",
       accent: "#14B8A6",
+      image: "/images/app-geo-guesser.webp",
+      href: "https://play.google.com/store/apps/details?id=com.snaxxtech.geoguesser&hl=en",
+      actionLabel: "Play Geoguesser",
       privacyHref: "/geo-guesser-world-3d/privacy",
       termsHref: "/geo-guesser-world-3d/terms",
     },
     {
-      title: "What's Next",
-      category: "Something small and surprising is taking shape in the lab.",
-      status: "In the lab",
-      year: "Soon",
-      image: "/images/lab-next.webp",
-      accent: "#131313",
+      id: "fjale",
+      name: "FJALË",
+      category: "Daily Albanian word game",
+      description:
+        "One word a day, five letters, six tries. Built for the Albanian language and the people who love it.",
+      status: "Live on the web",
+      accent: "#D08700",
+      image: "/images/app-fjale.webp",
+      href: "https://xn--fjal-opa.com",
+      actionLabel: "Play FJALË",
     },
   ],
-  cta: {
-    label: "Open inbox",
-    heading: "Have a bug, a question, or a wonderfully strange idea?",
-    linkText: "Send it our way",
-    linkHref: "#contact",
-  },
-  viewAllLabel: "",
 };
 
-// Testimonials section configuration (hidden — no testimonials yet)
-export interface TestimonialItem {
-  quote: string;
-  author: string;
-  role: string;
-  company: string;
-  image: string;
-  rating: number;
+// Studio
+export interface StudioStat {
+  value: string;
+  label: string;
 }
 
-export interface TestimonialsConfig {
+export interface StudioPrinciple {
+  title: string;
+  body: string;
+}
+
+export interface StudioConfig {
+  index: string;
   label: string;
   heading: string;
-  testimonials: TestimonialItem[];
+  description: string;
+  stats: StudioStat[];
+  principles: StudioPrinciple[];
 }
 
-export const testimonialsConfig: TestimonialsConfig = {
-  label: "",
-  heading: "",
-  testimonials: [],
+export const studioConfig: StudioConfig = {
+  index: "05",
+  label: "Studio",
+  heading: "Small kitchen. Industrial standards.",
+  description:
+    "Snaxx Tech is an independent studio. We keep the kitchen small so every product gets the same hands from first sketch to long-term support.",
+  stats: [
+    { value: "5", label: "Products on the menu" },
+    { value: "2", label: "Platforms: Android & web" },
+    { value: "100%", label: "Independent" },
+  ],
+  principles: [
+    {
+      title: "Privacy by default",
+      body: "No accounts unless the product needs them, progress on your device, ads clearly disclosed, policies written in plain language.",
+    },
+    {
+      title: "Support that answers",
+      body: "Real people reply within two to three business days, and we keep maintaining products long after launch.",
+    },
+    {
+      title: "Motion with intent",
+      body: "Every animation explains a relationship or answers an input. Reduced-motion users get the same information, calmly.",
+    },
+  ],
 };
 
-// CTA section configuration
-export interface CTAConfig {
-  tags: string[];
+// Contact
+export interface ContactConfig {
+  index: string;
+  label: string;
   heading: string;
   description: string;
   buttonText: string;
-  buttonHref: string;
   email: string;
-  backgroundImage: string;
+  tags: string[];
 }
 
-export const ctaConfig: CTAConfig = {
-  tags: ["Android", "Web", "Independent studio"],
-  heading: "Ideas, questions, bug reports — we read every one.",
+export const contactConfig: ContactConfig = {
+  index: "06",
+  label: "Contact",
+  heading: "Ideas, questions, bug reports. We read every one.",
   description:
-    "Whether it's support for Arrows, Block Destroy, Geo Guesser World 3D!, or FJALË, a press inquiry, or a wild idea for our next app — our inbox is always open.",
-  buttonText: "Email Us",
-  buttonHref: "mailto:techsnaxx@gmail.com",
+    "Support for any of our games, access to Offday, a press inquiry or a strange and wonderful idea: our inbox is open.",
+  buttonText: "Email the studio",
   email: "techsnaxx@gmail.com",
-  backgroundImage: "/images/cta-bg.webp",
+  tags: ["Android", "Web", "Independent studio"],
 };
 
-// Footer section configuration
+// Footer
 export interface FooterLinkColumn {
   title: string;
   links: { label: string; href: string }[];
-}
-
-export interface SocialLink {
-  iconName: string;
-  href: string;
-  label: string;
 }
 
 export interface FooterConfig {
   logo: string;
   description: string;
   columns: FooterLinkColumn[];
-  socialLinks: SocialLink[];
-  newsletterHeading: string;
-  newsletterDescription: string;
-  newsletterButtonText: string;
-  newsletterPlaceholder: string;
   copyright: string;
   credit: string;
 }
@@ -343,24 +331,23 @@ export interface FooterConfig {
 export const footerConfig: FooterConfig = {
   logo: "Snaxx Tech",
   description:
-    "An independent studio crafting apps and games with care. Home of Arrows, Block Destroy, Geo Guesser World 3D!, and the daily Albanian word game FJALË.",
+    "An independent studio making bite-sized software and games with care. Home of Offday, Arrows, Block Destroy, Geo Guesser World 3D! and FJALË.",
   columns: [
     {
-      title: "Apps",
+      title: "Products",
       links: [
-        { label: "Arrows", href: "#portfolio" },
-        { label: "Block Destroy", href: "#portfolio" },
+        { label: "Offday", href: "#software" },
+        { label: "Arrows", href: "#games" },
+        { label: "Block Destroy", href: "#games" },
+        { label: "Geo Guesser World 3D!", href: "#games" },
         { label: "FJALË", href: "https://xn--fjal-opa.com" },
-        { label: "Geo Guesser World 3D!", href: "#portfolio" },
-        { label: "What's Next", href: "#portfolio" },
       ],
     },
     {
       title: "Studio",
       links: [
-        { label: "About", href: "#about" },
-        { label: "What We Do", href: "#services" },
-        { label: "Support", href: "#contact" },
+        { label: "About", href: "#studio" },
+        { label: "Contact", href: "#contact" },
       ],
     },
     {
@@ -376,11 +363,6 @@ export const footerConfig: FooterConfig = {
       ],
     },
   ],
-  socialLinks: [],
-  newsletterHeading: "",
-  newsletterDescription: "",
-  newsletterButtonText: "",
-  newsletterPlaceholder: "",
   copyright: "© 2026 Snaxx Tech. All rights reserved.",
-  credit: "Made with care, coffee & code.",
+  credit: "Made with care, coffee & crumbs.",
 };

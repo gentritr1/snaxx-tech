@@ -41,48 +41,46 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        exvia: {
-          black: '#131313',
-          white: '#FFFFFF',
-          'base-black': '#1D1D1D',
-          subtle: '#EAEAEA',
-          border: '#EFEFF2',
-          blue: '#0082F3',
-          focus: '#4D65FF',
+        /* Confectionery Engine brand tokens — see DESIGN.md.
+           A bright vanilla-cream studio: `void` is the page cream, `silver` the
+           cocoa text. Text-safe on void: silver (13.5:1), mist (5.4:1), ember (4.9:1). */
+        void: '#F7F0E4',
+        graphite: '#EFE5D5',
+        steel: '#E2D4C0',
+        'steel-light': '#D3C1A8',
+        mist: '#7A6753',
+        silver: '#2B1D12',
+        cocoa: '#3D2416',
+        caramel: '#C9842B',
+        cream: '#FFFBF5',
+        ember: {
+          DEFAULT: '#9E5E14',
+          soft: '#F2B35B',
+          deep: '#7F4A0E',
         },
-        /* Almanac theme — sampled from the hero illustration.
-           Text-safe on paper: ink (11.4:1), ink-strong (14.1:1),
-           ink-soft (5.1:1), olive (5.7:1), blue (4.4:1 — large text/focus
-           only). rust and ink-mid are DECORATIVE ONLY (fail 4.5:1). */
-        almanac: {
-          paper: '#F4EBD7',
-          'paper-deep': '#EADDC0',
-          'paper-card': '#F8F1E1',
-          ink: '#3C2B19',
-          'ink-strong': '#291B0D',
-          'ink-soft': '#75603F',
-          'ink-mid': '#8C714F',
-          'ink-faint': '#C8B58F',
-          blue: '#4D7094',
-          rust: '#BD9161',
-          olive: '#6D5844',
-          gold: '#C9A86A',
+        paper: {
+          DEFAULT: '#FAF4EA',
+          deep: '#EFE5D5',
+          card: '#FFFFFF',
+        },
+        ink: {
+          DEFAULT: '#1A110A',
+          soft: '#5B4A3A',
+          faint: '#D7CAB7',
+        },
+        product: {
+          arrows: '#2F8CFF',
+          block: '#FF7A29',
+          fjale: '#D08700',
+          geo: '#14B8A6',
+          offday: '#58D6A6',
+          lab: '#F2B35B',
         },
       },
       fontFamily: {
         geist: ['Geist', 'Arial', 'sans-serif'],
         'geist-mono': ['GeistMono', 'Courier New', 'monospace'],
-        display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
-      },
-      fontSize: {
-        'h1': ['clamp(3rem, 21vw, 21vw)', { lineHeight: '1', letterSpacing: '-0.04em' }],
-        'h2': ['4rem', { lineHeight: '1', letterSpacing: '-0.04em' }],
-        'h3': ['2.5rem', { lineHeight: '1.2', letterSpacing: '-0.04em' }],
-        'h4': ['2.5rem', { lineHeight: '1.1' }],
-        'h5': ['1.5rem', { lineHeight: '1.2' }],
-        'h6': ['1.25rem', { lineHeight: '1.3' }],
-        'small': ['0.875rem', { lineHeight: '1.5' }],
-        'xs': ['0.75rem', { lineHeight: '1.5' }],
+        display: ['Geist', 'Arial', 'sans-serif'],
       },
       spacing: {
         '18': '4.5rem',
@@ -98,6 +96,7 @@ module.exports = {
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        glass: "0 0 0 1px rgb(255 255 255 / 0.06) inset, 0 24px 60px -30px rgb(0 0 0 / 0.8)",
       },
       keyframes: {
         "accordion-down": {

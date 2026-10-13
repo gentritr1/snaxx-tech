@@ -222,9 +222,11 @@ export const gamesConfig: GamesConfig = {
       category: "Explore and guess",
       description:
         "Dropped anywhere on Earth in 3D. Look around, read the clues, and pin where you think you are.",
-      status: "Coming to Android",
+      status: "Live on Android",
       accent: "#14B8A6",
       image: "/images/app-geo-guesser.webp",
+      href: "https://play.google.com/store/apps/details?id=com.snaxxtech.geoguesser&hl=en",
+      actionLabel: "Play Geoguesser",
       privacyHref: "/geo-guesser-world-3d/privacy",
       termsHref: "/geo-guesser-world-3d/terms",
     },

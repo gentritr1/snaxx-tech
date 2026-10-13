@@ -2,15 +2,15 @@
 
 The studio website for Snaxx Tech, themed around snacking: one continuous,
 scroll-directed 3D film (React Three Fiber + GSAP ScrollTrigger) in a bright
-vanilla-cream studio, in which a confectionery core (caramel centre,
-chocolate shell, porcelain rings) opens into the studio's software and a
-pantry of games, plus light-weight legal and support pages for each app. Built with React 19, TypeScript, Tailwind
+vanilla-cream studio, in which a chocolate bonbon (caramel centre, chocolate
+shell, caramel drizzle) opens into the studio's software and a pantry of
+games, plus light-weight legal and support pages for each app. Built with React 19, TypeScript, Tailwind
 CSS and Vite.
 
 ## Experience
 
 - **Awakening** on load: the caramel centre lights up and the camera reveals the confection.
-- **Approach and reveal**: hundreds of instanced chocolate pieces peel off and expose the porcelain rings, glass shell and caramel threads.
+- **Approach and reveal**: hundreds of instanced chocolate pieces peel off as the caramel drizzle unwinds, exposing the glass shell and caramel threads.
 - **Fly-through**: the camera passes through the centre into a warm digital pantry.
 - **Transformation**: the pieces re-form into a frame around holographic Offday interfaces.
 - **Portal**: the pieces halo a glazed, sprinkled donut; the camera flies through its caramel iris into the games.

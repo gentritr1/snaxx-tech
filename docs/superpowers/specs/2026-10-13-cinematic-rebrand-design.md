@@ -42,8 +42,9 @@ studio makes snacks for your screen; the craft is industrial-grade. Luxury
 comes from restraint: warm cocoa darks, real gloss (chocolate, caramel,
 glaze, porcelain), one accent light per scene, generous whitespace, exact
 type. In 3D everything is edible or serves food: the core is a caramel
-centre in a glass shell wrapped in tempered-chocolate pieces and porcelain
-rings; fragments are sprinkles; particles are sugar dust; the portal is a
+centre in a glass shell wrapped in tempered-chocolate pieces and caramel
+drizzle ribbons (the earlier porcelain rings read as a solar system and were
+replaced); fragments are sprinkles; particles are sugar dust; the portal is a
 glazed donut; the game exhibits sit on porcelain plates (a candy dart, a
 chocolate bar, a candy planet, biscuit letter tiles).
 

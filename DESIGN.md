@@ -99,9 +99,9 @@ components:
 
 Snaxx Tech makes snacks for your screen, and the brand treats snacking the
 way a luxury chocolatier treats a bonbon. The website is one continuous,
-real-time 3D film: a levitating confection awakens (a molten caramel centre
-inside a glass shell, wrapped in tempered-chocolate pieces and porcelain
-rings), cracks open to reveal its centre, re-forms into a frame around the
+real-time 3D film: a levitating bonbon awakens (a molten caramel centre
+inside a glass shell, wrapped in tempered-chocolate pieces and ribbons of
+caramel drizzle), cracks open to reveal its centre, re-forms into a frame around the
 studio's software, becomes a glazed donut portal, and gives way to a pantry
 of game exhibits served on porcelain plates. Every chapter is a cinematic
 scene; every transition is part of the same directed sequence.
@@ -158,7 +158,8 @@ background and fog so the page and the scene are one space.
 
 - **Graphite / Steel:** Raised cream surfaces, hairlines, panel fills.
 - **Cocoa / Cream / Caramel:** The 3D materials (tempered chocolate,
-  porcelain and shortbread, molten centre) referenced in UI only as tints.
+  caramel drizzle, porcelain plates, shortbread, molten centre) referenced
+  in UI only as tints.
 - **Paper / Ink:** The cream reading surface for privacy, terms and support.
 
 ### Named rules
@@ -280,6 +281,8 @@ mini footer with every published legal URL.
   narrative purpose.
 - **Don't** go dark: no black space, no vignette-heavy frames, no sci-fi
   grids in cold blue. The world is daylight on cream.
+- **Don't** orbit the bonbon: rings around a sphere read as a planet. Wrap
+  it (drizzle, ribbon, glaze) instead.
 - **Don't** bloom chocolate, porcelain, text or UI panels.
 - **Don't** stack glass or use gradient text.
 - **Don't** bring back the serif display face or the paper-illustration art.

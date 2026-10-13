@@ -4,26 +4,41 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Environment, Lightformer } from '@react-three/drei';
-import { Color, Fog, PointLight, SpotLight } from 'three';
-import { sceneState, smoothstep } from '../sceneState';
+import { Color, DirectionalLight, Fog, PointLight, Vector3 } from 'three';
+import { clamp01, sceneState, smoothstep } from '../sceneState';
 import { createGridMaterial, createHorizonMaterial } from '../shaders/materials';
+import { gamesConfig } from '@/config';
 
 const FOG_STUDIO = new Color('#F7F0E4');
 const FOG_WORLD = new Color('#F4E4CF');
 
+// Where the single roaming "accent" light sits for each scene moment.
+const HOLO_LIGHT = new Vector3(0, 0.6, -11.5);
+const PORTAL_LIGHT = new Vector3(0, 0, -20.5);
+const GAMES_X = [-7.5, -2.5, 2.5, 7.5];
+const GAME_ACCENTS = gamesConfig.games.map((g) => new Color(g.accent));
+const HOLO_COLOR = new Color('#58D6A6');
+const PORTAL_COLOR = new Color('#F2B35B');
+
 /**
  * Lighting, environment reflections, fog and the two world backdrops (the
- * digital grid floor and the far horizon). Everything is procedural: the
+ * counter grid and the far horizon). Everything is procedural: the
  * production CSP forbids fetching HDRIs.
+ *
+ * The scene always contains exactly the same five lights. three.js bakes the
+ * light count into every lit shader, so adding or hiding a light mid-scroll
+ * forces a recompile of every material and shows up as a visible stall; one
+ * roaming accent light replaces the per-section lights instead.
  */
 export function Atmosphere() {
   const fog = useRef<Fog>(null);
-  const key = useRef<SpotLight>(null);
-  const rim = useRef<PointLight>(null);
+  const key = useRef<DirectionalLight>(null);
   const core = useRef<PointLight>(null);
+  const accent = useRef<PointLight>(null);
   const grid = useMemo(() => createGridMaterial(), []);
   const horizon = useMemo(() => createHorizonMaterial(), []);
   const fogColor = useMemo(() => new Color(), []);
+  const scratch = useMemo(() => ({ pos: new Vector3(), tmp: new Vector3(), color: new Color(), colorB: new Color() }), []);
 
   useFrame(({ clock }) => {
     const s = sceneState;
@@ -39,18 +54,47 @@ export function Atmosphere() {
       fog.current.far = 64 - s.flow * 20 + s.world * 10;
     }
     if (key.current) {
-      key.current.position.x = 6 + s.pointer.x * 2.5;
-      key.current.position.y = 9 + s.pointer.y * 1.5;
-      key.current.intensity = 150 + s.energy * 40;
-    }
-    if (rim.current) {
-      rim.current.intensity = 40 + s.world * 20;
+      key.current.position.set(6 + s.pointer.x * 2.5, 9 + s.pointer.y * 1.5, 7);
+      key.current.intensity = 2.6 + s.energy * 0.6;
     }
     if (core.current) {
       const fade = 1 - smoothstep(0.5, 1, s.flow);
       // Sealed shell leaks little light; the exploded core glows fully.
-      const open = 0.35 + 0.65 * Math.min(1, Math.max(0, s.formation));
+      const open = 0.35 + 0.65 * clamp01(s.formation);
       core.current.intensity = s.energy * 5.5 * open * fade * (0.9 + Math.sin(t * 1.4) * 0.1);
+    }
+    if (accent.current) {
+      // Blend the three possible focus points by how present each scene moment is.
+      const wHolo = s.holo;
+      const wPortal = smoothstep(2.4, 3, s.formation) * (1 - smoothstep(3.5, 4, s.formation)) + s.portal * 0.5;
+      const wGames = s.gamesReveal;
+      const total = wHolo + wPortal + wGames;
+      if (total < 0.001) {
+        accent.current.intensity = 0;
+      } else {
+        const { pos, tmp, color, colorB } = scratch;
+        const gi = Math.max(0, Math.min(GAMES_X.length - 1.0001, s.gamesFocus));
+        const g0 = Math.floor(gi);
+        const gt = gi - g0;
+        const gx = GAMES_X[g0] + (GAMES_X[g0 + 1] - GAMES_X[g0]) * gt;
+        pos.set(0, 0, 0);
+        pos.addScaledVector(HOLO_LIGHT, wHolo);
+        pos.addScaledVector(PORTAL_LIGHT, wPortal);
+        pos.addScaledVector(tmp.set(gx, 2.4, -36.8), wGames);
+        pos.divideScalar(total);
+        accent.current.position.copy(pos);
+        color.setRGB(0, 0, 0);
+        color.r += HOLO_COLOR.r * wHolo + PORTAL_COLOR.r * wPortal;
+        color.g += HOLO_COLOR.g * wHolo + PORTAL_COLOR.g * wPortal;
+        color.b += HOLO_COLOR.b * wHolo + PORTAL_COLOR.b * wPortal;
+        colorB.copy(GAME_ACCENTS[g0]).lerp(GAME_ACCENTS[Math.min(g0 + 1, GAME_ACCENTS.length - 1)], gt);
+        color.r += colorB.r * wGames;
+        color.g += colorB.g * wGames;
+        color.b += colorB.b * wGames;
+        color.multiplyScalar(1 / total);
+        accent.current.color.copy(color);
+        accent.current.intensity = Math.min(1, total) * (24 + s.portal * 24);
+      }
     }
   });
 
@@ -60,18 +104,9 @@ export function Atmosphere() {
       <fog ref={fog} attach="fog" args={['#F7F0E4', 24, 64]} />
       <ambientLight intensity={0.55} />
       <hemisphereLight args={['#FFFFFF', '#E6D3B8', 0.9]} />
-      <spotLight
-        ref={key}
-        position={[6, 9, 7]}
-        angle={0.55}
-        penumbra={0.85}
-        intensity={150}
-        color="#FFF4E6"
-        decay={2}
-        distance={60}
-      />
-      <pointLight ref={rim} position={[-7, 3, -5]} intensity={40} color="#FFD9B0" decay={2} distance={40} />
+      <directionalLight ref={key} position={[6, 9, 7]} intensity={2.6} color="#FFF4E6" />
       <pointLight ref={core} position={[0, 0, 0]} intensity={0} color="#FFD9A0" decay={2} distance={9} />
+      <pointLight ref={accent} position={[0, 0, -20]} intensity={0} color="#F2B35B" decay={2} distance={16} />
 
       <Environment resolution={256} frames={1} background={false}>
         <color attach="background" args={['#F1E6D4']} />

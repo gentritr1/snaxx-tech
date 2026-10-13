@@ -192,7 +192,7 @@ export function Navigation() {
         <div
           id="mobile-navigation"
           className={cn(
-            'fixed inset-0 z-40 bg-void/95 backdrop-blur-xl transition-[opacity,visibility] duration-500 ease-out-cubic lg:hidden',
+            'fixed inset-0 z-40 bg-void/97 transition-[opacity,visibility] duration-500 ease-out-cubic lg:hidden',
             isMenuOpen ? 'visible opacity-100' : 'pointer-events-none invisible opacity-0',
           )}
         >

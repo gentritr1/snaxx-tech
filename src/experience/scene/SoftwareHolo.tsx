@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/immutability */
 import { useMemo, useRef } from 'react';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
-import { Group, Mesh, PointLight, ShaderMaterial } from 'three';
+import { Group, Mesh, ShaderMaterial } from 'three';
 import { damp } from 'maath/easing';
 import { sceneState, setHover, smoothstep } from '../sceneState';
 import { createHoloMaterial } from '../shaders/materials';
@@ -98,7 +98,6 @@ function Panel({ spec }: { spec: PanelSpec }) {
 export function SoftwareHolo() {
   const panels = usePanels();
   const group = useRef<Group>(null);
-  const light = useRef<PointLight>(null);
 
   useFrame((_, delta) => {
     const s = sceneState;
@@ -107,7 +106,6 @@ export function SoftwareHolo() {
       damp(group.current.rotation, 'y', s.pointer.x * 0.08, 0.4, delta);
       damp(group.current.rotation, 'x', -s.pointer.y * 0.05, 0.4, delta);
     }
-    if (light.current) light.current.intensity = s.holo * 26;
   });
 
   return (
@@ -115,7 +113,6 @@ export function SoftwareHolo() {
       {panels.map((spec) => (
         <Panel key={spec.id} spec={spec} />
       ))}
-      <pointLight ref={light} position={[0, 0.5, 2.5]} color="#58D6A6" intensity={0} distance={14} decay={2} />
     </group>
   );
 }

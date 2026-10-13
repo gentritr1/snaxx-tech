@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/immutability */
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Color, Group, InstancedMesh, Mesh, MeshPhysicalMaterial, Object3D, PointLight } from 'three';
+import { Color, Group, InstancedMesh, Mesh, MeshPhysicalMaterial, Object3D } from 'three';
 import { mulberry32, sceneState, smoothstep } from '../sceneState';
 import { createPortalMaterial } from '../shaders/materials';
 
@@ -42,7 +42,6 @@ export function Portal() {
   const ring = useRef<Group>(null);
   const sprinkles = useRef<InstancedMesh>(null);
   const iris = useRef<Mesh>(null);
-  const light = useRef<PointLight>(null);
   const material = useMemo(() => createPortalMaterial(), []);
   const glaze = useMemo(() => createGlazeMaterial(), []);
   const trackMaterial = useMemo(
@@ -89,7 +88,6 @@ export function Portal() {
     if (ring.current) ring.current.rotation.z = s.reducedMotion ? 0 : t * 0.04;
     if (iris.current) iris.current.visible = s.portal > 0.005 && s.portal < 0.995;
     trackMaterial.emissiveIntensity = presence * (0.9 + s.portal * 1.4);
-    if (light.current) light.current.intensity = presence * 30 + s.portal * 50;
   });
 
   return (
@@ -112,8 +110,6 @@ export function Portal() {
       <mesh ref={iris} material={material}>
         <planeGeometry args={[6.4, 6.4]} />
       </mesh>
-      <pointLight ref={light} position={[0, 0, 0.5]} color="#F2B35B" intensity={0} distance={18} decay={2} />
-      <pointLight position={[3, 4, 5]} color="#FFF4E6" intensity={60} distance={20} decay={2} />
     </group>
   );
 }

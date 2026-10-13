@@ -16,7 +16,6 @@ import {
   Mesh,
   MeshPhysicalMaterial,
   Object3D,
-  PointLight,
   Quaternion,
   Vector3,
 } from 'three';
@@ -29,6 +28,7 @@ import { gamesConfig, type GameItem } from '@/config';
 import { CHOCOLATE, GOLD, PORCELAIN } from './Core';
 import { scrollToGame } from '@/lib/scroll';
 
+const ZERO = new Vector3(0, 0, 0);
 const GAMES_Z = -38;
 const GAMES_X = [-7.5, -2.5, 2.5, 7.5];
 const GAMES_Y = -1.2;
@@ -43,7 +43,6 @@ function focusWeight(index: number) {
 function Exhibit({ game, index, children }: { game: GameItem; index: number; children: React.ReactNode }) {
   const group = useRef<Group>(null);
   const inner = useRef<Group>(null);
-  const light = useRef<PointLight>(null);
   const ringMaterial = useMemo(
     () => new MeshPhysicalMaterial({ color: '#111318', emissive: new Color(game.accent), emissiveIntensity: 0.2, roughness: 0.4 }),
     [game.accent],
@@ -84,7 +83,6 @@ function Exhibit({ game, index, children }: { game: GameItem; index: number; chi
       inner.current.position.y = 1.15 + Math.sin(t * 0.9 + index) * 0.06;
     }
     ringMaterial.emissiveIntensity = 0.25 + w * 2.4 + hover.current * 0.8;
-    if (light.current) light.current.intensity = 6 + w * 30 + hover.current * 10;
   });
 
   return (
@@ -102,7 +100,6 @@ function Exhibit({ game, index, children }: { game: GameItem; index: number; chi
       <mesh material={ringMaterial} position={[0, 0.09, 0]} rotation-x={-Math.PI / 2}>
         <ringGeometry args={[1.42, 1.5, 96]} />
       </mesh>
-      <pointLight ref={light} position={[0, 2.4, 1.2]} color={game.accent} intensity={0} distance={12} decay={2} />
       {/* Hover/click volume */}
       <mesh position={[0, 1.2, 0]} onPointerOver={onOver} onPointerOut={onOut} onClick={onClick} visible={false}>
         <sphereGeometry args={[1.7, 12, 12]} />
@@ -177,7 +174,7 @@ function ArrowsExhibit({ accent }: { accent: string }) {
       curve.getTangentAt(u, tangent);
       p.x += Math.sin(u * 20 + i) * 0.12;
       p.y += Math.cos(u * 17 + i * 2) * 0.1;
-      look.lookAt(tangent, new Vector3(0, 0, 0), up);
+      look.lookAt(tangent, ZERO, up);
       q.setFromRotationMatrix(look);
       const fade = smoothstep(0, 0.12, u) * (1 - smoothstep(0.85, 1, u));
       scratch.s.setScalar(0.13 * fade + 0.001);

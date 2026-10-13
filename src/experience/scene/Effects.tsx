@@ -1,29 +1,18 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Bloom, DepthOfField, EffectComposer, Noise, ToneMapping, Vignette } from '@react-three/postprocessing';
-import { DepthOfFieldEffect, ToneMappingMode } from 'postprocessing';
-import { Vector3 } from 'three';
-import { sceneState } from '../sceneState';
+import { Bloom, EffectComposer, Noise, ToneMapping, Vignette } from '@react-three/postprocessing';
+import { ToneMappingMode } from 'postprocessing';
 import type { Quality } from '../quality';
 
-/** Art-directed post stack: HDR bloom on emissives only, shallow DoF on desktop. */
+/**
+ * Art-directed post stack. Bloom is reserved for the few emissive parts
+ * (caramel centre, portal rim); depth of field was dropped because on a
+ * bright, evenly lit scene it costs a full-resolution pass for almost no
+ * visible gain.
+ */
 export function Effects({ quality }: { quality: Quality }) {
-  const dof = useRef<DepthOfFieldEffect>(null);
-  const focus = useMemo(() => new Vector3(), []);
-
-  useEffect(() => {
-    if (dof.current) dof.current.target = focus;
-  }, [focus]);
-
-  useFrame(() => {
-    focus.copy(sceneState.target);
-  });
-
   return (
     <EffectComposer multisampling={quality.multisampling} enableNormalPass={false}>
-      <Bloom mipmapBlur intensity={0.45} luminanceThreshold={1} luminanceSmoothing={0.3} radius={0.6} />
-      {quality.dof ? (
-        <DepthOfField ref={dof} focalLength={0.04} bokehScale={2.4} worldFocusRange={16} />
+      {quality.bloom ? (
+        <Bloom mipmapBlur intensity={0.45} luminanceThreshold={1} luminanceSmoothing={0.3} radius={0.6} levels={5} />
       ) : (
         <></>
       )}

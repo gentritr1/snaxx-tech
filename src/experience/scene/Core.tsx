@@ -3,7 +3,6 @@
 /* eslint-disable react-hooks/immutability */
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { MeshTransmissionMaterial } from '@react-three/drei';
 import {
   BufferAttribute,
   CatmullRomCurve3,
@@ -14,6 +13,7 @@ import {
   Matrix4,
   Mesh,
   MeshPhysicalMaterial,
+  MeshStandardMaterial,
   Quaternion,
   TubeGeometry,
   Vector3,
@@ -57,7 +57,19 @@ export const GOLD = new MeshPhysicalMaterial({
 // ---------------------------------------------------------------------------
 // Centre: a glass shell around molten caramel. Dissolves during the fly-through.
 
-function Heart({ quality }: { quality: Quality }) {
+const glassMaterial = new MeshPhysicalMaterial({
+  color: '#FFEBCB',
+  transparent: true,
+  opacity: 0.3,
+  roughness: 0.03,
+  metalness: 0,
+  clearcoat: 1,
+  clearcoatRoughness: 0.02,
+  envMapIntensity: 2.4,
+  depthWrite: false,
+});
+
+function Heart() {
   const plasma = useMemo(() => createPlasmaMaterial(), []);
   const glass = useRef<Mesh>(null);
   const inner = useRef<Mesh>(null);
@@ -85,31 +97,15 @@ function Heart({ quality }: { quality: Quality }) {
 
   return (
     <>
-      <mesh ref={glass}>
-        <icosahedronGeometry args={[0.95, 6]} />
-        {quality.transmission ? (
-          <MeshTransmissionMaterial
-            samples={quality.tier === 'high' ? 6 : 4}
-            resolution={quality.tier === 'high' ? 512 : 256}
-            thickness={0.9}
-            roughness={0.06}
-            transmission={1}
-            ior={1.45}
-            chromaticAberration={0.05}
-            anisotropicBlur={0.15}
-            distortion={0.18}
-            distortionScale={0.5}
-            temporalDistortion={0.08}
-            color="#F7E6C8"
-            attenuationColor="#D98A2B"
-            attenuationDistance={1.6}
-          />
-        ) : (
-          <meshPhysicalMaterial transparent opacity={0.55} roughness={0.08} metalness={0} clearcoat={1} color="#E0A24D" />
-        )}
+      {/* Glass shell. A true transmission material re-renders the whole scene
+          into an offscreen buffer every frame; a clear-coated, slightly tinted
+          translucent shell reads the same against the caramel for a fraction
+          of the cost. */}
+      <mesh ref={glass} material={glassMaterial}>
+        <icosahedronGeometry args={[0.95, 4]} />
       </mesh>
       <mesh ref={inner} material={plasma}>
-        <icosahedronGeometry args={[0.95, 5]} />
+        <icosahedronGeometry args={[0.95, 4]} />
       </mesh>
     </>
   );
@@ -189,11 +185,7 @@ const CARAMEL = new MeshPhysicalMaterial({
   roughness: 0.12,
   clearcoat: 1,
   clearcoatRoughness: 0.05,
-  envMapIntensity: 1.3,
-  transmission: 0.12,
-  thickness: 0.4,
-  attenuationColor: new Color('#8A4A12'),
-  attenuationDistance: 0.8,
+  envMapIntensity: 1.5,
 });
 
 function ribbonGeometry(spec: RibbonSpec) {
@@ -378,18 +370,16 @@ function Plates({ count }: { count: number }) {
   const mesh = useRef<InstancedMesh>(null);
   const layout = useMemo(() => buildPlateLayout(count), [count]);
   const geometry = useMemo(() => {
-    const g = new RoundedBoxGeometry(0.32, 0.18, 0.05, 2, 0.02);
+    const g = new RoundedBoxGeometry(0.32, 0.18, 0.05, 1, 0.02);
     g.setAttribute('aGlow', new InstancedBufferAttribute(new Float32Array(count), 1));
     return g;
   }, [count]);
   const material = useMemo(() => {
-    const mat = new MeshPhysicalMaterial({
+    const mat = new MeshStandardMaterial({
       color: '#3D2416',
       metalness: 0.05,
-      roughness: 0.3,
-      clearcoat: 0.7,
-      clearcoatRoughness: 0.14,
-      envMapIntensity: 0.55,
+      roughness: 0.26,
+      envMapIntensity: 1.0,
     });
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uGlowColor = { value: EMBER };
@@ -510,7 +500,7 @@ const up = new Vector3(0, 1, 0);
 export function Core({ quality }: { quality: Quality }) {
   return (
     <group>
-      <Heart quality={quality} />
+      <Heart />
       <Filaments />
       <Drizzle />
       <Plates count={quality.plates} />

@@ -60,6 +60,26 @@ src/
   legal/content.ts          Legal content per app
 ```
 
+## Performance rules
+
+The scene holds 60 fps at retina resolution (measured in headless Chrome on
+an Apple M4 Pro, also under a 4x CPU slowdown). Keep it that way:
+
+- **No transmission.** Any material with `transmission` (including drei's
+  `MeshTransmissionMaterial`) makes three.js re-render the whole scene into an
+  offscreen buffer every frame. The glass shell is a clear-coated translucent
+  physical material instead.
+- **A fixed set of lights.** three.js bakes the light count into every lit
+  shader, so showing or hiding a light mid-scroll recompiles every material and
+  stalls the page. The scene always has the same five lights; one accent light
+  roams between the software, portal and game moments.
+- **No `backdrop-filter` over the canvas.** The canvas repaints every frame, so
+  the browser would re-blur that region every frame. Panels use a mostly opaque
+  cream fill instead.
+- **Budget triangles.** Instanced shell pieces use a one-segment rounded box
+  and a standard (not clear-coated) material; pixel ratio is capped at 1.5.
+- **No allocations in `useFrame`.** Reuse vectors, quaternions and eulers.
+
 See `DESIGN.md` for the brand system ("The Confectionery Engine") and
 `docs/superpowers/specs/` for the design spec.
 

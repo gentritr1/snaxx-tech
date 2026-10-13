@@ -211,21 +211,19 @@
     margin-right: auto;
   }
 
-  /* Frosted panel over the 3D scene: enough fill to keep cocoa text
-     readable against the bright world, little enough to stay airy. */
+  /* Cream panel over the 3D scene. Deliberately NOT a backdrop blur: the
+     canvas repaints every frame, and a backdrop filter over it forces the
+     browser to re-blur that region on every frame. A mostly opaque cream
+     fill keeps cocoa text readable at no per-frame cost. */
   .glass {
-    background: linear-gradient(180deg, rgb(255 251 245 / 0.78), rgb(255 251 245 / 0.62));
+    background: linear-gradient(180deg, rgb(255 251 245 / 0.9), rgb(255 249 240 / 0.84));
     border: 1px solid rgb(61 36 22 / 0.1);
-    backdrop-filter: blur(14px) saturate(1.1);
-    -webkit-backdrop-filter: blur(14px) saturate(1.1);
     box-shadow: 0 0 0 1px rgb(255 255 255 / 0.5) inset, 0 24px 60px -32px rgb(61 36 22 / 0.35);
   }
 
   .glass-strong {
-    background: linear-gradient(180deg, rgb(251 246 238 / 0.9), rgb(247 240 228 / 0.84));
+    background: linear-gradient(180deg, rgb(251 246 238 / 0.96), rgb(247 240 228 / 0.92));
     border: 1px solid rgb(61 36 22 / 0.1);
-    backdrop-filter: blur(18px) saturate(1.1);
-    -webkit-backdrop-filter: blur(18px) saturate(1.1);
   }
 
   .hairline {

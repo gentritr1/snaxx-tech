@@ -12,15 +12,16 @@ export interface Quality {
   plates: number;
   particles: number;
   fragments: number;
-  dof: boolean;
-  transmission: boolean;
+  bloom: boolean;
   multisampling: number;
 }
 
 export const QUALITY: Record<Tier, Quality> = {
-  high: { tier: 'high', dpr: [1, 2], plates: 900, particles: 6000, fragments: 220, dof: true, transmission: true, multisampling: 4 },
-  medium: { tier: 'medium', dpr: [1, 1.5], plates: 600, particles: 3200, fragments: 160, dof: false, transmission: true, multisampling: 2 },
-  low: { tier: 'low', dpr: [1, 1.25], plates: 320, particles: 1400, fragments: 90, dof: false, transmission: false, multisampling: 0 },
+  // Pixel ratio is the biggest lever: a retina canvas is four times the
+  // pixels of a 1x one. Every tier caps below the device's native ratio.
+  high: { tier: 'high', dpr: [1, 1.5], plates: 640, particles: 3200, fragments: 150, bloom: true, multisampling: 2 },
+  medium: { tier: 'medium', dpr: [1, 1.25], plates: 420, particles: 1800, fragments: 100, bloom: true, multisampling: 2 },
+  low: { tier: 'low', dpr: [1, 1], plates: 240, particles: 900, fragments: 60, bloom: false, multisampling: 0 },
 };
 
 export function detectTier(): Tier {

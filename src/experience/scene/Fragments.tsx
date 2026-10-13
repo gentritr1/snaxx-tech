@@ -3,7 +3,10 @@
 /* eslint-disable react-hooks/immutability */
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Color, Group, InstancedMesh, Matrix4, MeshPhysicalMaterial, Quaternion, Vector3 } from 'three';
+import { Color, Euler, Group, InstancedMesh, Matrix4, MeshStandardMaterial, Quaternion, Vector3 } from 'three';
+
+// Reused across frames so the hot loop allocates nothing per shard.
+const euler = new Euler();
 import { damp3 } from 'maath/easing';
 import { mulberry32, sceneState } from '../sceneState';
 
@@ -48,12 +51,10 @@ export function Fragments({ count }: { count: number }) {
   }, [count]);
   const material = useMemo(
     () =>
-      new MeshPhysicalMaterial({
+      new MeshStandardMaterial({
         color: '#FFFFFF',
         metalness: 0,
-        roughness: 0.25,
-        clearcoat: 1,
-        clearcoatRoughness: 0.1,
+        roughness: 0.28,
         envMapIntensity: 1.2,
       }),
     [],
@@ -88,7 +89,8 @@ export function Fragments({ count }: { count: number }) {
       p.set(Math.cos(a) * sh.radius, sh.lift + Math.sin(a * 1.7) * 0.6, Math.sin(a) * sh.radius * Math.cos(sh.tilt));
       p.y += Math.sin(a) * sh.radius * Math.sin(sh.tilt);
       e.set(sh.spin.x * t, sh.spin.y * t, sh.spin.z * t);
-      q.setFromEuler(new EulerLike(e.x, e.y, e.z));
+      euler.set(e.x, e.y, e.z);
+      q.setFromEuler(euler);
       // Shrink sprinkles that drift too close to the lens.
       const near = smoothstep(0.8, 3.2, p.x + g.position.x - camera.position.x, p.y + g.position.y - camera.position.y, p.z + g.position.z - camera.position.z);
       const sc = sh.scale * near;
@@ -102,12 +104,9 @@ export function Fragments({ count }: { count: number }) {
   return (
     <group ref={group}>
       <instancedMesh ref={mesh} args={[undefined, undefined, count]} material={material} frustumCulled={false}>
-        <capsuleGeometry args={[0.42, 1.5, 4, 10]} />
+        <capsuleGeometry args={[0.42, 1.5, 3, 6]} />
       </instancedMesh>
     </group>
   );
 }
 
-// Tiny Euler stand-in so the hot loop allocates nothing per shard.
-import { Euler } from 'three';
-class EulerLike extends Euler {}

@@ -87,7 +87,7 @@ export function createFilamentMaterial() {
         float pulse = smoothstep(0.72, 1.0, flow);
         float base = 0.08 + pulse * 1.0;
         vec3 col = mix(uColor * 0.55, uWhite, pulse * 0.8) * (0.6 + base * (0.3 + uEnergy * 1.6));
-        float ends = smoothstep(0.0, 0.08, vUv.x) * smoothstep(1.0, 0.92, vUv.x);
+        float ends = smoothstep(0.0, 0.08, vUv.x) * (1.0 - smoothstep(0.92, 1.0, vUv.x));
         gl_FragColor = vec4(col, (0.55 + pulse * 0.45) * ends * min(uEnergy, 1.0));
       }
     `,
@@ -150,7 +150,7 @@ export function createParticleMaterial() {
       void main() {
         vec2 c = gl_PointCoord - 0.5;
         float d = length(c);
-        float disc = smoothstep(0.5, 0.08, d);
+        float disc = 1.0 - smoothstep(0.08, 0.5, d);
         vec3 accent = mix(uEmber, uBlue, uWorld);
         vec3 col = mix(uSilver, accent, step(0.72, vTint));
         float a = disc * vFade * (0.3 + 0.35 * min(uEnergy, 1.0));
@@ -196,7 +196,7 @@ export function createGridMaterial() {
         float minor = gridLine(p, 1.0) * 0.35;
         float major = gridLine(p, 0.2) * 0.9;
         float d = distance(vPos.xz, uPortal.xz);
-        float pulse = smoothstep(0.06, 0.0, abs(fract(d * 0.05 - uTime * 0.12) - 0.5) - 0.44);
+        float pulse = 1.0 - smoothstep(0.0, 0.06, abs(fract(d * 0.05 - uTime * 0.12) - 0.5) - 0.44);
         float fade = 1.0 - smoothstep(14.0, 46.0, d);
         float line = max(minor, major);
         vec3 col = uLine * line + uAccent * pulse * 0.35 * line;
@@ -288,7 +288,7 @@ export function createPortalMaterial() {
         float swirl = fbm(vec3(cos(a) * 1.5 + r * 2.5, sin(a) * 1.5 - uTime * 0.6, r * 3.0 + uTime * 0.2));
         float iris = uOpen * 0.92;
         float band = smoothstep(iris - 0.06, iris + 0.04, r) * (1.0 - smoothstep(0.93, 1.0, r));
-        float inner = smoothstep(iris + 0.2, iris, r) * 1.6;
+        float inner = (1.0 - smoothstep(iris, iris + 0.2, r)) * 1.6;
         float n = smoothstep(-0.2, 0.8, swirl);
         vec3 col = mix(uColorA, uColorB, n * 0.8 + inner * 0.2);
         float glow = 0.75 + inner * 0.6 * uOpen;
@@ -366,7 +366,7 @@ export function createGlobeDotsMaterial(accent: string) {
       void main() {
         if (vLand < 0.5) discard;
         vec2 c = gl_PointCoord - 0.5;
-        float disc = smoothstep(0.5, 0.2, length(c));
+        float disc = 1.0 - smoothstep(0.2, 0.5, length(c));
         gl_FragColor = vec4(uColor * (1.1 + uFocus * 1.4) * vLight, disc * 0.95);
       }
     `,

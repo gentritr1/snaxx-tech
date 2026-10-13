@@ -325,6 +325,18 @@
   will-change: opacity, transform;
 }
 
+/* A chapter stage laid out in normal flow instead of pinned: used by the
+   reduced-motion variant of the games chapter, whose cards would otherwise
+   stack on top of one another. */
+.chapter-flow {
+  position: relative;
+  height: auto;
+  min-height: 100svh;
+  display: block;
+  overflow: visible;
+  padding-block: 7rem 4rem;
+}
+
 /* Soft one-shot entrance for lazy routes (legal pages & 404) */
 @keyframes pageEnter {
   from { opacity: 0; transform: translateY(6px); }

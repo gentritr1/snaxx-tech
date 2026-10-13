@@ -2,6 +2,15 @@
 
 Date: 2026-10-13 · Branch: `feat/cinematic-3d-experience` · Status: approved by brief (autonomous build)
 
+> **Superseded in part.** This spec records the original architecture and scroll
+> choreography, which still hold. Where it disagrees with `DESIGN.md` or the
+> "Performance rules" section of `README.md`, those win. In particular the
+> palette table below (a dark cocoa `void`, a cream `silver`, a dark glass nav and
+> a dark 404) was inverted into a bright cream studio: `void` is now `#F7F0E4` and
+> `silver` is now `#2B1D12`. The transmission glass heart, depth of field and the
+> per-section point lights described here were removed for performance, and the
+> porcelain rings became caramel drizzle.
+
 ## 1. Intent (what the brief asked for)
 
 Rebrand Snaxx Tech from the hand-drawn "Almanac" storybook site into a

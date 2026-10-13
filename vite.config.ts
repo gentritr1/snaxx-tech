@@ -33,16 +33,11 @@ export default defineConfig(({ mode }) => ({
       port: 3000,
     },
     build: {
-      chunkSizeWarningLimit: 1200,
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            three: ['three'],
-            r3f: ['@react-three/fiber', '@react-three/drei', '@react-three/postprocessing', 'postprocessing', 'maath'],
-            gsap: ['gsap', '@gsap/react'],
-          },
-        },
-      },
+      // The 3D stack is one lazy chunk (see Home.tsx). Do not use manualChunks
+      // to split it: Rollup then hoists shared modules such as React into the
+      // vendor chunk, and the entry bundle ends up preloading three.js on
+      // every route, legal pages included.
+      chunkSizeWarningLimit: 1500,
     },
     // Avast falsely flags the pre-bundled drei chunk (JS:Prontexi-Z) and
     // quarantines it on every regeneration; serving drei unbundled avoids it.

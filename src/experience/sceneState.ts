@@ -1,9 +1,13 @@
-import { Vector3 } from 'three';
-
 /**
  * The single source of truth the scroll timeline writes and the renderer
  * reads. It is a plain mutable object on purpose: GSAP tweens it at scroll
  * rate and React Three Fiber reads it every frame without React re-renders.
+ *
+ * It deliberately imports nothing from three.js: the home page's DOM code
+ * imports this module eagerly, and a three import here would drag the whole
+ * 3D library into the entry bundle of every route, legal pages included.
+ * Vectors are therefore plain {x, y, z} records; the renderer copies them
+ * into its own Vector3 scratch objects.
  */
 export const sceneState = {
   /** Awakening on load, 0 → 1. Drives the power-up and the first camera reveal. */
@@ -11,8 +15,8 @@ export const sceneState = {
   /** Scroll progress across the whole page, 0 → 1 (informational). */
   progress: 0,
 
-  cam: new Vector3(0, 0.5, 12.4),
-  target: new Vector3(0, 0, 0),
+  cam: { x: 0, y: 0.5, z: 12.4 },
+  target: { x: 0, y: 0, z: 0 },
   fov: 40,
   /** Framing offsets so the subject sits beside the copy (landscape, x) or above it (portrait, y). */
   shiftX: 0,

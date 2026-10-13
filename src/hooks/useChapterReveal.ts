@@ -57,7 +57,8 @@ export function useSequenceReveal(
     const els = items.current?.slice(0, count) ?? [];
     if (!sectionEl || els.length === 0) return;
     if (prefersReducedMotion()) {
-      els.forEach((el) => el && gsap.set(el, { opacity: 1, y: 0, pointerEvents: 'auto' }));
+      // Reduced motion: every item is simply shown (the caller lays them out in flow).
+      els.forEach((el) => el && gsap.set(el, { autoAlpha: 1, y: 0, pointerEvents: 'auto' }));
       return;
     }
     const tl = gsap.timeline({
@@ -70,9 +71,11 @@ export function useSequenceReveal(
       if (!el) return;
       const start = i * slice;
       const end = (i + 1) * slice;
-      gsap.set(el, { opacity: 0, y: 40, pointerEvents: 'none' });
-      tl.to(el, { opacity: 1, y: 0, pointerEvents: 'auto', duration: edge, ease: 'power2.out' }, start + (i === 0 ? 0.02 : edge * 0.4));
-      tl.to(el, { opacity: 0, y: -30, pointerEvents: 'none', duration: edge, ease: 'power2.in' }, end - edge - (i === count - 1 ? 0.04 : 0));
+      // autoAlpha toggles `visibility` along with opacity, so an inactive
+      // item's links are removed from the tab order and the accessibility tree.
+      gsap.set(el, { autoAlpha: 0, y: 40, pointerEvents: 'none' });
+      tl.to(el, { autoAlpha: 1, y: 0, pointerEvents: 'auto', duration: edge, ease: 'power2.out' }, start + (i === 0 ? 0.02 : edge * 0.4));
+      tl.to(el, { autoAlpha: 0, y: -30, pointerEvents: 'none', duration: edge, ease: 'power2.in' }, end - edge - (i === count - 1 ? 0.04 : 0));
     });
     return () => {
       tl.scrollTrigger?.kill();

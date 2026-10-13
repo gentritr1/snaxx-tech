@@ -79,6 +79,12 @@ an Apple M4 Pro, also under a 4x CPU slowdown). Keep it that way:
 - **Budget triangles.** Instanced shell pieces use a one-segment rounded box
   and a standard (not clear-coated) material; pixel ratio is capped at 1.5.
 - **No allocations in `useFrame`.** Reuse vectors, quaternions and eulers.
+- **Keep three.js out of the entry bundle.** The home page's DOM code imports
+  `sceneState` eagerly, so it must not import `three` (cam and target are plain
+  `{x, y, z}` records), and `vite.config.ts` must not use `manualChunks` for the
+  3D libraries. The legal and 404 routes then load no 3D code at all; the whole
+  3D stack is the lazy `Experience` chunk. Check with
+  `grep modulepreload dist/index.html` after a build: it should list nothing.
 
 See `DESIGN.md` for the brand system ("The Confectionery Engine") and
 `docs/superpowers/specs/` for the design spec.

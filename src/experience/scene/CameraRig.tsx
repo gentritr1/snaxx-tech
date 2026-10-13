@@ -25,6 +25,8 @@ export function CameraRig() {
   const goal = useMemo(() => new Vector3(), []);
   const look = useMemo(() => new Vector3(), []);
   const lookGoal = useMemo(() => new Vector3(), []);
+  const camKey = useMemo(() => new Vector3(), []);
+  const targetKey = useMemo(() => new Vector3(), []);
   const primed = useRef(false);
 
   useFrame((_, delta) => {
@@ -35,17 +37,19 @@ export function CameraRig() {
     damp(pointer.current, 'y', s.pointer.active ? s.pointer.y : 0, 0.5, dt);
 
     const k = s.reducedMotion ? 1 : easeOutCubic(s.intro);
-    goal.copy(INTRO_CAM).lerp(s.cam, k);
+    camKey.set(s.cam.x, s.cam.y, s.cam.z);
+    targetKey.set(s.target.x, s.target.y, s.target.z);
+    goal.copy(INTRO_CAM).lerp(camKey, k);
     const landscape = aspect >= 1;
     if (!landscape) {
       // Portrait viewports see a narrower slice of the scene: step back.
-      goal.sub(s.target).multiplyScalar(1.32).add(s.target);
+      goal.sub(targetKey).multiplyScalar(1.32).add(targetKey);
     }
     const parallax = 1 - s.flow * 0.6;
     goal.x += pointer.current.x * 0.5 * parallax;
     goal.y += pointer.current.y * 0.28 * parallax;
 
-    lookGoal.copy(s.target);
+    lookGoal.copy(targetKey);
     lookGoal.x += landscape ? s.shiftX : 0;
     lookGoal.y += landscape ? 0 : s.shiftY;
     lookGoal.x += pointer.current.x * 0.18;

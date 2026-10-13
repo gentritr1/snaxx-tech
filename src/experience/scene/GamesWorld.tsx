@@ -26,7 +26,7 @@ import { createGlobeDotsMaterial } from '../shaders/materials';
 import { createLetterTexture } from '../textures/ui';
 import { gamesConfig, type GameItem } from '@/config';
 import { CHOCOLATE, GOLD, PORCELAIN } from './Core';
-import { scrollToGame } from '@/lib/scroll';
+import { isDomControlClick, scrollToGame } from '@/lib/scroll';
 
 const ZERO = new Vector3(0, 0, 0);
 const GAMES_Z = -38;
@@ -59,8 +59,7 @@ function Exhibit({ game, index, children }: { game: GameItem; index: number; chi
     setHover(null);
   };
   const onClick = (e: ThreeEvent<MouseEvent>) => {
-    const target = e.nativeEvent.target as HTMLElement | null;
-    if (target?.closest('a, button')) return;
+    if (isDomControlClick(e)) return;
     scrollToGame(index);
   };
 

@@ -7,6 +7,7 @@ import { Color, Euler, Group, InstancedMesh, Matrix4, MeshStandardMaterial, Quat
 
 // Reused across frames so the hot loop allocates nothing per shard.
 const euler = new Euler();
+const focus = new Vector3();
 import { damp3 } from 'maath/easing';
 import { mulberry32, sceneState } from '../sceneState';
 
@@ -81,7 +82,8 @@ export function Fragments({ count }: { count: number }) {
     if (!inst || !g) return;
     const s = sceneState;
     const t = s.reducedMotion ? 0 : clock.elapsedTime * (1 - s.calm * 0.6);
-    damp3(g.position, s.target, 0.9, Math.min(delta, 0.05));
+    focus.set(s.target.x, s.target.y, s.target.z);
+    damp3(g.position, focus, 0.9, Math.min(delta, 0.05));
     const { m, p, q, e } = scratch;
     for (let i = 0; i < shards.length; i++) {
       const sh = shards[i];

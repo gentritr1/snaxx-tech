@@ -15,6 +15,7 @@ import {
   createStripTexture,
 } from '../textures/ui';
 import { softwareConfig } from '@/config';
+import { isDomControlClick } from '@/lib/scroll';
 
 const HOLO_CENTER: [number, number, number] = [0, 0.1, -14];
 
@@ -87,7 +88,10 @@ function Panel({ spec }: { spec: PanelSpec }) {
       material={material}
       onPointerOver={onOver}
       onPointerOut={onOut}
-      onClick={() => document.getElementById('software')?.scrollIntoView({ behavior: 'smooth' })}
+      onClick={(e) => {
+        if (isDomControlClick(e)) return;
+        document.getElementById('software')?.scrollIntoView({ behavior: sceneState.reducedMotion ? 'auto' : 'smooth' });
+      }}
     >
       <planeGeometry args={[spec.width, spec.height]} />
     </mesh>

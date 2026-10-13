@@ -69,6 +69,10 @@ export function GamesChapter() {
   const header = useRef<HTMLDivElement>(null);
   const cards = useRef<(HTMLDivElement | null)[]>([]);
   const [hover, setLocal] = useState<string | null>(null);
+  // Reduced motion shows every game at once in normal document flow; the
+  // animated layout stacks the cards on top of each other and reveals one at
+  // a time, which would hide all but the last card from these visitors.
+  const [reduced] = useState(prefersReducedMotion);
   useEffect(() => subscribeHover(setLocal), []);
   useSequenceReveal(section, cards, gamesConfig.games.length);
 
@@ -77,42 +81,57 @@ export function GamesChapter() {
     const sectionEl = section.current;
     const el = header.current;
     if (!sectionEl || !el) return;
-    if (prefersReducedMotion()) {
+    if (reduced) {
       gsap.set(el, { opacity: 1 });
       return;
     }
     const tl = gsap.timeline({ scrollTrigger: { trigger: sectionEl, start: 'top top', end: 'bottom bottom', scrub: true } });
-    tl.fromTo(el, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.05, ease: 'power2.out' }, 0.01);
+    tl.fromTo(el, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.05, ease: 'power2.out', immediateRender: false }, 0.01);
     tl.to(el, { opacity: 0, y: -20, duration: 0.05, ease: 'power2.in' }, 0.94);
     return () => {
       tl.scrollTrigger?.kill();
       tl.kill();
     };
-  }, []);
+  }, [reduced]);
 
   return (
-    <section id="games" ref={section} className="relative" style={{ height: '420vh' }}>
-      <div className="chapter-stage">
-        <div className="container-large relative h-full w-full px-6 lg:px-12">
-          <div ref={header} className="chapter-copy absolute left-6 top-20 max-w-sm sm:top-24 lg:left-12 lg:top-28">
+    <section id="games" ref={section} className="relative" style={reduced ? undefined : { height: '420vh' }}>
+      <div className={cn('chapter-stage', reduced && 'chapter-flow')}>
+        <div className={cn('container-large w-full px-6 lg:px-12', !reduced && 'relative h-full')}>
+          <div
+            ref={header}
+            className={cn('chapter-copy max-w-sm', !reduced && 'absolute left-6 top-20 sm:top-24 lg:left-12 lg:top-28')}
+          >
             <p className="label-mono flex items-center gap-3 text-mist">
               <span className="text-ember">{gamesConfig.index}</span>
               <span className="h-px w-6 bg-ink/20" aria-hidden="true" />
               <span>{gamesConfig.label}</span>
             </p>
             <h2 className="font-display type-title mt-3 text-ink sm:mt-4">{gamesConfig.heading}</h2>
-            <p className="mt-3 hidden text-sm leading-relaxed text-mist lg:block">{gamesConfig.description}</p>
+            <p className={cn('mt-3 text-sm leading-relaxed text-mist', !reduced && 'hidden lg:block')}>{gamesConfig.description}</p>
           </div>
 
-          <div className="absolute inset-x-6 bottom-8 flex justify-start lg:inset-x-12 lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2">
+          <div
+            className={cn(
+              reduced
+                ? 'mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4'
+                : 'absolute inset-x-6 bottom-8 flex justify-start lg:inset-x-12 lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2',
+            )}
+          >
             {gamesConfig.games.map((game, i) => (
               <div
                 key={game.id}
                 ref={(el) => {
                   cards.current[i] = el;
                 }}
-                className="chapter-copy absolute bottom-0 left-0 w-full lg:top-1/2 lg:w-auto lg:-translate-y-1/2"
-                style={{ opacity: 0 }}
+                className={cn(
+                  'chapter-copy',
+                  reduced ? 'w-full' : 'absolute bottom-0 left-0 w-full lg:top-1/2 lg:w-auto lg:-translate-y-1/2',
+                )}
+                // Hidden until its slice of the scroll: not just transparent but
+                // out of the tab order too, so keyboard focus never lands on a
+                // card nobody can see.
+                style={reduced ? undefined : { opacity: 0, visibility: 'hidden' }}
               >
                 <GameCard game={game} index={i} active={hover === game.id} />
               </div>

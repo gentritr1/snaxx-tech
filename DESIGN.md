@@ -68,20 +68,19 @@ spacing:
   chapter: "100svh"
 components:
   button-primary:
-    backgroundColor: "{colors.silver}"
-    textColor: "{colors.ink}"
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.cream}"
     rounded: "{rounded.lg}"
     padding: "12px 20px"
   button-outline:
     backgroundColor: "transparent"
-    textColor: "{colors.silver}"
-    border: "1px solid rgb(255 255 255 / 0.25)"
+    textColor: "{colors.ink}"
+    border: "1px solid rgb(26 17 10 / 0.25)"
     rounded: "{rounded.lg}"
     padding: "12px 20px"
   glass-panel:
-    backgroundColor: "rgb(255 255 255 / 0.05)"
-    border: "1px solid rgb(255 255 255 / 0.08)"
-    backdropFilter: "blur(14px) saturate(1.2)"
+    backgroundColor: "rgb(255 255 255 / 0.7)"
+    border: "1px solid rgb(61 36 22 / 0.1)"
     rounded: "{rounded.xl}"
   chip-product:
     backgroundColor: "transparent"

@@ -11,14 +11,11 @@ import {
   Group,
   InstancedBufferAttribute,
   InstancedMesh,
-  LatheGeometry,
   Matrix4,
   Mesh,
   MeshPhysicalMaterial,
-  Object3D,
   Quaternion,
   TubeGeometry,
-  Vector2,
   Vector3,
 } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -166,115 +163,87 @@ function Filaments() {
 }
 
 // ---------------------------------------------------------------------------
-// Rings: three porcelain gyroscopic rings with chocolate studs and a caramel light track.
+// Drizzle: glossy caramel ribbons wrapped around the bonbon. They unwind as
+// the shell opens and fade once the camera is through the centre.
 
-interface RingSpec {
+interface RibbonSpec {
+  turns: number;
   radius: number;
-  width: number;
+  height: number;
+  wobble: number;
   thickness: number;
-  tilt: [number, number, number];
+  phase: number;
   speed: number;
-  precession: number;
-  teeth: number;
+  tilt: [number, number, number];
 }
 
-const RINGS: RingSpec[] = [
-  { radius: 2.3, width: 0.24, thickness: 0.1, tilt: [0.55, 0.2, 0.1], speed: 0.16, precession: 0.05, teeth: 36 },
-  { radius: 2.95, width: 0.17, thickness: 0.08, tilt: [-0.35, 0.9, 0.45], speed: -0.11, precession: -0.035, teeth: 48 },
-  { radius: 3.6, width: 0.32, thickness: 0.12, tilt: [1.15, -0.4, 0.2], speed: 0.08, precession: 0.025, teeth: 64 },
+const RIBBONS: RibbonSpec[] = [
+  { turns: 1.6, radius: 2.15, height: 2.2, wobble: 0.35, thickness: 0.075, phase: 0, speed: 0.11, tilt: [0.35, 0, 0.1] },
+  { turns: 1.2, radius: 2.55, height: 1.4, wobble: 0.5, thickness: 0.06, phase: 2.1, speed: -0.08, tilt: [-0.5, 0.6, 0.3] },
+  { turns: 0.9, radius: 2.95, height: 0.9, wobble: 0.3, thickness: 0.05, phase: 4.2, speed: 0.06, tilt: [1.0, -0.3, 0.15] },
 ];
 
-function ringGeometry(r: number, w: number, t: number) {
-  const c = Math.min(w, t) * 0.22;
-  const inner = r - w / 2;
-  const outer = r + w / 2;
-  const profile = [
-    new Vector2(inner + c, -t / 2),
-    new Vector2(outer - c, -t / 2),
-    new Vector2(outer, -t / 2 + c),
-    new Vector2(outer, t / 2 - c),
-    new Vector2(outer - c, t / 2),
-    new Vector2(inner + c, t / 2),
-    new Vector2(inner, t / 2 - c),
-    new Vector2(inner, -t / 2 + c),
-    new Vector2(inner + c, -t / 2),
-  ];
-  return new LatheGeometry(profile, 168);
+const CARAMEL = new MeshPhysicalMaterial({
+  color: '#D48A2A',
+  metalness: 0,
+  roughness: 0.12,
+  clearcoat: 1,
+  clearcoatRoughness: 0.05,
+  envMapIntensity: 1.3,
+  transmission: 0.12,
+  thickness: 0.4,
+  attenuationColor: new Color('#8A4A12'),
+  attenuationDistance: 0.8,
+});
+
+function ribbonGeometry(spec: RibbonSpec) {
+  const points: Vector3[] = [];
+  const steps = 96;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const angle = spec.phase + t * Math.PI * 2 * spec.turns;
+    const r = spec.radius + Math.sin(t * 9.0 + spec.phase) * spec.wobble * 0.5;
+    const y = (t - 0.5) * spec.height + Math.sin(t * 13.0 + spec.phase) * spec.wobble * 0.4;
+    points.push(new Vector3(Math.cos(angle) * r, y, Math.sin(angle) * r));
+  }
+  const curve = new CatmullRomCurve3(points, false, 'catmullrom', 0.5);
+  return new TubeGeometry(curve, 220, spec.thickness, 10, false);
 }
 
-function Ring({ spec, index }: { spec: RingSpec; index: number }) {
+function Ribbon({ spec, index }: { spec: RibbonSpec; index: number }) {
   const outer = useRef<Group>(null);
   const spin = useRef<Group>(null);
-  const teeth = useRef<InstancedMesh>(null);
-  const track = useRef<Mesh>(null);
-  const geometry = useMemo(() => ringGeometry(spec.radius, spec.width, spec.thickness), [spec]);
-  const trackMaterial = useMemo(
-    () =>
-      new MeshPhysicalMaterial({
-        color: '#1A1A1A',
-        emissive: EMBER,
-        emissiveIntensity: 0,
-        roughness: 0.3,
-        metalness: 0.2,
-      }),
-    [],
-  );
-
-  useLayoutEffect(() => {
-    const mesh = teeth.current;
-    if (!mesh) return;
-    const dummy = new Object3D();
-    const r = spec.radius + spec.width / 2 + 0.02;
-    for (let i = 0; i < spec.teeth; i++) {
-      const a = (i / spec.teeth) * Math.PI * 2;
-      dummy.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
-      dummy.rotation.set(0, -a, 0);
-      const tall = i % 4 === 0 ? 1.6 : 1;
-      dummy.scale.set(1, tall, 1);
-      dummy.updateMatrix();
-      mesh.setMatrixAt(i, dummy.matrix);
-    }
-    mesh.instanceMatrix.needsUpdate = true;
-  }, [spec]);
+  const geometry = useMemo(() => ribbonGeometry(spec), [spec]);
 
   useFrame(({ clock }) => {
     const s = sceneState;
     const t = clock.elapsedTime;
-    const spinAmount = s.reducedMotion ? 0 : t * spec.speed * (0.4 + s.energy * 0.9 + s.ringSpread * 0.6);
-    if (spin.current) spin.current.rotation.y = spinAmount;
-    if (outer.current) {
-      const p = s.reducedMotion ? 0 : t * spec.precession;
-      outer.current.rotation.set(spec.tilt[0] + Math.sin(p) * 0.25, spec.tilt[1] + p, spec.tilt[2] + Math.cos(p * 0.7) * 0.2);
-      const spread = 1 + s.ringSpread * (0.18 + index * 0.12);
-      outer.current.scale.setScalar(spread);
-      // Rings dim out once we are through and into the digital world.
-      outer.current.visible = s.cam.z > -4 || s.formation < 1.8;
+    if (spin.current) {
+      spin.current.rotation.y = s.reducedMotion ? 0 : t * spec.speed * (0.5 + s.energy * 0.8 + s.ringSpread * 0.5);
     }
-    if (track.current) {
-      trackMaterial.emissiveIntensity = s.energy * (1.2 + Math.sin(t * 2 + index) * 0.3);
+    if (outer.current) {
+      const p = s.reducedMotion ? 0 : t * 0.04 * (index + 1);
+      outer.current.rotation.set(spec.tilt[0] + Math.sin(p) * 0.12, spec.tilt[1], spec.tilt[2] + Math.cos(p * 0.8) * 0.1);
+      const spread = 1 + s.ringSpread * (0.25 + index * 0.18);
+      outer.current.scale.set(spread, 1 + s.ringSpread * 0.6, spread);
+      outer.current.visible = s.cam.z > -4 || s.formation < 1.8;
     }
   });
 
   return (
     <group ref={outer} rotation={spec.tilt}>
       <group ref={spin}>
-        <mesh geometry={geometry} material={PORCELAIN} />
-        <mesh ref={track} material={trackMaterial} rotation-x={Math.PI / 2}>
-          <torusGeometry args={[spec.radius - spec.width / 2 - 0.01, 0.012, 8, 160]} />
-        </mesh>
-        <instancedMesh ref={teeth} args={[undefined, undefined, spec.teeth]} material={CHOCOLATE}>
-          <boxGeometry args={[0.07, spec.thickness * 1.5, 0.12]} />
-        </instancedMesh>
+        <mesh geometry={geometry} material={CARAMEL} />
       </group>
     </group>
   );
 }
 
-function Rings() {
+function Drizzle() {
   return (
     <group>
-      {RINGS.map((spec, i) => (
-        <Ring key={i} spec={spec} index={i} />
+      {RIBBONS.map((spec, i) => (
+        <Ribbon key={i} spec={spec} index={i} />
       ))}
     </group>
   );
@@ -543,7 +512,7 @@ export function Core({ quality }: { quality: Quality }) {
     <group>
       <Heart quality={quality} />
       <Filaments />
-      <Rings />
+      <Drizzle />
       <Plates count={quality.plates} />
     </group>
   );

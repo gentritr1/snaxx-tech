@@ -47,7 +47,7 @@ interface CamKey {
 }
 
 function buildTimeline(r: Record<ChapterId, Range>) {
-  const tl = gsap.timeline({ paused: true, defaults: { ease: 'power2.inOut', immediateRender: false } });
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'power2.inOut' } });
   const at = (id: ChapterId, t: number) => r[id].start + (r[id].end - r[id].start) * t;
 
   // --- Camera path -----------------------------------------------------
@@ -76,14 +76,16 @@ function buildTimeline(r: Record<ChapterId, Range>) {
     const b = keys[i];
     const duration = Math.max(0.0001, b.p - a.p);
     const ease = b.ease ?? 'power2.inOut';
-    tl.fromTo(sceneState.cam, { x: a.cam[0], y: a.cam[1], z: a.cam[2] }, { x: b.cam[0], y: b.cam[1], z: b.cam[2], duration, ease }, a.p);
-    tl.fromTo(sceneState.target, { x: a.target[0], y: a.target[1], z: a.target[2] }, { x: b.target[0], y: b.target[1], z: b.target[2], duration, ease }, a.p);
-    tl.fromTo(sceneState, { fov: a.fov }, { fov: b.fov, duration, ease }, a.p);
+    // GSAP renders a fromTo's start values the moment it is created unless told
+    // otherwise, and timeline defaults do not reach that flag: pass it explicitly.
+    tl.fromTo(sceneState.cam, { x: a.cam[0], y: a.cam[1], z: a.cam[2] }, { x: b.cam[0], y: b.cam[1], z: b.cam[2], duration, ease, immediateRender: false }, a.p);
+    tl.fromTo(sceneState.target, { x: a.target[0], y: a.target[1], z: a.target[2] }, { x: b.target[0], y: b.target[1], z: b.target[2], duration, ease, immediateRender: false }, a.p);
+    tl.fromTo(sceneState, { fov: a.fov }, { fov: b.fov, duration, ease, immediateRender: false }, a.p);
   }
 
   // --- Scalar choreography --------------------------------------------
   const seg = (key: keyof typeof sceneState, from: number, to: number, p0: number, p1: number, ease = 'power2.inOut') => {
-    tl.fromTo(sceneState, { [key]: from }, { [key]: to, duration: Math.max(0.0001, p1 - p0), ease }, p0);
+    tl.fromTo(sceneState, { [key]: from }, { [key]: to, duration: Math.max(0.0001, p1 - p0), ease, immediateRender: false }, p0);
   };
 
   // Plates: shell → exploded → frame → ring → sky
@@ -138,7 +140,7 @@ function buildTimeline(r: Record<ChapterId, Range>) {
   for (let i = 1; i < shiftKeys.length; i++) {
     const [p0, x0, y0] = shiftKeys[i - 1];
     const [p1, x1, y1] = shiftKeys[i];
-    tl.fromTo(sceneState, { shiftX: x0, shiftY: y0 }, { shiftX: x1, shiftY: y1, duration: Math.max(0.0001, p1 - p0), ease: 'power2.inOut' }, p0);
+    tl.fromTo(sceneState, { shiftX: x0, shiftY: y0 }, { shiftX: x1, shiftY: y1, duration: Math.max(0.0001, p1 - p0), ease: 'power2.inOut', immediateRender: false }, p0);
   }
 
   // Pad to exactly 1 so progress maps 1:1 onto page scroll.
@@ -198,7 +200,7 @@ export function createChoreography(root: HTMLElement, reducedMotion: boolean): C
     const progress = tl.progress();
     tl.kill();
     tl = buildTimeline(ranges);
-    tl.progress(progress);
+    tl.progress(progress, false);
     build();
     ScrollTrigger.refresh();
   };

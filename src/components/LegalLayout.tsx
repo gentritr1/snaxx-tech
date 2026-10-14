@@ -18,7 +18,8 @@ function siblingKinds(app: AppLegal, kind: LegalKind): LegalKind[] {
 export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
   const meta = { title: KIND_TITLES[kind] };
   const siblings = siblingKinds(app, kind);
-  const otherApp = Object.values(legalApps).find((a) => a.slug !== app.slug);
+  // Cross-link only to a sibling on the same platform (the games link to each other; the Sheets add-on has none).
+  const otherApp = Object.values(legalApps).find((a) => a.slug !== app.slug && (a.platformLabel ?? null) === (app.platformLabel ?? null));
 
   return (
     <div className="min-h-screen bg-almanac-paper">
@@ -78,7 +79,7 @@ export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
             )}
 
             <p className="mt-4 text-sm text-almanac-ink-soft">
-              Android · No Snaxx Tech account · Ad-supported
+              {app.summaryLine ?? 'Android · No Snaxx Tech account · Ad-supported'}
             </p>
 
             {/* Cross links */}

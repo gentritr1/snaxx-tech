@@ -37,6 +37,13 @@ export interface AppLegal {
   slug: string;
   appName: string;
   appKind: string; // e.g. "arcade game" / "mobile app"
+  // How the page's meta description names the app, e.g. "a Google Sheets
+  // add-on". Omitted for the Android games, which keep "an Android <appKind>"
+  // ("an offline Android <appKind>" on support pages).
+  platformLabel?: string;
+  // One-line facts under the document title. Omitted for the Android games,
+  // which show "Android · No Snaxx Tech account · Ad-supported".
+  summaryLine?: string;
   accent: string; // hex accent color for chips & highlights
   effectiveDate: string;
   lastUpdated?: string; // shown as "Last updated"; falls back to effectiveDate
@@ -53,6 +60,8 @@ const EFFECTIVE_DATE = "July 18, 2026";
 const CONTACT_EMAIL = "techsnaxx@gmail.com";
 const PRIVACY_EMAIL = "privacy@snaxxtech.com";
 const SUPPORT_RESPONSE_TIME = "within 2–3 business days";
+
+const JIRA_SHEETS_EFFECTIVE_DATE = "October 14, 2026";
 
 // Advertising provider for a given app's release build.
 //   "unity-levelplay" — Unity Ads served through Unity LevelPlay (ironSource) mediation
@@ -698,6 +707,330 @@ const GEO_GUESSER_PROFILE: LegalProfile = {
   ],
 };
 
+// Jira → Sheets — a Google Sheets add-on, not an Android game, so its documents
+// are written by hand instead of going through the game LegalProfile builders.
+// It has no Snaxx Tech server: it runs as Google Apps Script in the user's own
+// Google account and talks only to Google and Atlassian. Atlassian's
+// "Sign in with Atlassian" sharing setup points at /jira-sheets/privacy. Keep
+// these sections in step with the add-on's appsscript.json scopes, its
+// Atlassian OAuth scopes, and what it writes to user and document properties.
+const JIRA_SHEETS_NAME = "Jira → Sheets";
+
+const JIRA_SHEETS_PRIVACY: LegalSection[] = numberSections([
+  {
+    id: "introduction",
+    title: "Introduction",
+    paragraphs: [
+      `This Privacy Policy explains how Snaxx Tech ("we", "us", or "our") handles information when you use ${JIRA_SHEETS_NAME}, our Google Sheets add-on (the "Add-on"). The Add-on pulls Jira Cloud issues into a spreadsheet tab from a JQL query, and can refresh that tab every hour.`,
+      "There is no Snaxx Tech account to create, and Snaxx Tech does not receive any of the information described in this policy.",
+    ],
+  },
+  {
+    id: "how-it-works",
+    title: "How the Add-on Works",
+    paragraphs: [
+      "There is no Snaxx Tech server. The Add-on runs as Google Apps Script inside your own Google account. When it runs, data moves only between Google (Apps Script and Google Sheets) and Atlassian (Jira Cloud). Nothing is sent to Snaxx Tech.",
+      "The Add-on stores a small amount of information in two places, both inside Google: your Google account, and the spreadsheet you use it in. Both are described below.",
+    ],
+  },
+  {
+    id: "stored-in-your-account",
+    title: "Information Stored in Your Google Account",
+    paragraphs: [
+      "When you connect to Jira, the Add-on saves the following in Apps Script user properties in your Google account. Only the Add-on, running as you, can read them. Other people who use the same spreadsheet cannot.",
+    ],
+    list: [
+      "Your Jira site address.",
+      "How you signed in: Sign in with Atlassian, or an Atlassian API token.",
+      "If you signed in with an API token: the token, and the Atlassian email address you typed with it.",
+      "If you used Sign in with Atlassian: the access token and refresh token that Atlassian issued to the Add-on.",
+      "Your Jira site's cloud ID, which Atlassian uses to identify the site.",
+    ],
+  },
+  {
+    id: "stored-with-the-spreadsheet",
+    title: "Information Stored with the Spreadsheet",
+    paragraphs: [
+      "The Add-on saves the following in the spreadsheet's document properties. Anyone who uses the Add-on in that spreadsheet can see them:",
+    ],
+    list: [
+      "Each tab's JQL query and the fields you chose for it.",
+      "The status line of the last refresh, which names the person who ran the pull by their Atlassian display name.",
+      "Timestamps of recent refreshes, which the Add-on uses to show whether the hourly refresh is working.",
+    ],
+  },
+  {
+    id: "the-spreadsheet",
+    title: "The Spreadsheet Itself",
+    paragraphs: [
+      "The spreadsheet holds the Jira issue data you chose to pull. Anyone who can open the spreadsheet can see that data.",
+      "You control who can open the spreadsheet through Google Sheets sharing. The Add-on does not share the spreadsheet with anyone.",
+    ],
+  },
+  {
+    id: "atlassian-access",
+    title: "Your Jira Data",
+    paragraphs: [
+      "The Add-on only reads from Jira. It never creates, edits, or deletes anything in Jira, and it can see only what the signed-in Jira user can see.",
+      "If you connect with an API token, what the token allows is set when you create it at Atlassian, and the Add-on still only reads.",
+      "When you use Sign in with Atlassian, the Add-on asks Atlassian for these scopes only:",
+    ],
+    list: [
+      "read:jira-work — read project and issue data, and search for issues.",
+      "read:jira-user — read user information that you can see in Jira.",
+      "offline_access — keep access while you are not using the Add-on, so the hourly refresh can run.",
+    ],
+  },
+  {
+    id: "google-permissions",
+    title: "Google Permissions",
+    paragraphs: [
+      "When you install the Add-on, Google asks you to allow the permissions below. This is what each one is used for:",
+    ],
+    list: [
+      `"See, edit, create and delete only the specific Google Sheets spreadsheets you use this app with" (spreadsheets.currentonly) — to write the issues into the spreadsheet you are using.`,
+      `"Connect to an external service" (script.external_request) — to reach Atlassian.`,
+      `"Display and run third-party web content in prompts and sidebars" (script.container.ui) — to show the Add-on's sidebar and menu.`,
+      `"Allow this application to run when you are not present" (script.scriptapp) — to run the optional hourly refresh.`,
+    ],
+  },
+  {
+    id: "google-user-data",
+    title: "Google API Services User Data Policy",
+    paragraphs: [
+      `${JIRA_SHEETS_NAME}'s use and transfer of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements.`,
+    ],
+    links: [
+      {
+        label: "Google API Services User Data Policy",
+        href: "https://developers.google.com/terms/api-services-user-data-policy",
+        description: "Google's rules for apps that use Google user data, including the Limited Use requirements.",
+      },
+    ],
+  },
+  {
+    id: "data-we-do-not-collect",
+    title: "What We Do Not Collect",
+    paragraphs: ["To be specific about what the Add-on does not do:"],
+    list: [
+      "No Snaxx Tech server — there isn't one, and the Add-on sends Snaxx Tech nothing.",
+      "No Atlassian account IDs — the Add-on does not store them.",
+      "No analytics or tracking — the Add-on does not measure how you use it.",
+      "No ads — the Add-on shows none.",
+      "No cookies — the Add-on does not set any.",
+      "No selling or sharing — we do not sell your information or share it with anyone else.",
+    ],
+  },
+  {
+    id: "deleting-and-revoking",
+    title: "Deleting Your Data and Revoking Access",
+    paragraphs: [
+      "Snaxx Tech holds no data about you, so there is nothing for us to delete. You control everything the Add-on stores:",
+    ],
+    list: [
+      "Disconnect — choosing Disconnect in the Add-on deletes the credentials stored in your Google account.",
+      "Atlassian sign-in — remove the Add-on under Connected apps in your Atlassian account settings.",
+      "API token — revoke the token on your Atlassian account's API tokens page.",
+      "Google access — remove the Add-on from your Google account's third-party connections.",
+      "The spreadsheet — deleting it deletes the issue data you pulled and the document properties stored with it.",
+    ],
+    links: [
+      {
+        label: "Atlassian connected apps",
+        href: "https://id.atlassian.com/manage-profile/apps",
+        description: "Revoke the Add-on's Sign in with Atlassian access.",
+      },
+      {
+        label: "Atlassian API tokens",
+        href: "https://id.atlassian.com/manage-profile/security/api-tokens",
+        description: "Revoke an API token you created for the Add-on.",
+      },
+      {
+        label: "Google account permissions",
+        href: "https://myaccount.google.com/permissions",
+        description: "Remove the Add-on's access to your Google account.",
+      },
+    ],
+  },
+  {
+    id: "third-party-services",
+    title: "Third-Party Services",
+    paragraphs: [
+      `${JIRA_SHEETS_NAME} works with the services below, whose own privacy policies apply to the information they handle:`,
+    ],
+    list: [
+      "Atlassian — Jira Cloud holds your issues, and Atlassian runs the sign-in and API the Add-on reads from.",
+      "Google — Google Apps Script runs the Add-on, and Google Sheets holds the spreadsheet and the information stored with it.",
+    ],
+    links: [
+      {
+        label: "Atlassian privacy policy",
+        href: "https://www.atlassian.com/legal/privacy-policy",
+        description: "How Atlassian handles information in Jira Cloud and your Atlassian account.",
+      },
+      {
+        label: "Google privacy policy",
+        href: "https://policies.google.com/privacy",
+        description: "How Google handles information across its services, including Google Sheets and Apps Script.",
+      },
+    ],
+  },
+  {
+    id: "children",
+    title: "Children's Privacy",
+    paragraphs: [
+      `${JIRA_SHEETS_NAME} is a work tool for people who use Jira Cloud. It is not directed at children.`,
+    ],
+  },
+  {
+    id: "changes",
+    title: "Changes to This Policy",
+    paragraphs: [
+      `If we change this Privacy Policy, we will post the update on this page with a new "Last updated" date.`,
+    ],
+  },
+  {
+    id: "contact",
+    title: "Contact Us",
+    paragraphs: [
+      `If you have any questions about this Privacy Policy or about how ${JIRA_SHEETS_NAME} handles information, you can reach Snaxx Tech at ${PRIVACY_EMAIL}. We aim to respond within a few business days.`,
+      `For anything that is not a privacy question — bugs, feedback, or general support — email us at ${CONTACT_EMAIL}.`,
+    ],
+  },
+]);
+
+const JIRA_SHEETS_TERMS: LegalSection[] = numberSections([
+  {
+    id: "agreement",
+    title: "Agreement to Terms",
+    paragraphs: [
+      `These Terms of Service ("Terms") form a legal agreement between you and Snaxx Tech ("we", "us", or "our") governing your use of ${JIRA_SHEETS_NAME}, our Google Sheets add-on (the "Add-on").`,
+      "By installing or using the Add-on, you agree to these Terms. If you do not agree, please do not use the Add-on.",
+    ],
+  },
+  {
+    id: "as-is",
+    title: "Free and Provided As Is",
+    paragraphs: [
+      "The Add-on is free.",
+      `It is provided "as is" and "as available", without warranties of any kind, whether express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, and non-infringement.`,
+      "We do not warrant that the Add-on will be error-free or uninterrupted, or that any defects will be corrected.",
+    ],
+  },
+  {
+    id: "your-responsibilities",
+    title: "Your Responsibilities",
+    paragraphs: [
+      "The Add-on copies Jira issue data into your spreadsheet. You are responsible for who you share that spreadsheet with.",
+      "You are also responsible for following your organization's rules for Jira and for handling its data when you use the Add-on.",
+    ],
+  },
+  {
+    id: "atlassian-and-google",
+    title: "Atlassian and Google",
+    paragraphs: [
+      "Snaxx Tech is not affiliated with, or endorsed by, Atlassian or Google.",
+      "Jira is a trademark of Atlassian.",
+    ],
+  },
+  {
+    id: "liability",
+    title: "Limitation of Liability",
+    paragraphs: [
+      "To the maximum extent permitted by law, Snaxx Tech shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of data, profits, or goodwill, arising out of or related to your use of the Add-on.",
+    ],
+  },
+  {
+    id: "changes",
+    title: "Changes and Discontinuation",
+    paragraphs: [
+      "We may change the Add-on, or discontinue it, at any time.",
+      "We may also update these Terms. When we do, we will revise the date at the top of this page.",
+    ],
+  },
+  {
+    id: "contact",
+    title: "Contact Us",
+    paragraphs: [
+      `Questions about these Terms? Reach us at ${CONTACT_EMAIL} — we're happy to help.`,
+    ],
+  },
+]);
+
+const JIRA_SHEETS_SUPPORT: LegalSection[] = numberSections([
+  {
+    id: "about",
+    title: `About ${JIRA_SHEETS_NAME}`,
+    paragraphs: [
+      `${JIRA_SHEETS_NAME} is a Google Sheets add-on. It pulls Jira Cloud issues into a spreadsheet tab from a JQL query, and can refresh that tab every hour.`,
+      "This page covers the questions we get most often. If none of it helps, email us — a real person reads it.",
+    ],
+  },
+  {
+    id: "connecting",
+    title: "Connecting to Jira",
+    paragraphs: ["Open the Add-on's sidebar and connect in one of two ways:"],
+    list: [
+      "Sign in with Atlassian — choose Sign in with Atlassian and accept on Atlassian's page. The Add-on gets read-only access to Jira.",
+      "API token — create a token on your Atlassian account's API tokens page, then enter your Jira site address, your Atlassian email, and the token in the sidebar.",
+    ],
+    links: [
+      {
+        label: "Atlassian API tokens",
+        href: "https://id.atlassian.com/manage-profile/security/api-tokens",
+        description: "Create or revoke an Atlassian API token.",
+      },
+    ],
+  },
+  {
+    id: "troubleshooting",
+    title: "Troubleshooting",
+    paragraphs: ["The most common things people run into, and what to do about them:"],
+    list: [
+      "A typo in your JQL — the Add-on shows Jira's own error message and keeps the rows already on the tab. Fix the query and pull again.",
+      "Your Atlassian sign-in expired — sign in again from the sidebar.",
+      "A red tab — the last refresh of that tab failed. Open the sidebar to see why.",
+      "An amber tab — the tab's hourly refresh is overdue. Open the sidebar to check it, or pull the tab again.",
+    ],
+  },
+  {
+    id: "disconnecting",
+    title: "Disconnecting and Revoking Access",
+    list: [
+      "Disconnect — choose Disconnect in the Add-on. This deletes the credentials stored in your Google account.",
+      "Atlassian sign-in — to fully revoke access, also remove the Add-on under Connected apps in your Atlassian account settings.",
+      "API token — revoke the token on your Atlassian account's API tokens page.",
+      "Google access — remove the Add-on from your Google account's third-party connections.",
+    ],
+    links: [
+      {
+        label: "Atlassian connected apps",
+        href: "https://id.atlassian.com/manage-profile/apps",
+        description: "Revoke the Add-on's Sign in with Atlassian access.",
+      },
+      {
+        label: "Atlassian API tokens",
+        href: "https://id.atlassian.com/manage-profile/security/api-tokens",
+        description: "Revoke an API token you created for the Add-on.",
+      },
+      {
+        label: "Google account permissions",
+        href: "https://myaccount.google.com/permissions",
+        description: "Remove the Add-on's access to your Google account.",
+      },
+    ],
+  },
+  {
+    id: "contact",
+    title: "Contact Us",
+    paragraphs: [
+      `Email ${CONTACT_EMAIL} and we will get back to you ${SUPPORT_RESPONSE_TIME}.`,
+      "It helps to include what you were doing and the exact message the sidebar showed.",
+      "Please never send your API token, passwords, or payment details. We will never ask you for them.",
+    ],
+  },
+]);
+
 export const legalApps: Record<string, AppLegal> = {
   arrows: {
     slug: "arrows",
@@ -746,6 +1079,22 @@ export const legalApps: Record<string, AppLegal> = {
       "geography guessing game",
       GEO_GUESSER_PROFILE,
     ),
+  },
+  "jira-sheets": {
+    slug: "jira-sheets",
+    appName: JIRA_SHEETS_NAME,
+    appKind: "Google Sheets add-on",
+    platformLabel: "a Google Sheets add-on",
+    summaryLine: "Google Sheets add-on · No Snaxx Tech server · Read-only Jira access",
+    accent: "#16A34A",
+    effectiveDate: JIRA_SHEETS_EFFECTIVE_DATE,
+    contactEmail: CONTACT_EMAIL,
+    privacyEmail: PRIVACY_EMAIL,
+    supportEmail: CONTACT_EMAIL,
+    supportResponseTime: SUPPORT_RESPONSE_TIME,
+    privacy: JIRA_SHEETS_PRIVACY,
+    terms: JIRA_SHEETS_TERMS,
+    support: JIRA_SHEETS_SUPPORT,
   },
 };
 

@@ -27,10 +27,12 @@ export default function LegalPage({ kind }: LegalPageProps) {
       : 'Page Not Found — Snaxx Tech';
 
     if (description) {
+      // The Android games keep their original wording; other apps name their
+      // platform through platformLabel (e.g. "a Google Sheets add-on").
       description.content = app
         ? kind === 'support'
-          ? `Support and troubleshooting for ${app.appName}, an offline Android ${app.appKind} by Snaxx Tech.`
-          : `${docTitle} for ${app.appName}, an Android ${app.appKind} by Snaxx Tech.`
+          ? `Support and troubleshooting for ${app.appName}, ${app.platformLabel ?? `an offline Android ${app.appKind}`} by Snaxx Tech.`
+          : `${docTitle} for ${app.appName}, ${app.platformLabel ?? `an Android ${app.appKind}`} by Snaxx Tech.`
         : 'The requested Snaxx Tech page could not be found.';
     }
 

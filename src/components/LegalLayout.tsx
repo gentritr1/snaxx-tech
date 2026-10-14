@@ -78,7 +78,7 @@ export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
             )}
 
             <p className="mt-4 text-sm text-almanac-ink-soft">
-              Android · No Snaxx Tech account · Ad-supported
+              {app.summaryLine ?? 'Android · No Snaxx Tech account · Ad-supported'}
             </p>
 
             {/* Cross links */}

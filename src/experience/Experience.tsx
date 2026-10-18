@@ -96,12 +96,11 @@ export default function Experience({ eventSource, onReady }: ExperienceProps) {
           onReady();
         }}
       >
-        <PerformanceMonitor
-          flipflops={3}
-          onDecline={() => setDpr((d) => Math.max(quality.dpr[0], d - 0.25))}
-          onIncline={() => setDpr((d) => Math.min(quality.dpr[1], d + 0.25))}
-          onFallback={() => setDpr(quality.dpr[0])}
-        />
+        {/* Step down only, on sustained low frame rates. drei counts every
+            "incline" check as a flip-flop even when nothing changes, so with
+            onIncline + flipflops + onFallback a smooth 60 fps machine hit the
+            fallback ~12 s after load and was dropped to the minimum ratio. */}
+        <PerformanceMonitor onDecline={() => setDpr((d) => Math.max(quality.dpr[0], d - 0.25))} />
         <FrameProbe onFrame={markFrame} />
         <Suspense fallback={null}>
           <CameraRig />

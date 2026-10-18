@@ -1,7 +1,7 @@
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { PerformanceMonitor, Preload } from '@react-three/drei';
-import { ACESFilmicToneMapping } from 'three';
+import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { PerformanceMonitor } from '@react-three/drei';
+import { CubeCamera, WebGLCubeRenderTarget, type Object3D } from 'three';
 import { QUALITY, detectTier, prefersReducedMotion, webglAvailable } from './quality';
 import { sceneState } from './sceneState';
 import { CameraRig } from './scene/CameraRig';
@@ -13,6 +13,33 @@ import { SoftwareHolo } from './scene/SoftwareHolo';
 import { Portal } from './scene/Portal';
 import { GamesWorld } from './scene/GamesWorld';
 import { Effects } from './scene/Effects';
+
+/**
+ * Compiles every program during the boot curtain, hidden groups included.
+ * drei's <Preload all /> compiles for the canvas (tone-mapped, sRGB), but the
+ * scene renders into the composer's linear target, so those 21 programs were
+ * never used and the real ones still compiled later. Rendering once into a
+ * linear cube target compiles exactly the variants the composer uses
+ * (measured: 49 -> 28 programs, worst boot frame ~300 -> ~230 ms).
+ */
+function PrecompileScene() {
+  const gl = useThree((s) => s.gl);
+  const scene = useThree((s) => s.scene);
+  useLayoutEffect(() => {
+    const hidden: Object3D[] = [];
+    scene.traverse((o) => {
+      if (!o.visible) {
+        hidden.push(o);
+        o.visible = true;
+      }
+    });
+    const target = new WebGLCubeRenderTarget(128);
+    new CubeCamera(0.01, 1000, target).update(gl, scene);
+    target.dispose();
+    hidden.forEach((o) => (o.visible = false));
+  }, [gl, scene]);
+  return null;
+}
 
 /** Reports rendered frames so the host can tell whether the stage is alive. */
 function FrameProbe({ onFrame }: { onFrame: () => void }) {
@@ -84,7 +111,8 @@ export default function Experience({ eventSource, onReady }: ExperienceProps) {
           powerPreference: 'high-performance',
           alpha: false,
           stencil: false,
-          toneMapping: ACESFilmicToneMapping,
+          // No toneMapping here: @react-three/postprocessing sets the renderer to
+          // NoToneMapping and Effects.tsx applies it once, in the composer.
         }}
         eventSource={eventSource as RefObject<HTMLElement>}
         eventPrefix="client"
@@ -112,7 +140,7 @@ export default function Experience({ eventSource, onReady }: ExperienceProps) {
           <Portal />
           <GamesWorld />
           <Effects quality={quality} />
-          <Preload all />
+          <PrecompileScene />
         </Suspense>
       </Canvas>
     </div>

@@ -40,13 +40,19 @@ export function prefersReducedMotion(): boolean {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+let webglChecked: boolean | undefined;
+
+/** Probes once per page load and releases the throwaway context it made. */
 export function webglAvailable(): boolean {
   if (typeof document === 'undefined') return false;
+  if (webglChecked !== undefined) return webglChecked;
   try {
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl2') ?? canvas.getContext('webgl');
-    return Boolean(gl);
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    webglChecked = Boolean(gl);
   } catch {
-    return false;
+    webglChecked = false;
   }
+  return webglChecked;
 }

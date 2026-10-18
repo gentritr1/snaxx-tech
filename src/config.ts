@@ -10,9 +10,9 @@ export interface SiteConfig {
 
 export const siteConfig: SiteConfig = {
   language: "en",
-  title: "Snaxx Tech — Bite-sized apps & games",
+  title: "Snaxx Tech — a small software studio for apps and games",
   description:
-    "Snaxx Tech is an independent studio making bite-sized software and games with industrial care: Offday for teams, and the games Arrows, Block Destroy, Geo Guesser World 3D! and the daily Albanian word game FJALË.",
+    "Snaxx Tech is a small software studio. We make Offday, a time-off app for teams, and the games Arrows, Block Destroy, Geo Guesser World 3D! and FJALË.",
 };
 
 // Navigation

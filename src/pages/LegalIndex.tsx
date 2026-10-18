@@ -3,17 +3,14 @@ import { Link, useLocation } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
 import { KIND_TITLES, legalAppList, legalKindsFor } from '@/legal/content';
 import { LegalShell } from '@/components/LegalLayout';
+import { usePageMeta } from '@/hooks/usePageMeta';
+import { LEGAL_INDEX_META } from '@/seo';
 
 /** /legal: every product's privacy policy, terms and support page, A to Z. */
 export default function LegalIndex() {
   const { hash } = useLocation();
 
-  useEffect(() => {
-    document.title = 'Legal and privacy — Snaxx Tech';
-    return () => {
-      document.title = 'Snaxx Tech — Bite-sized apps & games';
-    };
-  }, []);
+  usePageMeta(LEGAL_INDEX_META);
 
   // Game cards link to /legal#<slug>; the route-change scroll reset runs
   // first, so jump to the app once the list is on screen.

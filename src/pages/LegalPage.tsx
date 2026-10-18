@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
 import { Link, useParams } from 'react-router';
 import { ArrowUpRight, Mail } from 'lucide-react';
 import { getAppLegal, KIND_TITLES, type LegalKind } from '@/legal/content';
 import { LegalLayout } from '@/components/LegalLayout';
+import { usePageMeta } from '@/hooks/usePageMeta';
+import { legalMeta, NOT_FOUND_META } from '@/seo';
 
 interface LegalPageProps {
   kind: LegalKind;
@@ -16,38 +17,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
 
   const docTitle = KIND_TITLES[kind];
 
-  useEffect(() => {
-    const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    const previousDescription = description?.content;
-    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-    const previousCanonical = canonical?.href;
-
-    document.title = app
-      ? `${app.appName} ${docTitle} — Snaxx Tech`
-      : 'Page Not Found — Snaxx Tech';
-
-    if (description) {
-      description.content = app
-        ? kind === 'support'
-          ? `Support and troubleshooting for ${app.appName}, an offline Android ${app.appKind} by Snaxx Tech.`
-          : `${docTitle} for ${app.appName}, an Android ${app.appKind} by Snaxx Tech.`
-        : 'The requested Snaxx Tech page could not be found.';
-    }
-
-    const canonicalLink = canonical ?? document.createElement('link');
-    if (!canonical) {
-      canonicalLink.rel = 'canonical';
-      document.head.appendChild(canonicalLink);
-    }
-    canonicalLink.href = window.location.href.split(/[?#]/)[0];
-
-    return () => {
-      document.title = 'Snaxx Tech — Bite-sized apps & games';
-      if (description && previousDescription) description.content = previousDescription;
-      if (canonical && previousCanonical) canonical.href = previousCanonical;
-      if (!canonical) canonicalLink.remove();
-    };
-  }, [app, docTitle, kind]);
+  usePageMeta(app ? legalMeta(app, kind) : NOT_FOUND_META);
 
   if (!app) {
     return (

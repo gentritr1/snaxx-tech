@@ -2,6 +2,7 @@ import path from "path"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 import { inspectAttr } from 'kimi-plugin-inspect-react'
+import { seoPages } from './scripts/seo-pages'
 
 // The dev-only inspector stamps a hyphenated `code-path` attribute on JSX
 // elements. React Three Fiber reads hyphenated props as nested property
@@ -28,6 +29,7 @@ export default defineConfig(({ mode }) => ({
             HTML_TAGS.has(node.openingElement.name.name),
         }),
       react(),
+      seoPages(),
     ].filter(Boolean),
     server: {
       port: 3000,

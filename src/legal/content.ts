@@ -768,7 +768,7 @@ export const legalApps: Record<string, AppLegal> = {
 
 // Slugs that used to be published and must keep resolving (renamed apps).
 // Play Console, AdMob, and any store listing may still point at these.
-const LEGACY_SLUGS: Record<string, string> = {
+export const LEGACY_SLUGS: Record<string, string> = {
   rowflare: "block-destroy",
   blockrow: "block-destroy",
   "block-blaster": "block-destroy",

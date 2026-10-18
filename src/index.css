@@ -456,3 +456,19 @@ html[data-surface='paper'] ::-webkit-scrollbar-track {
 html[data-surface='paper'] ::-webkit-scrollbar-thumb {
   background: var(--ink-faint);
 }
+
+/* Static copy written at build time (scripts/seo-pages.ts) for crawlers and
+   visitors without JavaScript. React replaces it on mount. */
+.seo-static {
+  max-width: 70ch;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+  color: var(--ink);
+  background: var(--paper, #F7F0E4);
+  line-height: 1.6;
+}
+.seo-static h1 { font-size: 2.25rem; font-weight: 500; line-height: 1.1; margin: 1.5rem 0 1rem; }
+.seo-static h2 { font-size: 1.25rem; font-weight: 500; margin: 2rem 0 0.5rem; }
+.seo-static p, .seo-static li { margin: 0.5rem 0; }
+.seo-static ul { padding-left: 1.25rem; list-style: disc; }
+.seo-static a { text-decoration: underline; }

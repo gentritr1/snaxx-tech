@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
+import { usePageMeta } from '@/hooks/usePageMeta';
+import { NOT_FOUND_META } from '@/seo';
 
 export default function NotFound() {
+  usePageMeta(NOT_FOUND_META);
   useEffect(() => {
-    document.title = 'Page Not Found — Snaxx Tech';
     document.documentElement.dataset.surface = 'void';
     return () => {
-      document.title = 'Snaxx Tech — Bite-sized apps & games';
       delete document.documentElement.dataset.surface;
     };
   }, []);

@@ -9,7 +9,9 @@ import { PortalChapter } from '@/chapters/PortalChapter';
 import { GamesChapter } from '@/chapters/GamesChapter';
 import { StudioChapter } from '@/chapters/StudioChapter';
 import { ContactChapter } from '@/chapters/ContactChapter';
-import { siteConfig, storyChapters } from '@/config';
+import { storyChapters } from '@/config';
+import { usePageMeta } from '@/hooks/usePageMeta';
+import { HOME_META } from '@/seo';
 import { createChoreography, playAwakening, type Choreography } from '@/experience/scroll';
 import { prefersReducedMotion } from '@/experience/quality';
 import { sceneState } from '@/experience/sceneState';
@@ -24,8 +26,8 @@ export default function Home() {
   const [awake, setAwake] = useState(false);
   const choreography = useRef<Choreography | null>(null);
 
+  usePageMeta(HOME_META);
   useEffect(() => {
-    document.title = siteConfig.title;
     document.documentElement.dataset.surface = 'void';
     return () => {
       delete document.documentElement.dataset.surface;

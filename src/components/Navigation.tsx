@@ -84,7 +84,7 @@ export function Navigation() {
       <nav
         className={cn(
           'fixed left-0 right-0 top-0 z-50 transition-[background-color,border-color,box-shadow] duration-500 ease-out-circ',
-          isScrolled || isMenuOpen ? 'glass-strong border-b border-ink/10' : 'border-b border-transparent bg-transparent',
+          isScrolled || isMenuOpen ? 'glass-strong' : 'bg-transparent',
         )}
         aria-label="Primary"
       >
@@ -128,9 +128,6 @@ export function Navigation() {
             )}
 
             <div className="flex items-center gap-3">
-              <span className="label-mono hidden text-mist md:block" aria-hidden="true">
-                {String(activeIndex + 1).padStart(2, '0')} / {String(CHAPTERS.length).padStart(2, '0')}
-              </span>
               {navigationConfig.contactLabel && (
                 <div className="hidden lg:block">
                   <div ref={magneticRef} className="inline-block will-change-transform">
@@ -171,7 +168,7 @@ export function Navigation() {
           >
             <span
               className={cn(
-                'label-mono text-[0.625rem] transition-[opacity,transform] duration-300 ease-out-quart',
+                'label transition-[opacity,transform] duration-300 ease-out-quart',
                 active === c.id ? 'translate-x-0 text-ink opacity-100' : 'translate-x-2 text-mist opacity-0 group-hover:translate-x-0 group-hover:opacity-100',
               )}
             >
@@ -197,7 +194,6 @@ export function Navigation() {
           )}
         >
           <div className="flex h-full flex-col items-start justify-center gap-6 px-8">
-            <span className="label-mono text-mist">Menu</span>
             {navigationConfig.links.map((link, index) => (
               <a
                 ref={index === 0 ? firstMenuLinkRef : undefined}

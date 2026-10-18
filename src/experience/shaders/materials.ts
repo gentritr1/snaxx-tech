@@ -42,7 +42,10 @@ export function createPlasmaMaterial() {
       varying vec3 vView;
       varying float vNoise;
       void main() {
-        float fres = pow(1.0 - max(dot(vNormal, vView), 0.0), 2.2);
+        // Clamp both ends: interpolated normals can make the dot product a hair
+        // above 1, and pow() of a negative base is NaN, which Bloom smears into
+        // a black square.
+        float fres = pow(clamp(1.0 - dot(vNormal, vView), 0.0, 1.0), 2.2);
         float veins = fbm(vec3(vNormal * 3.5 + uTime * 0.15));
         float v = smoothstep(0.1, 0.6, veins + vNoise * 0.4);
         vec3 col = mix(uColorA, uColorB, v);
@@ -246,7 +249,8 @@ export function createHoloMaterial(map: Texture, accent: string) {
         float border = 1.0 - smoothstep(0.0, 0.012, edge);
         float scan = 0.985 + 0.015 * sin(vUv.y * 420.0 + uTime * 3.0);
         float sweepPos = fract(uTime * 0.11) * 1.6 - 0.3;
-        float sweep = exp(-pow((vUv.x - sweepPos) * 9.0, 2.0)) * 0.18;
+        float sx = (vUv.x - sweepPos) * 9.0;
+        float sweep = exp(-sx * sx) * 0.18;
         vec3 col = mix(tex.rgb * scan, uAccent * (1.1 + uHover * 0.6), border) + vec3(sweep * 0.6);
         float alpha = (tex.a * (0.94 + uHover * 0.06) + border) * mask;
         gl_FragColor = vec4(col + slide, alpha);
@@ -322,8 +326,12 @@ export function createHorizonMaterial() {
       uniform vec3 uGlow;
       varying vec2 vUv;
       void main() {
-        float band = exp(-pow((vUv.y - 0.42) * 5.0, 2.0));
-        float centre = exp(-pow((vUv.x - 0.5) * 2.4, 2.0));
+        // x * x, not pow(x, 2.0): pow of a negative base is undefined in GLSL
+        // and returns NaN on some GPUs.
+        float by = (vUv.y - 0.42) * 5.0;
+        float cx = (vUv.x - 0.5) * 2.4;
+        float band = exp(-by * by);
+        float centre = exp(-cx * cx);
         vec3 col = mix(uTop, uGlow, band * centre);
         gl_FragColor = vec4(col, (band * centre * 0.9) * uWorld);
       }

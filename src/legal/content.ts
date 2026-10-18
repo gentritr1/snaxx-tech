@@ -2,6 +2,19 @@
 // Each app is published at:
 //   /<slug>/privacy   /<slug>/terms   /<slug>/support   (canonical)
 //   /privacy/<slug>   /terms/<slug>                     (kept working)
+// and listed on the /legal hub, which is the only legal link the rest of the
+// site shows.
+//
+// Adding a product (the rule):
+//   1. Write a LegalProfile for it below: ad provider, consent model, what it
+//      stores, which third parties it calls. The profile is the contract; the
+//      privacy and terms text is generated from it, never hand-written.
+//   2. Add one entry to `legalApps` with a stable, lowercase, hyphenated slug.
+//      That slug becomes the URL you paste into Play Console / App Store.
+//   3. Never rename or delete a published slug. If the app is renamed, add the
+//      old slug to LEGACY_SLUGS so store links keep resolving.
+//   4. Run `npm run build`: the /legal hub, the sitemap and each page's
+//      <head> (title, description, canonical) are generated from this file.
 //
 // IMPORTANT: Review these documents before publishing. They describe the
 // data practices configured below — update them if an app adds analytics,
@@ -11,15 +24,10 @@
 // the advertising disclosures below must stay consistent with the Play
 // Console Data Safety form for that app's release build.
 
-// The document kinds an app can publish. Lives here rather than in the layout
-// component so Fast Refresh keeps working (components-only exports there).
-export type LegalKind = "privacy" | "terms" | "support";
-
-export const KIND_TITLES: Record<LegalKind, string> = {
-  privacy: "Privacy Policy",
-  terms: "Terms of Service",
-  support: "Support",
-};
+// The document kinds live in src/seo.ts: the home page's entry bundle needs
+// their titles, and importing them from here would pull every legal text in.
+import { KIND_TITLES, type LegalKind } from "../seo";
+export { KIND_TITLES, type LegalKind };
 
 export interface LegalSection {
   id: string;
@@ -38,6 +46,7 @@ export interface AppLegal {
   appName: string;
   appKind: string; // e.g. "arcade game" / "mobile app"
   accent: string; // hex accent color for chips & highlights
+  summary: string; // one line under the title, e.g. "Android · No account · Ad-supported"
   effectiveDate: string;
   lastUpdated?: string; // shown as "Last updated"; falls back to effectiveDate
   contactEmail: string; // general studio contact
@@ -704,6 +713,7 @@ export const legalApps: Record<string, AppLegal> = {
     appName: "Arrows",
     appKind: "arcade game",
     accent: "#0082F3",
+    summary: "Android · No Snaxx Tech account · Ad-supported",
     effectiveDate: EFFECTIVE_DATE,
     contactEmail: CONTACT_EMAIL,
     privacy: buildPrivacy("Arrows", "arcade game", ARROWS_PROFILE),
@@ -714,6 +724,7 @@ export const legalApps: Record<string, AppLegal> = {
     appName: "Block Destroy",
     appKind: "block puzzle game",
     accent: "#FF7A29",
+    summary: "Android · No Snaxx Tech account · Ad-supported",
     effectiveDate: EFFECTIVE_DATE,
     lastUpdated: "July 27, 2026",
     contactEmail: CONTACT_EMAIL,
@@ -734,6 +745,7 @@ export const legalApps: Record<string, AppLegal> = {
     appName: "Geo Guesser World 3D!",
     appKind: "geography guessing game",
     accent: "#14B8A6",
+    summary: "Android · No Snaxx Tech account · Ad-supported",
     effectiveDate: "July 25, 2026",
     contactEmail: CONTACT_EMAIL,
     privacy: buildPrivacy(
@@ -751,12 +763,22 @@ export const legalApps: Record<string, AppLegal> = {
 
 // Slugs that used to be published and must keep resolving (renamed apps).
 // Play Console, AdMob, and any store listing may still point at these.
-const LEGACY_SLUGS: Record<string, string> = {
+export const LEGACY_SLUGS: Record<string, string> = {
   rowflare: "block-destroy",
   blockrow: "block-destroy",
   "block-blaster": "block-destroy",
   blockblaster: "block-destroy",
 };
+
+/** Every app with published documents, A to Z: the order the /legal hub uses. */
+export const legalAppList: AppLegal[] = Object.values(legalApps).sort((a, b) =>
+  a.appName.localeCompare(b.appName),
+);
+
+/** The documents an app publishes, in display order. */
+export function legalKindsFor(app: AppLegal): LegalKind[] {
+  return app.support ? ["privacy", "terms", "support"] : ["privacy", "terms"];
+}
 
 export function getAppLegal(slug: string | undefined): AppLegal | undefined {
   if (!slug) return undefined;

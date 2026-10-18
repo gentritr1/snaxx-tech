@@ -126,7 +126,8 @@ function buildTimeline(r: Record<ChapterId, Range>) {
 
   // Framing: keep the subject clear of the copy.
   const shiftKeys: [number, number, number][] = [
-    [0, -2.3, -2.1],
+    // Portrait: lift the core into the top of the screen, clear of the hero copy.
+    [0, -2.3, -3.4],
     [at('core', 0.5), -1.8, -1.5],
     [at('inside', 0.3), 0, 0],
     [at('software', 0.18), 1.7, -1.4],

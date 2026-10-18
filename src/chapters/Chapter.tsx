@@ -43,13 +43,3 @@ export function Chapter({ id, height, align = 'left', fadeIn, fadeOutAt, classNa
     </section>
   );
 }
-
-export function ChapterLabel({ index, label, className }: { index: string; label: string; className?: string }) {
-  return (
-    <p className={cn('label-mono flex items-center gap-3 text-mist', className)}>
-      <span className="text-ember">{index}</span>
-      <span className="h-px w-6 bg-ink/20" aria-hidden="true" />
-      <span>{label}</span>
-    </p>
-  );
-}

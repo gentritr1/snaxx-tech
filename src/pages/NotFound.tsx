@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
+import { usePageMeta } from '@/hooks/usePageMeta';
+import { NOT_FOUND_META } from '@/seo';
 
 export default function NotFound() {
+  usePageMeta(NOT_FOUND_META);
   useEffect(() => {
-    document.title = 'Page Not Found — Snaxx Tech';
     document.documentElement.dataset.surface = 'void';
     return () => {
-      document.title = 'Snaxx Tech — Bite-sized apps & games';
       delete document.documentElement.dataset.surface;
     };
   }, []);
@@ -21,7 +22,7 @@ export default function NotFound() {
       </div>
 
       <div className="relative z-10 flex flex-col items-center">
-        <p className="label-mono text-ember">Error 404</p>
+        <p className="label text-ember">Error 404</p>
         <h1 className="font-display type-headline mt-5 text-ink">This shelf of the pantry is empty.</h1>
         <p className="type-lead mt-5 max-w-md">The page you asked for is not here. The rest of the snacks are.</p>
         <Link

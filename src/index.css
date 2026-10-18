@@ -254,7 +254,8 @@
   z-index: 1;
   opacity: 1;
   pointer-events: none;
-  transition: opacity 0.7s var(--ease-out-cubic);
+  /* Fade, then leave the accessibility tree once the fade is done. */
+  transition: opacity 0.7s var(--ease-out-cubic), visibility 0s linear 0.7s;
 }
 
 /* The mark waits where the core will appear: above the copy on portrait
@@ -271,9 +272,18 @@
     top: 50%;
   }
 }
+/* Short landscape phones: the hero copy fills the row the mark would sit on,
+   so the curtain alone covers the stage (the status is still announced). */
+@media (orientation: landscape) and (max-height: 500px) {
+  .page-overlay > div {
+    display: none;
+  }
+}
 
-.page-overlay.hidden {
+/* Not Tailwind's `hidden` (display: none), which would cut the fade. */
+.page-overlay.is-lifted {
   opacity: 0;
+  visibility: hidden;
 }
 
 /* Hero copy rises on first paint, not after the stage is ready. */

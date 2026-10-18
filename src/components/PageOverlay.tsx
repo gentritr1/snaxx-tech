@@ -8,7 +8,7 @@ interface PageOverlayProps {
 export function PageOverlay({ isVisible }: PageOverlayProps) {
   return (
     <div
-      className={cn('page-overlay', !isVisible && 'hidden')}
+      className={cn('page-overlay', !isVisible && 'is-lifted')}
       role="status"
       aria-live="polite"
       aria-label={isVisible ? 'Loading Snaxx Tech' : undefined}

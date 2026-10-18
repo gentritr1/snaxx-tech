@@ -151,7 +151,7 @@ function buildTimeline(r: Record<ChapterId, Range>) {
 
 /** The scroll position (as timeline progress) that shows a chapter's "still". */
 function stillPoint(r: Record<ChapterId, Range>, id: ChapterId) {
-  const mid: Record<ChapterId, number> = { hero: 0, core: 1, inside: 0.3, software: 0.5, portal: 0.5, games: 0.5, studio: 0.7, contact: 0.8 };
+  const mid: Record<ChapterId, number> = { hero: 0.001, core: 1, inside: 0.3, software: 0.5, portal: 0.5, games: 0.5, studio: 0.7, contact: 0.8 };
   return r[id].start + (r[id].end - r[id].start) * mid[id];
 }
 
@@ -208,7 +208,13 @@ export function createChoreography(root: HTMLElement, reducedMotion: boolean): C
 
   build();
   let resizeTimer: number | undefined;
+  // Phone toolbars resize the viewport height while scrolling; rebuilding the
+  // timeline then can jump the scene, so only a width change rebuilds there.
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  let lastWidth = window.innerWidth;
   const onResize = () => {
+    if (coarse && window.innerWidth === lastWidth) return;
+    lastWidth = window.innerWidth;
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(refresh, 180);
   };

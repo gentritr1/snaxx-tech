@@ -15,7 +15,7 @@ export function ContactChapter() {
           </AnimatedButton>
           <a
             href={`mailto:${contactConfig.email}`}
-            className="inline-flex min-h-11 items-center gap-2 rounded-md px-2 text-sm text-mist transition-colors hover:text-ink"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md px-2 text-sm text-ink/75 transition-colors hover:text-ink"
           >
             <Mail className="h-4 w-4" aria-hidden="true" />
             {contactConfig.email}

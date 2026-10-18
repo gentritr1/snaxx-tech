@@ -16,8 +16,8 @@ function GameCard({ game, active }: { game: GameItem; active: boolean }) {
       className="product-accent product-ring glass w-full max-w-md rounded-xl p-6 transition-[border-color,box-shadow] duration-300 ease-out-quart lg:p-7"
       style={{ '--accent': game.accent } as CSSProperties}
       data-active={active ? 'true' : 'false'}
-      onMouseEnter={() => setHover(game.id)}
-      onMouseLeave={() => setHover(null)}
+      onPointerEnter={(e) => e.pointerType === 'mouse' && setHover(game.id)}
+      onPointerLeave={() => setHover(null)}
       aria-labelledby={`game-${game.id}-title`}
     >
       <div className="flex items-center justify-between gap-4">
@@ -52,6 +52,7 @@ function GameCard({ game, active }: { game: GameItem; active: boolean }) {
 export function GamesChapter() {
   const section = useRef<HTMLElement>(null);
   const header = useRef<HTMLDivElement>(null);
+  const intro = useRef<HTMLParagraphElement>(null);
   const cards = useRef<(HTMLDivElement | null)[]>([]);
   const [hover, setLocal] = useState<string | null>(null);
   // Reduced motion shows every game at once in normal document flow; the
@@ -71,7 +72,8 @@ export function GamesChapter() {
       return;
     }
     const tl = gsap.timeline({ scrollTrigger: { trigger: sectionEl, start: 'top top', end: 'bottom bottom', scrub: true } });
-    tl.fromTo(el, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.05, ease: 'power2.out', immediateRender: false }, 0.01);
+    tl.fromTo(el, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.05, ease: 'power2.out' }, 0.01);
+    if (intro.current) tl.to(intro.current, { opacity: 0, y: -12, duration: 0.04, ease: 'power2.in' }, 0.2);
     tl.to(el, { opacity: 0, y: -20, duration: 0.05, ease: 'power2.in' }, 0.94);
     return () => {
       tl.scrollTrigger?.kill();
@@ -82,13 +84,13 @@ export function GamesChapter() {
   return (
     <section id="games" ref={section} className="relative" style={reduced ? undefined : { height: '420vh' }}>
       <div className={cn('chapter-stage', reduced && 'chapter-flow')}>
-        <div className={cn('container-large w-full px-6 lg:px-12', !reduced && 'relative h-full')}>
+        <div className={cn('container-large w-full px-6 lg:pl-12 lg:pr-32', !reduced && 'relative h-full')}>
           <div
             ref={header}
             className={cn('chapter-copy max-w-sm', !reduced && 'absolute left-6 top-20 sm:top-24 lg:left-12 lg:top-28')}
           >
             <h2 className="font-display type-title text-ink">{gamesConfig.heading}</h2>
-            <p className={cn('mt-3 text-sm leading-relaxed text-mist', !reduced && 'hidden lg:block')}>{gamesConfig.description}</p>
+            <p ref={intro} className={cn('mt-3 text-sm leading-relaxed text-ink/80', !reduced && 'hidden lg:block')}>{gamesConfig.description}</p>
           </div>
 
           <div

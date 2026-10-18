@@ -21,7 +21,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
 
   if (!app) {
     return (
-      <div className="page-enter min-h-screen bg-paper flex flex-col items-center justify-center px-6 text-center">
+      <div className="page-enter min-h-svh bg-paper flex flex-col items-center justify-center px-6 text-center">
         <p className="label text-ink-soft">404</p>
         <h1 className="mt-4 font-display type-headline text-ink">
           We couldn't find that page.
@@ -32,7 +32,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
         </p>
         <Link
           to="/"
-          className="pressable mt-8 inline-flex min-h-11 items-center gap-2 rounded-lg bg-ink px-5 py-3 text-sm font-medium text-paper transition-colors hover:bg-graphite focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6BFF] focus-visible:ring-offset-2"
+          className="pressable mt-8 inline-flex min-h-11 items-center gap-2 rounded-lg bg-ink px-5 py-3 text-sm font-medium text-paper transition-colors hover:bg-cocoa focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6BFF] focus-visible:ring-offset-2"
         >
           Back to Snaxx Tech
         </Link>

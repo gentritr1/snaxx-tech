@@ -21,11 +21,11 @@ function ProductCard({ product, active, compact }: { product: SoftwareProduct; a
   };
   return (
     <article
-      className={cn('product-accent product-ring glass rounded-xl p-5 transition-[border-color,box-shadow] duration-300 ease-out-quart lg:p-6', compact && 'p-4 lg:p-5')}
+      className={cn('product-accent product-ring glass rounded-xl p-5 transition-[border-color,box-shadow] duration-300 ease-out-quart lg:p-6', compact && 'p-4 lg:p-5 shortland:hidden')}
       style={{ '--accent': product.accent } as CSSProperties}
       data-active={active ? 'true' : 'false'}
-      onMouseEnter={() => setHover(product.id)}
-      onMouseLeave={() => setHover(null)}
+      onPointerEnter={(e) => e.pointerType === 'mouse' && setHover(product.id)}
+      onPointerLeave={() => setHover(null)}
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
@@ -35,9 +35,9 @@ function ProductCard({ product, active, compact }: { product: SoftwareProduct; a
         <span className="label text-mist">{product.status}</span>
       </div>
       <p className={cn('mt-2 text-ink/80', compact ? 'text-sm' : 'text-base')}>{product.tagline}</p>
-      {!compact && <p className="mt-3 hidden text-sm leading-relaxed text-mist sm:block">{product.description}</p>}
+      {!compact && <p className="mt-3 hidden text-sm leading-relaxed text-mist sm:block short:hidden">{product.description}</p>}
       {product.features.length > 0 && (
-        <ul className={cn('mt-4 gap-x-5 gap-y-2.5 sm:mt-5 sm:gap-y-3', compact ? 'hidden grid-cols-1 sm:grid' : 'grid grid-cols-2')}>
+        <ul className={cn('mt-4 gap-x-5 gap-y-2.5 sm:mt-5 sm:gap-y-3 shortland:hidden', compact ? 'hidden grid-cols-1 sm:grid short:hidden' : 'grid grid-cols-2')}>
           {product.features.map((f) => (
             <li key={f.title}>
               <p className="text-sm font-medium text-ink">{f.title}</p>
@@ -65,9 +65,9 @@ export function SoftwareChapter() {
   const [primary, ...rest] = softwareConfig.products;
   return (
     <Chapter id="software" height="280vh" align="right" fadeIn={0.14} fadeOutAt={0.84}>
-      <div className="w-full max-w-md pt-16 sm:pt-20 lg:pt-0">
+      <div className="w-full max-w-md pt-16 sm:pt-20 lg:pt-0 shortland:pt-0">
         <h2 className="font-display type-headline text-ink">{softwareConfig.heading}</h2>
-        <p className="type-lead mt-4 hidden sm:block">{softwareConfig.description}</p>
+        <p className="type-lead mt-4 hidden sm:block [@media(max-height:820px)]:hidden">{softwareConfig.description}</p>
         <div className="mt-5 space-y-3 sm:mt-7">
           {primary && <ProductCard product={primary} active={hover === primary.id} />}
           {rest.map((p) => (

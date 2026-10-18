@@ -20,17 +20,17 @@ export function HeroChapter({ awake }: { awake: boolean }) {
     <section id="hero" ref={section} className="relative" style={{ height: '160vh' }}>
       <div className="chapter-stage">
         {/* Phones: copy sits on the bottom of the screen, the core above it. */}
-        <div className="container-large w-full self-end px-6 lg:self-auto lg:px-12">
+        <div className="container-large w-full self-end px-6 lg:self-auto lg:pl-12 lg:pr-32">
           <div ref={copy} className="chapter-copy flex w-full items-end lg:items-center">
             <div className="w-full max-w-2xl pb-10 lg:pb-0">
-              <h1 className="hero-rise font-display type-display text-ink">
+              <h1 className="hero-rise font-display type-display text-ink shortland:text-[2.75rem]">
                 <span className="block">{heroConfig.headline[0]}</span>
                 <span className="block">{heroConfig.headline[1]}</span>
               </h1>
-              <p className="hero-rise type-lead mt-7 max-w-lg" style={{ animationDelay: '120ms' }}>
+              <p className="hero-rise type-lead mt-7 max-w-lg shortland:mt-4 shortland:line-clamp-2" style={{ animationDelay: '120ms' }}>
                 {heroConfig.intro}
               </p>
-              <div className="hero-rise mt-9 flex flex-wrap items-center gap-3" style={{ animationDelay: '240ms' }}>
+              <div className="hero-rise mt-9 flex flex-wrap items-center gap-3 shortland:mt-5" style={{ animationDelay: '240ms' }}>
                 <AnimatedButton href={heroConfig.primaryCta.href} variant="primary" size="lg" showIcon onClick={onPrimary}>
                   {heroConfig.primaryCta.label}
                 </AnimatedButton>

@@ -7,6 +7,12 @@ module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      screens: {
+        // Laptop heights where the software column would run under the nav.
+        short: { raw: '(max-height: 940px)' },
+        // Landscape phones: every chapter stage is one viewport tall.
+        shortland: { raw: '(orientation: landscape) and (max-height: 500px)' },
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -43,12 +49,13 @@ module.exports = {
         },
         /* Confectionery Engine brand tokens — see DESIGN.md.
            A bright vanilla-cream studio: `void` is the page cream, `silver` the
-           cocoa text. Text-safe on void: silver (13.5:1), mist (5.4:1), ember (4.9:1). */
+           cocoa text. Text-safe on void: silver (13.5:1), mist (5.9:1 on void,
+           ~5.0:1 on the rendered 3D background), ember (4.9:1). */
         void: '#F7F0E4',
         graphite: '#EFE5D5',
         steel: '#E2D4C0',
         'steel-light': '#D3C1A8',
-        mist: '#7A6753',
+        mist: '#6B5846',
         silver: '#2B1D12',
         cocoa: '#3D2416',
         caramel: '#C9842B',

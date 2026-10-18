@@ -57,7 +57,7 @@ export const GOLD = new MeshPhysicalMaterial({
 // ---------------------------------------------------------------------------
 // Centre: a glass shell around molten caramel. Dissolves during the fly-through.
 
-const glassMaterial = new MeshPhysicalMaterial({
+const GLASS = new MeshPhysicalMaterial({
   color: '#FFEBCB',
   transparent: true,
   opacity: 0.3,
@@ -101,7 +101,7 @@ function Heart() {
           into an offscreen buffer every frame; a clear-coated, slightly tinted
           translucent shell reads the same against the caramel for a fraction
           of the cost. */}
-      <mesh ref={glass} material={glassMaterial}>
+      <mesh ref={glass} material={GLASS}>
         <icosahedronGeometry args={[0.95, 4]} />
       </mesh>
       <mesh ref={inner} material={plasma}>

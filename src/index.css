@@ -34,7 +34,7 @@
     --graphite: #EFE5D5;
     --steel: #E2D4C0;
     --steel-light: #D3C1A8;
-    --mist: #7A6753;
+    --mist: #6B5846;
     --silver: #2B1D12;
     --cocoa: #3D2416;
     --caramel: #C9842B;
@@ -218,7 +218,7 @@
      unshadowed at rest: the fill alone separates it from the scene. The
      transparent border keeps the active ring from shifting the layout. */
   .glass {
-    background: rgb(255 250 243 / 0.9);
+    background: rgb(255 250 243 / 0.96);
     border: 1px solid transparent;
   }
 
@@ -332,9 +332,16 @@
   50% { transform: translateY(7px); opacity: 1; }
 }
 
-/* Press feedback — subtle squash on pressables */
+/* Press feedback — subtle squash on pressables. Lists the colour properties
+   too: this rule loads after Tailwind's utilities and would otherwise cancel
+   their colour fades on the same element. */
 .pressable {
-  transition: transform 160ms var(--ease-out-quart);
+  transition:
+    transform 160ms var(--ease-out-quart),
+    color 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
 }
 .pressable:active {
   transform: scale(0.97);
@@ -387,11 +394,16 @@
   border-radius: 9999px;
   background: var(--accent);
 }
-.product-ring:hover,
 .product-ring:focus-within,
 .product-ring[data-active='true'] {
   border-color: color-mix(in srgb, var(--accent) 70%, rgb(255 255 255 / 0.1));
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent), 0 20px 60px -30px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+@media (hover: hover) and (pointer: fine) {
+  .product-ring:hover {
+    border-color: color-mix(in srgb, var(--accent) 70%, rgb(255 255 255 / 0.1));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent), 0 20px 60px -30px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
 }
 
 /* Canvas host */

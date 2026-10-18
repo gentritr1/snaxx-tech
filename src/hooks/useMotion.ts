@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
-// Shared motion helpers — magnetic buttons and count-up stats.
+// Shared motion helper — magnetic buttons.
 // All respect prefers-reduced-motion and desktop pointer-fine where relevant.
 
 // Gently attract an element toward the cursor (<= maxOffset px), rAF-driven.
@@ -20,15 +20,21 @@ export function useMagnetic<T extends HTMLElement = HTMLDivElement>(maxOffset = 
     const target = { x: 0, y: 0 };
     const current = { x: 0, y: 0 };
 
-    const tick = () => {
-      current.x += (target.x - current.x) * 0.18;
-      current.y += (target.y - current.y) * 0.18;
+    // 0.18 of the gap per 60 Hz frame, scaled by elapsed time so 120 Hz
+    // screens settle at the same speed.
+    let last = 0;
+    const tick = (now: number) => {
+      const a = last ? 1 - Math.pow(0.82, (now - last) / 16.67) : 0.18;
+      last = now;
+      current.x += (target.x - current.x) * a;
+      current.y += (target.y - current.y) * a;
       el.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
       if (Math.abs(target.x - current.x) > 0.1 || Math.abs(target.y - current.y) > 0.1) {
         rafId = requestAnimationFrame(tick);
       } else {
         el.style.transform = `translate3d(${target.x}px, ${target.y}px, 0)`;
         rafId = null;
+        last = 0;
       }
     };
 
@@ -64,68 +70,4 @@ export function useMagnetic<T extends HTMLElement = HTMLDivElement>(maxOffset = 
   }, [maxOffset]);
 
   return ref;
-}
-
-// Count a numeric string (e.g. "3", "100%") up from 0 when scrolled into view, once.
-// Non-numeric values (e.g. "Soon") pass through unchanged. Static under reduced motion.
-export function useCountUp<T extends HTMLElement = HTMLDivElement>(
-  value: string,
-  duration = 800,
-) {
-  const ref = useRef<T>(null);
-  const match = value.match(/^(\d+)(.*)$/);
-  const targetNum = match ? parseInt(match[1], 10) : null;
-  const suffix = match ? match[2] : '';
-  // Lazy initializer avoids synchronous setState in the effect:
-  // non-numeric values and reduced-motion users start at their final value.
-  const [display, setDisplay] = useState<string>(() => {
-    if (targetNum == null) return value;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return `${targetNum}${suffix}`;
-    }
-    return `0${suffix}`;
-  });
-
-  useEffect(() => {
-    if (targetNum == null) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    const el = ref.current;
-    if (!el) return;
-
-    let rafId: number | null = null;
-    let started = false;
-
-    const run = () => {
-      const startTime = performance.now();
-      const step = (now: number) => {
-        const t = Math.min(1, (now - startTime) / duration);
-        const eased = 1 - Math.pow(1 - t, 3); // ease-out-cubic
-        setDisplay(`${Math.round(eased * targetNum)}${suffix}`);
-        if (t < 1) rafId = requestAnimationFrame(step);
-      };
-      rafId = requestAnimationFrame(step);
-    };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !started) {
-            started = true;
-            run();
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.4 },
-    );
-    observer.observe(el);
-
-    return () => {
-      observer.disconnect();
-      if (rafId != null) cancelAnimationFrame(rafId);
-    };
-  }, [targetNum, suffix, duration]);
-
-  return { ref, display };
 }

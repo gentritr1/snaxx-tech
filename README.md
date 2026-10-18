@@ -1,28 +1,36 @@
-# Exvia - Portfolio Website Template
+# Snaxx Tech — cinematic 3D brand site
 
-A modern, animated single-page portfolio template with a cinematic hero section featuring mouse-tracking image reveal, scroll-triggered animations, parallax effects, and a testimonial slider. Built with React, TypeScript, Tailwind CSS, and Vite.
+The studio website for Snaxx Tech, themed around snacking: one continuous,
+scroll-directed 3D film (React Three Fiber + GSAP ScrollTrigger) in a bright
+vanilla-cream studio, in which a chocolate bonbon (caramel centre, chocolate
+shell, caramel drizzle) opens into the studio's software and a pantry of
+games, plus light-weight legal and support pages for each app. Built with React 19, TypeScript, Tailwind
+CSS and Vite.
 
-## Features
+## Experience
 
-- **Cinematic Hero Section** - Full-screen hero with blurred background, sharp mouse-tracking image window with crosshair, and role labels on sides
-- **Scroll Animations** - Intersection Observer based reveal animations with staggered timing
-- **Mouse Parallax** - Service cards feature mouse-following hover images with rotation
-- **Testimonial Slider** - Auto-advancing carousel with slide transitions, star ratings, and dot/arrow navigation
-- **Page Load Overlay** - Smooth loading screen with animated progress indicator
-- **Responsive Navigation** - Fixed navbar with transparent-to-white scroll transition, animated hamburger menu for mobile
-- **Animated Buttons** - Text slide animation on hover with arrow icon support
-- **Bento Grid Portfolio** - Mixed layout grid with featured projects, CTA card, and decorative circles
-- **Newsletter Footer** - Full footer with link columns, social icons, and email subscription form
-- **Fully Configurable** - All content driven by a single `config.ts` file
+- **Awakening** on load: the caramel centre lights up and the camera reveals the confection.
+- **Approach and reveal**: hundreds of instanced chocolate pieces peel off as the caramel drizzle unwinds, exposing the glass shell and caramel threads.
+- **Fly-through**: the camera passes through the centre into a warm digital pantry.
+- **Transformation**: the pieces re-form into a frame around holographic Offday interfaces.
+- **Portal**: the pieces halo a glazed, sprinkled donut; the camera flies through its caramel iris into the games.
+- **Games**: four exhibits on porcelain plates (a candy dart, a chocolate bar, a candy planet, biscuit tiles) with a tracking shot and synced cards.
+- **Studio and contact**: a calm overview and the studio inbox.
+
+The scene is decorative for assistive tech: every word lives in the DOM.
+Reduced motion shows one still composition per chapter. If WebGL is
+unavailable a poster background is used and the content is unaffected.
 
 ## Tech Stack
 
-- **React 19** with TypeScript
-- **Vite 7** for development and building
-- **Tailwind CSS 3** with custom design tokens (Exvia Design System)
-- **Lucide React** for icons (dynamically resolved by name)
-- **Geist Font** (Regular, Medium, Mono) loaded via CDN
-- **shadcn/ui** component primitives available
+- **React 19** with TypeScript, **Vite 7**, **Tailwind CSS 3**
+- **Three.js**, **React Three Fiber**, **Drei**, **@react-three/postprocessing**
+- **GSAP ScrollTrigger** for the scroll-bound choreography
+- **maath** for damped motion
+- Self-hosted **Geist** and **Geist Mono**
+
+No runtime requests leave the origin: environment lighting, textures and
+geometry are procedural, which keeps the strict production CSP intact.
 
 ## Quick Start
 
@@ -31,73 +39,55 @@ npm install
 npm run dev
 ```
 
-## Configuration
-
-All site content is managed through `src/config.ts`. Each section has its own configuration object with TypeScript interfaces for type safety. When a config object has empty values, the corresponding section returns `null` and is not rendered.
-
-### Config Objects
-
-- `siteConfig` - Global site title, description, language
-- `navigationConfig` - Logo text, nav links, contact button
-- `heroConfig` - Name, roles (displayed on left/right sides), background image path
-- `aboutConfig` - Label, description, experience badge, stats array, images array
-- `servicesConfig` - Label, heading, services array (each with iconName, title, description, image)
-- `portfolioConfig` - Label, heading, description, projects array, CTA card, view all label
-- `testimonialsConfig` - Label, heading, testimonials array (each with quote, author, role, company, image, rating)
-- `ctaConfig` - Tags, heading, description, button text/href, email, background image
-- `footerConfig` - Logo, description, link columns, social links, newsletter, copyright, credit
-
-### Icon Names
-
-Service and social icons use Lucide icon names (PascalCase). Examples: `Compass`, `PenTool`, `Layout`, `Code`, `Dribbble`, `Twitter`, `Linkedin`, `Instagram`.
-
-## Required Images
-
-Place images in `public/images/`:
-
-- `hero-bg.jpg` - Hero section background (full-screen, high resolution)
-- `about-1.jpg` to `about-4.jpg` - About section image grid (portrait 4:5 ratio)
-- `service-1.jpg` to `service-4.jpg` - Service hover preview images
-- `portfolio-1.jpg` to `portfolio-5.jpg` - Portfolio project thumbnails
-- `testimonial-1.jpg` to `testimonial-3.jpg` - Testimonial author photos (portrait)
-- `cta-bg.jpg` - CTA section background image
-
-## Design System
-
-- **Colors**: Black (#131313), White (#FFFFFF), Base Black (#1D1D1D), Subtle (#EAEAEA), Border (#EFEFF2), Blue (#0082F3), Focus (#4D65FF)
-- **Typography**: Geist (400, 500) for body, GeistMono (500) for labels and monospace text
-- **Animations**: Custom easing curves (out-quad, out-cubic, out-quart, out-circ, in-out-quad)
-- **Layout**: Full-width sections with container-large (80rem max) inner content
-
-## Project Structure
+## Structure
 
 ```
 src/
-  config.ts          # All site content configuration
-  App.tsx            # Main app with page load overlay
-  App.css            # Base Vite styles
-  index.css          # Global styles, fonts, animations, utilities
-  main.tsx           # React entry point
-  components/
-    Navigation.tsx   # Fixed navbar with mobile menu
-    AnimatedButton.tsx  # Hover-animated button component
-    PageOverlay.tsx  # Loading screen overlay
-  sections/
-    Hero.tsx         # Full-screen hero with mouse-tracking image reveal
-    About.tsx        # Two-column about with image grid
-    Services.tsx     # Service cards with hover parallax images
-    Portfolio.tsx    # Bento grid project showcase
-    Testimonials.tsx # Auto-advancing testimonial carousel
-    CTA.tsx          # Call-to-action with background image
-    Footer.tsx       # Multi-column footer with newsletter
-  hooks/
-    useMouseParallax.ts  # Mouse parallax for hero and services
-    usePageLoad.ts       # Page load state management
-    useScrollAnimation.ts # Intersection Observer scroll reveals
-    use-mobile.ts        # Mobile breakpoint detection
-  lib/
-    utils.ts         # cn() utility for class merging
+  config.ts                 All copy and product data (the scene reads it too)
+  pages/Home.tsx            Chapters + canvas + boot + choreography wiring
+  chapters/                 DOM chapters (hero, story, software, portal, games, studio, contact)
+  experience/
+    Experience.tsx          Fixed canvas host, quality tiers, WebGL fallback
+    scroll.ts               Scroll choreography timeline and the awakening
+    sceneState.ts           Mutable scene state GSAP writes and R3F reads
+    quality.ts              Tier detection and adaptive settings
+    scene/                  CameraRig, Atmosphere, Core, Fragments, Particles,
+                            SoftwareHolo, Portal, GamesWorld, Effects
+    shaders/                Custom GLSL materials
+    textures/ui.ts          Canvas-drawn holographic UI textures
+  components/               Navigation, Footer, AnimatedButton, PageOverlay, LegalLayout
+  pages/LegalPage.tsx       Privacy / terms / support documents
+  legal/content.ts          Legal content per app
 ```
+
+## Performance rules
+
+The scene holds 60 fps at retina resolution (measured in headless Chrome on
+an Apple M4 Pro, also under a 4x CPU slowdown). Keep it that way:
+
+- **No transmission.** Any material with `transmission` (including drei's
+  `MeshTransmissionMaterial`) makes three.js re-render the whole scene into an
+  offscreen buffer every frame. The glass shell is a clear-coated translucent
+  physical material instead.
+- **A fixed set of lights.** three.js bakes the light count into every lit
+  shader, so showing or hiding a light mid-scroll recompiles every material and
+  stalls the page. The scene always has the same five lights; one accent light
+  roams between the software, portal and game moments.
+- **No `backdrop-filter` over the canvas.** The canvas repaints every frame, so
+  the browser would re-blur that region every frame. Panels use a mostly opaque
+  cream fill instead.
+- **Budget triangles.** Instanced shell pieces use a one-segment rounded box
+  and a standard (not clear-coated) material; pixel ratio is capped at 1.5.
+- **No allocations in `useFrame`.** Reuse vectors, quaternions and eulers.
+- **Keep three.js out of the entry bundle.** The home page's DOM code imports
+  `sceneState` eagerly, so it must not import `three` (cam and target are plain
+  `{x, y, z}` records), and `vite.config.ts` must not use `manualChunks` for the
+  3D libraries. The legal and 404 routes then load no 3D code at all; the whole
+  3D stack is the lazy `Experience` chunk. Check with
+  `grep modulepreload dist/index.html` after a build: it should list nothing.
+
+See `DESIGN.md` for the brand system ("The Confectionery Engine") and
+`docs/superpowers/specs/` for the design spec.
 
 ## Offday PTO app
 

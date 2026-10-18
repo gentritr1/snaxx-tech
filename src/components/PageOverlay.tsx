@@ -22,7 +22,7 @@ export function PageOverlay({ isVisible }: PageOverlayProps) {
         <div className="h-px w-28 overflow-hidden rounded-full bg-steel">
           <div className="boot-bar h-full w-1/3 rounded-full bg-ember" />
         </div>
-        <span className="label-mono text-mist">Preheating the core</span>
+        <span className="label text-mist">Preheating the core</span>
       </div>
     </div>
   );

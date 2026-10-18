@@ -1,6 +1,6 @@
 import { useCountUp } from '@/hooks/useMotion';
 import { studioConfig } from '@/config';
-import { Chapter, ChapterLabel } from './Chapter';
+import { Chapter } from './Chapter';
 
 function Stat({ value, label }: { value: string; label: string }) {
   const { ref, display } = useCountUp<HTMLSpanElement>(value);
@@ -19,19 +19,17 @@ export function StudioChapter() {
     <Chapter id="studio" height="220vh" align="left" fadeIn={0.16} fadeOutAt={0.84}>
       <div className="grid w-full items-center gap-10 pt-20 lg:grid-cols-2 lg:gap-16 lg:pt-0">
         <div className="copy-scrim max-w-lg">
-          <ChapterLabel index={studioConfig.index} label={studioConfig.label} />
-          <h2 className="font-display type-headline mt-5 text-ink">{studioConfig.heading}</h2>
+          <h2 className="font-display type-headline text-ink">{studioConfig.heading}</h2>
           <p className="type-lead mt-5 max-w-md">{studioConfig.description}</p>
-          <div className="mt-8 grid grid-cols-3 gap-6 border-t border-ink/10 pt-6">
+          <div className="mt-10 grid grid-cols-3 gap-6">
             {studioConfig.stats.map((s) => (
               <Stat key={s.label} value={s.value} label={s.label} />
             ))}
           </div>
         </div>
-        <ul className="glass hidden divide-y divide-ink/10 rounded-xl sm:block lg:justify-self-end lg:w-full lg:max-w-md">
-          {studioConfig.principles.map((p, i) => (
-            <li key={p.title} className="flex gap-5 p-5 lg:p-6">
-              <span className="label-mono mt-1 text-ember">{String(i + 1).padStart(2, '0')}</span>
+        <ul className="glass hidden rounded-xl py-2 sm:block lg:justify-self-end lg:w-full lg:max-w-md">
+          {studioConfig.principles.map((p) => (
+            <li key={p.title} className="px-5 py-3 lg:px-6 lg:py-4">
               <div>
                 <h3 className="text-base font-medium text-ink">{p.title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-mist">{p.body}</p>

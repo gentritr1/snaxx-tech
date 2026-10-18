@@ -8,7 +8,7 @@ import { useSequenceReveal } from '@/hooks/useChapterReveal';
 import { gsap } from '@/experience/scroll';
 import { prefersReducedMotion } from '@/experience/quality';
 
-function GameCard({ game, index, active }: { game: GameItem; index: number; active: boolean }) {
+function GameCard({ game, active }: { game: GameItem; active: boolean }) {
   const linkClass =
     'pressable inline-flex min-h-11 items-center gap-2 rounded-lg border border-ink/15 px-3.5 text-sm font-medium text-ink transition-colors hover:border-ink/40 hover:text-ink';
   return (
@@ -21,13 +21,10 @@ function GameCard({ game, index, active }: { game: GameItem; index: number; acti
       aria-labelledby={`game-${game.id}-title`}
     >
       <div className="flex items-center justify-between gap-4">
-        <p className="label-mono flex items-center gap-2.5 text-mist">
+        <p className="label flex items-center gap-2.5 text-mist">
           <span className="product-dot" aria-hidden="true" />
           {game.status}
         </p>
-        <span className="label-mono text-[0.625rem] text-mist" aria-hidden="true">
-          {String(index + 1).padStart(2, '0')} / {String(gamesConfig.games.length).padStart(2, '0')}
-        </span>
       </div>
       <h3 id={`game-${game.id}-title`} className="font-display type-title mt-5 text-ink">
         {game.name}
@@ -90,12 +87,7 @@ export function GamesChapter() {
             ref={header}
             className={cn('chapter-copy max-w-sm', !reduced && 'absolute left-6 top-20 sm:top-24 lg:left-12 lg:top-28')}
           >
-            <p className="label-mono flex items-center gap-3 text-mist">
-              <span className="text-ember">{gamesConfig.index}</span>
-              <span className="h-px w-6 bg-ink/20" aria-hidden="true" />
-              <span>{gamesConfig.label}</span>
-            </p>
-            <h2 className="font-display type-title mt-3 text-ink sm:mt-4">{gamesConfig.heading}</h2>
+            <h2 className="font-display type-title text-ink">{gamesConfig.heading}</h2>
             <p className={cn('mt-3 text-sm leading-relaxed text-mist', !reduced && 'hidden lg:block')}>{gamesConfig.description}</p>
           </div>
 
@@ -121,7 +113,7 @@ export function GamesChapter() {
                 // card nobody can see.
                 style={reduced ? undefined : { opacity: 0, visibility: 'hidden' }}
               >
-                <GameCard game={game} index={i} active={hover === game.id} />
+                <GameCard game={game} active={hover === game.id} />
               </div>
             ))}
           </div>

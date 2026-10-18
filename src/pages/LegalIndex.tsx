@@ -44,7 +44,7 @@ export default function LegalIndex() {
                     {app.appName}
                   </h2>
                   <p className="mt-1 text-sm text-ink-soft">{app.summary}</p>
-                  <p className="mt-1 font-geist-mono text-xs text-ink-soft">
+                  <p className="mt-1 text-xs text-ink-soft">
                     Updated {app.lastUpdated ?? app.effectiveDate}
                   </p>
                 </div>

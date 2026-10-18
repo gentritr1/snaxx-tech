@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { softwareConfig, type SoftwareProduct } from '@/config';
 import { setHover, subscribeHover } from '@/experience/sceneState';
 import { scrollToHash } from '@/lib/scroll';
-import { Chapter, ChapterLabel } from './Chapter';
+import { Chapter } from './Chapter';
 
 function useHoverSync() {
   const [hover, setLocal] = useState<string | null>(null);
@@ -32,16 +32,16 @@ function ProductCard({ product, active, compact }: { product: SoftwareProduct; a
           <span className="product-dot" aria-hidden="true" />
           <h3 className={cn('font-display font-medium tracking-[-0.02em] text-ink', compact ? 'text-lg' : 'text-2xl')}>{product.name}</h3>
         </div>
-        <span className="label-mono text-[0.625rem] text-mist">{product.status}</span>
+        <span className="label text-mist">{product.status}</span>
       </div>
       <p className={cn('mt-2 text-ink/80', compact ? 'text-sm' : 'text-base')}>{product.tagline}</p>
       {!compact && <p className="mt-3 hidden text-sm leading-relaxed text-mist sm:block">{product.description}</p>}
       {product.features.length > 0 && (
         <ul className={cn('mt-4 gap-x-5 gap-y-2.5 sm:mt-5 sm:gap-y-3', compact ? 'hidden grid-cols-1 sm:grid' : 'grid grid-cols-2')}>
           {product.features.map((f) => (
-            <li key={f.title} className="border-t border-ink/10 pt-2.5 sm:pt-3">
+            <li key={f.title}>
               <p className="text-sm font-medium text-ink">{f.title}</p>
-              {!compact && <p className="mt-0.5 hidden text-xs leading-relaxed text-mist sm:block">{f.body}</p>}
+              {!compact && <p className="mt-0.5 hidden text-[0.8125rem] leading-snug text-mist sm:block">{f.body}</p>}
             </li>
           ))}
         </ul>
@@ -66,8 +66,7 @@ export function SoftwareChapter() {
   return (
     <Chapter id="software" height="280vh" align="right" fadeIn={0.14} fadeOutAt={0.84}>
       <div className="w-full max-w-md pt-16 sm:pt-20 lg:pt-0">
-        <ChapterLabel index={softwareConfig.index} label={softwareConfig.label} />
-        <h2 className="font-display type-headline mt-4 text-ink sm:mt-5">{softwareConfig.heading}</h2>
+        <h2 className="font-display type-headline text-ink">{softwareConfig.heading}</h2>
         <p className="type-lead mt-4 hidden sm:block">{softwareConfig.description}</p>
         <div className="mt-5 space-y-3 sm:mt-7">
           {primary && <ProductCard product={primary} active={hover === primary.id} />}

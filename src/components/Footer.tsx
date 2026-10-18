@@ -12,7 +12,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative z-10 w-full border-t border-ink/10 bg-void/90 py-16 lg:py-24">
+    <footer className="relative z-10 w-full bg-paper-deep py-16 lg:py-24">
       <div className="container-large px-6 lg:px-12">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-5">
@@ -26,7 +26,7 @@ export function Footer() {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-7">
             {footerConfig.columns.map((column) => (
               <div key={column.title}>
-                <h2 className="label-mono text-mist">{column.title}</h2>
+                <h2 className="label text-mist">{column.title}</h2>
                 <ul className="mt-5 space-y-1">
                   {column.links.map((link) => {
                     const external = link.href.startsWith('http');
@@ -60,7 +60,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col gap-3 border-t border-ink/10 pt-8 text-xs text-mist sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-3 text-[0.8125rem] text-mist sm:flex-row sm:items-center sm:justify-between">
           <p>{footerConfig.copyright}</p>
           <p>{footerConfig.credit}</p>
         </div>

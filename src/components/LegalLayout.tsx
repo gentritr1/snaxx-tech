@@ -87,7 +87,7 @@ export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
                 style={{ backgroundColor: app.accent }}
                 aria-hidden="true"
               />
-              <span className="label-mono text-ink-soft">
+              <span className="label text-ink-soft">
                 {app.appName}
               </span>
             </div>
@@ -97,7 +97,7 @@ export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
             </h1>
 
             {kind !== 'support' && (
-              <p className="mt-4 text-sm font-geist-mono leading-relaxed text-ink-soft">
+              <p className="mt-4 text-sm leading-relaxed text-ink-soft">
                 Last updated: {app.lastUpdated ?? app.effectiveDate}
                 {app.lastUpdated && app.lastUpdated !== app.effectiveDate && (
                   <> · Effective: {app.effectiveDate}</>

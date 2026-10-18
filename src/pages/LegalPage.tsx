@@ -52,7 +52,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
   if (!app) {
     return (
       <div className="page-enter min-h-screen bg-paper flex flex-col items-center justify-center px-6 text-center">
-        <p className="label-mono text-ink-soft">404</p>
+        <p className="label text-ink-soft">404</p>
         <h1 className="mt-4 font-display type-headline text-ink">
           We couldn't find that page.
         </h1>
@@ -88,7 +88,7 @@ export default function LegalPage({ kind }: LegalPageProps) {
         {/* Table of contents */}
         <aside className="hidden lg:block lg:col-span-3" aria-label={`${docTitle} contents`}>
           <div className="sticky top-28">
-            <p className="mb-4 label-mono text-ink-soft">
+            <p className="mb-4 label text-ink-soft">
               On this page
             </p>
             <nav className="space-y-1 border-l border-ink/10">

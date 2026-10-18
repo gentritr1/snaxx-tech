@@ -245,22 +245,43 @@
   }
 }
 
-/* Page Overlay (boot screen) */
+/* Page Overlay (boot screen): a curtain over the 3D stage only. The copy
+   and navigation sit above it, so they paint without waiting for WebGL. */
 .page-overlay {
   position: fixed;
   inset: 0;
   background: var(--void);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  z-index: 1;
   opacity: 1;
+  pointer-events: none;
   transition: opacity 0.7s var(--ease-out-cubic);
+}
+
+/* The mark waits where the core will appear: above the copy on portrait
+   screens, beside it on landscape ones (see CameraRig shiftX/shiftY). */
+.page-overlay > div {
+  position: absolute;
+  left: 50%;
+  top: 31%;
+  transform: translate(-50%, -50%);
+}
+@media (orientation: landscape) {
+  .page-overlay > div {
+    left: 67%;
+    top: 50%;
+  }
 }
 
 .page-overlay.hidden {
   opacity: 0;
-  pointer-events: none;
+}
+
+/* Hero copy rises on first paint, not after the stage is ready. */
+@keyframes heroRise {
+  from { opacity: 0; transform: translateY(1.25rem); }
+}
+.hero-rise {
+  animation: heroRise 900ms var(--ease-out-quart) both;
 }
 
 @keyframes bootSlide {
@@ -406,7 +427,8 @@
   }
 
   .scroll-cue,
-  .boot-bar {
+  .boot-bar,
+  .hero-rise {
     animation: none;
   }
 

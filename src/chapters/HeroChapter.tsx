@@ -16,12 +16,6 @@ export function HeroChapter({ awake }: { awake: boolean }) {
     scrollToHash(heroConfig.primaryCta.href);
   };
 
-  const reveal = (delay: number) =>
-    cn(
-      'transition-[opacity,transform] duration-1000 ease-out-quart',
-      awake ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0',
-    ) + ` [transition-delay:${delay}ms]`;
-
   return (
     <section id="hero" ref={section} className="relative" style={{ height: '160vh' }}>
       <div className="chapter-stage">
@@ -29,14 +23,14 @@ export function HeroChapter({ awake }: { awake: boolean }) {
         <div className="container-large w-full self-end px-6 lg:self-auto lg:px-12">
           <div ref={copy} className="chapter-copy flex w-full items-end lg:items-center">
             <div className="w-full max-w-2xl pb-10 lg:pb-0">
-              <h1 className={cn('font-display type-display text-ink', reveal(350))} style={{ transitionDelay: '350ms' }}>
+              <h1 className="hero-rise font-display type-display text-ink">
                 <span className="block">{heroConfig.headline[0]}</span>
                 <span className="block">{heroConfig.headline[1]}</span>
               </h1>
-              <p className={cn('type-lead mt-7 max-w-lg', reveal(600))} style={{ transitionDelay: '600ms' }}>
+              <p className="hero-rise type-lead mt-7 max-w-lg" style={{ animationDelay: '120ms' }}>
                 {heroConfig.intro}
               </p>
-              <div className={cn('mt-9 flex flex-wrap items-center gap-3', reveal(800))} style={{ transitionDelay: '800ms' }}>
+              <div className="hero-rise mt-9 flex flex-wrap items-center gap-3" style={{ animationDelay: '240ms' }}>
                 <AnimatedButton href={heroConfig.primaryCta.href} variant="primary" size="lg" showIcon onClick={onPrimary}>
                   {heroConfig.primaryCta.label}
                 </AnimatedButton>

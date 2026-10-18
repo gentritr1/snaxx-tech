@@ -5,6 +5,7 @@ import Home from './pages/Home'
 // Legal + 404 routes are reached directly from Google Play links; splitting
 // them keeps those visitors off the home page's heavier code path.
 const LegalPage = lazy(() => import('./pages/LegalPage'))
+const LegalIndex = lazy(() => import('./pages/LegalIndex'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 function ScrollToTop() {
@@ -41,6 +42,7 @@ export default function App() {
       <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/legal" element={<LegalIndex />} />
           {/* Canonical per-app document URLs, e.g. /block-destroy/privacy */}
           <Route path="/:appSlug/privacy" element={<LegalPage kind="privacy" />} />
           <Route path="/:appSlug/terms" element={<LegalPage kind="terms" />} />

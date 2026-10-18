@@ -167,9 +167,8 @@ export interface GameItem {
   image: string;
   href?: string;
   actionLabel?: string;
-  privacyHref?: string;
-  termsHref?: string;
-  supportHref?: string;
+  /** Slug in src/legal/content.ts; the card links to that app on the /legal hub. */
+  legalSlug?: string;
 }
 
 export interface GamesConfig {
@@ -200,8 +199,7 @@ export const gamesConfig: GamesConfig = {
       status: "Coming to Android",
       accent: "#2F8CFF",
       image: "/images/app-arrows.webp",
-      privacyHref: "/privacy/arrows",
-      termsHref: "/terms/arrows",
+      legalSlug: "arrows",
     },
     {
       id: "block-destroy",
@@ -212,9 +210,7 @@ export const gamesConfig: GamesConfig = {
       status: "Coming to Android",
       accent: "#FF7A29",
       image: "/images/app-block-destroy.webp",
-      privacyHref: "/block-destroy/privacy",
-      termsHref: "/block-destroy/terms",
-      supportHref: "/block-destroy/support",
+      legalSlug: "block-destroy",
     },
     {
       id: "geo-guesser",
@@ -227,8 +223,7 @@ export const gamesConfig: GamesConfig = {
       image: "/images/app-geo-guesser.webp",
       href: "https://play.google.com/store/apps/details?id=com.snaxxtech.geoguesser&hl=en",
       actionLabel: "Play Geoguesser",
-      privacyHref: "/geo-guesser-world-3d/privacy",
-      termsHref: "/geo-guesser-world-3d/terms",
+      legalSlug: "geo-guesser-world-3d",
     },
     {
       id: "fjale",
@@ -352,15 +347,7 @@ export const footerConfig: FooterConfig = {
     },
     {
       title: "Legal",
-      links: [
-        { label: "Arrows — Privacy", href: "/privacy/arrows" },
-        { label: "Arrows — Terms", href: "/terms/arrows" },
-        { label: "Block Destroy — Privacy", href: "/block-destroy/privacy" },
-        { label: "Block Destroy — Terms", href: "/block-destroy/terms" },
-        { label: "Block Destroy — Support", href: "/block-destroy/support" },
-        { label: "Geo Guesser — Privacy", href: "/geo-guesser-world-3d/privacy" },
-        { label: "Geo Guesser — Terms", href: "/geo-guesser-world-3d/terms" },
-      ],
+      links: [{ label: "Privacy & terms", href: "/legal" }],
     },
   ],
   copyright: "© 2026 Snaxx Tech. All rights reserved.",

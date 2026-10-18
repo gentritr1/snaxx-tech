@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router';
-import { ArrowUpRight, FileText, LifeBuoy, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { gamesConfig, type GameItem } from '@/config';
 import { setHover, subscribeHover } from '@/experience/sceneState';
@@ -41,22 +41,10 @@ function GameCard({ game, index, active }: { game: GameItem; index: number; acti
             <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
           </a>
         )}
-        {game.privacyHref && (
-          <Link to={game.privacyHref} className={linkClass}>
+        {game.legalSlug && (
+          <Link to={`/legal#${game.legalSlug}`} className={linkClass}>
             <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-            Privacy
-          </Link>
-        )}
-        {game.termsHref && (
-          <Link to={game.termsHref} className={linkClass}>
-            <FileText className="h-4 w-4" aria-hidden="true" />
-            Terms
-          </Link>
-        )}
-        {game.supportHref && (
-          <Link to={game.supportHref} className={linkClass}>
-            <LifeBuoy className="h-4 w-4" aria-hidden="true" />
-            Support
+            Privacy & terms
           </Link>
         )}
       </div>

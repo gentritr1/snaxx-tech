@@ -748,6 +748,7 @@ export const legalApps: Record<string, AppLegal> = {
     appKind: "geography guessing game",
     accent: "#14B8A6",
     effectiveDate: "July 25, 2026",
+    lastUpdated: "October 18, 2026", // set to the day this text goes live
     contactEmail: CONTACT_EMAIL,
     privacy: buildPrivacy(
       "Geo Guesser World 3D!",

@@ -17,3 +17,7 @@ test("Geo Guesser legal text matches the v1.5.0 app", () => {
     assert.ok(text.includes(fact), `missing "${fact}"`);
   }
 });
+
+test("the page date moves when the policy changes", () => {
+  assert.ok(geo.lastUpdated && geo.lastUpdated !== geo.effectiveDate, "lastUpdated must be set to the day this text goes live");
+});

@@ -24,15 +24,10 @@
 // the advertising disclosures below must stay consistent with the Play
 // Console Data Safety form for that app's release build.
 
-// The document kinds an app can publish. Lives here rather than in the layout
-// component so Fast Refresh keeps working (components-only exports there).
-export type LegalKind = "privacy" | "terms" | "support";
-
-export const KIND_TITLES: Record<LegalKind, string> = {
-  privacy: "Privacy Policy",
-  terms: "Terms of Service",
-  support: "Support",
-};
+// The document kinds live in src/seo.ts: the home page's entry bundle needs
+// their titles, and importing them from here would pull every legal text in.
+import { KIND_TITLES, type LegalKind } from "../seo";
+export { KIND_TITLES, type LegalKind };
 
 export interface LegalSection {
   id: string;

@@ -72,15 +72,6 @@
       ]
     },
     {
-      "source": "/videos/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
       "source": "/(favicon.svg|favicon.png|apple-touch-icon.png|icon-512.png)",
       "headers": [
         {

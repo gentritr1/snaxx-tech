@@ -3,7 +3,16 @@
 // so what a crawler reads and what a visitor's tab shows never drift apart.
 // Pure data: no React, no DOM, so the Vite config can import it.
 import { siteConfig } from './config';
-import { KIND_TITLES, type AppLegal, type LegalKind } from './legal/content';
+import type { AppLegal } from './legal/content';
+
+/** The document kinds an app can publish. */
+export type LegalKind = 'privacy' | 'terms' | 'support';
+
+export const KIND_TITLES: Record<LegalKind, string> = {
+  privacy: 'Privacy Policy',
+  terms: 'Terms of Service',
+  support: 'Support',
+};
 
 /** The canonical origin. The apex and the vercel.app host redirect here. */
 export const SITE_URL = 'https://www.snaxxtech.com';

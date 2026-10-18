@@ -91,8 +91,10 @@ function makeTexture(w: number, h: number, draw: Draw): CanvasTexture {
   texture.magFilter = LinearFilter;
   texture.anisotropy = 4;
   // Redraw once the web fonts are in, so the panels never keep fallback glyphs.
-  if (typeof document !== 'undefined' && document.fonts?.ready) {
-    document.fonts.ready.then(() => {
+  // Nothing in the DOM uses GeistMono any more, so ask for it explicitly; that
+  // keeps it off the preload list of every page, legal pages included.
+  if (typeof document !== 'undefined' && document.fonts?.load) {
+    Promise.all([document.fonts.load(`500 16px ${MONO}`), document.fonts.ready]).then(() => {
       draw(ctx, w, h);
       texture.needsUpdate = true;
     });

@@ -99,6 +99,8 @@ interface LegalProfile {
   // No account, no sign-in, no cloud save, and no Snaxx Tech backend that
   // receives gameplay data.
   noBackend?: boolean;
+  /** Asks Google Play to show its In-App Review rating dialog. */
+  usesInAppReview?: boolean;
   /** The app never requests the device's location permission. */
   noDeviceLocation?: boolean;
   /** Runtime content dependencies; adds a "Maps & Imagery" privacy section. */
@@ -160,6 +162,14 @@ function buildPrivacy(
       1,
       0,
       "Google Play Games — if you choose to use features such as leaderboards or achievements, Google processes the information needed to provide those features under Google's Privacy Policy.",
+    );
+  }
+
+  if (profile.usesInAppReview) {
+    informationList.splice(
+      1,
+      0,
+      "Google Play In-App Review — after you have finished at least two games, the App may ask Google Play to show its rating dialog. Google decides whether the dialog appears, and any rating or review you submit is handled by Google Play under Google's Privacy Policy.",
     );
   }
 
@@ -655,24 +665,27 @@ const BLOCK_DESTROY_PROFILE: LegalProfile = {
 };
 
 // Geo Guesser World 3D! (com.snaxxtech.geoguesser) — the outlier of the
-// catalogue: it is online-only, persists nothing at all (scores live in memory
-// for the length of a session), and requests non-personalized ads rather than
+// catalogue: it is online-only, persists only a personal best and a small
+// player record (games finished, walkthrough, last rating prompt) on the device,
+// and requests non-personalized ads rather than
 // showing a UMP consent form. It also streams panoramas, map tiles, and its
 // mapping libraries from third parties, each of which sees the device IP.
 const GEO_GUESSER_PROFILE: LegalProfile = {
-  localData: null,
+  localData:
+    "Your personal best score, the number of games you have finished, whether you have seen the how-to-play walkthrough, and when the App last asked you for a rating",
   supportsPlayGames: false,
   isGame: true,
   adProvider: "admob",
   consentModel: "non-personalized",
   adPlacements:
-    "Ads appear in three places: a full-screen ad after the fifth and final round, shown before your score summary; a banner on that summary screen; and a banner inside the guess drawer. No ad interrupts you while you are exploring a panorama.",
+    "Ads appear in four places: a banner at the bottom of the home screen; a banner inside the guess drawer; a full-screen ad after the fifth and final round, shown before your score summary; and a banner on that summary screen. No ad interrupts you while you are exploring a panorama.",
   prohibitAdInterference: true,
   noBackend: true,
   noDeviceLocation: true,
+  usesInAppReview: true,
   generalAudience: true,
   contentAttribution:
-    "Street-level imagery comes from Mapillary, and map tiles come from CARTO, built from data by OpenStreetMap contributors.",
+    "Street-level imagery comes from Mapillary, and map tiles come from OpenFreeMap, built from data by OpenStreetMap contributors.",
   contentServices: [
     {
       name: "Mapillary (Meta)",
@@ -682,15 +695,15 @@ const GEO_GUESSER_PROFILE: LegalProfile = {
       policyDescription: "How Mapillary handles information from apps and sites that request its imagery.",
     },
     {
-      name: "CARTO",
-      purpose: "Supplies the map tiles for the guessing map, built from OpenStreetMap data.",
-      policyLabel: "CARTO privacy policy",
-      policyHref: "https://carto.com/privacy/",
-      policyDescription: "How CARTO handles information when its basemap tiles are requested.",
+      name: "OpenFreeMap",
+      purpose: "Supplies the map tiles for the guessing and result maps, built from OpenStreetMap data.",
+      policyLabel: "OpenFreeMap privacy policy",
+      policyHref: "https://openfreemap.org/privacy/",
+      policyDescription: "How OpenFreeMap handles information when its map tiles are requested.",
     },
     {
       name: "unpkg (Cloudflare)",
-      purpose: "Delivers the Leaflet and mapillary-js mapping libraries the App loads at runtime.",
+      purpose: "Delivers the MapLibre GL and mapillary-js mapping libraries the App loads at runtime.",
       policyLabel: "Cloudflare privacy policy",
       policyHref: "https://www.cloudflare.com/privacypolicy/",
       policyDescription: "How Cloudflare, which serves the unpkg CDN, handles information from requests it answers.",

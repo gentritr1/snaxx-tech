@@ -1,5 +1,15 @@
-import { Color, DoubleSide, NormalBlending, ShaderMaterial, Texture, Vector3 } from 'three';
+import { Color, DoubleSide, LinearSRGBColorSpace, NormalBlending, ShaderMaterial, Texture, Vector3 } from 'three';
 import { simplex3 } from './noise.glsl';
+
+/**
+ * Scene background and fog, in linear light. The composer applies Khronos
+ * Neutral tone mapping; these are its inverse of the brand cream #F7F0E4 and
+ * of the games-world #F4E4CF, so the rendered background matches the page
+ * (measured 246,240,228 top-centre). They sit above 1.0, which is why
+ * Bloom's threshold is 1.6 (Effects.tsx).
+ */
+export const SCENE_BG = new Color().setRGB(1.3842, 1.294, 1.1473, LinearSRGBColorSpace);
+export const SCENE_BG_WORLD = new Color().setRGB(1.1642, 0.9988, 0.8039, LinearSRGBColorSpace);
 
 const EMBER = new Color('#F2B35B');
 const EMBER_DEEP = new Color('#8A4A12');
@@ -310,7 +320,7 @@ export function createHorizonMaterial() {
     depthWrite: false,
     uniforms: {
       uWorld: { value: 0 },
-      uTop: { value: new Color('#F7F0E4') },
+      uTop: { value: SCENE_BG.clone() },
       uGlow: { value: new Color('#F5D7B0') },
     },
     vertexShader: /* glsl */ `

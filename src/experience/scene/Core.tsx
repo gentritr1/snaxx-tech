@@ -179,12 +179,13 @@ const RIBBONS: RibbonSpec[] = [
   { turns: 0.9, radius: 2.95, height: 0.9, wobble: 0.3, thickness: 0.05, phase: 4.2, speed: 0.06, tilt: [1.0, -0.3, 0.15] },
 ];
 
-const CARAMEL = new MeshPhysicalMaterial({
+// No clearcoat: on the thin ribbons' silhouette pixels the clearcoat
+// Fresnel term reaches 1 and removes the whole base layer, leaving black
+// speckles along every edge.
+const CARAMEL = new MeshStandardMaterial({
   color: '#D48A2A',
   metalness: 0,
   roughness: 0.12,
-  clearcoat: 1,
-  clearcoatRoughness: 0.05,
   envMapIntensity: 1.5,
 });
 

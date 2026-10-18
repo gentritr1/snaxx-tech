@@ -208,8 +208,8 @@ export function Navigation() {
         <div
           id="mobile-navigation"
           className={cn(
-            'fixed inset-0 z-40 bg-void transition-[opacity,visibility] duration-500 ease-out-cubic lg:hidden',
-            isMenuOpen ? 'visible opacity-100' : 'pointer-events-none invisible opacity-0',
+            'fixed inset-0 z-40 bg-void transition-[opacity,visibility] ease-out-cubic lg:hidden',
+            isMenuOpen ? 'visible opacity-100 duration-300' : 'pointer-events-none invisible opacity-0 duration-200',
           )}
         >
           <div className="flex h-full flex-col items-start justify-center gap-6 px-8">

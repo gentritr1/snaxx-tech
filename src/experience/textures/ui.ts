@@ -1,4 +1,5 @@
-import { CanvasTexture, LinearFilter, SRGBColorSpace } from 'three';
+import { CanvasTexture, LinearFilter, LinearMipmapLinearFilter, SRGBColorSpace } from 'three';
+import { detectTier } from '../quality';
 
 // Procedural UI textures for the holographic product panels. Drawn on a
 // 2D canvas with the site's own fonts, so no external asset or request is
@@ -80,16 +81,21 @@ function avatar(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, 
 }
 
 function makeTexture(w: number, h: number, draw: Draw): CanvasTexture {
+  // The panels fill ~1,500 device px at rest on desktop; 2x keeps their text
+  // crisp there. Drawing code stays in logical w x h units.
+  const scale = detectTier() === 'high' ? 2 : 1;
   const canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
+  canvas.width = w * scale;
+  canvas.height = h * scale;
   const ctx = canvas.getContext('2d')!;
+  ctx.scale(scale, scale);
   draw(ctx, w, h);
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
-  texture.minFilter = LinearFilter;
+  texture.generateMipmaps = true;
+  texture.minFilter = LinearMipmapLinearFilter;
   texture.magFilter = LinearFilter;
-  texture.anisotropy = 4;
+  texture.anisotropy = 8;
   // Redraw once the web fonts are in, so the panels never keep fallback glyphs.
   // Nothing in the DOM uses GeistMono any more, so ask for it explicitly; that
   // keeps it off the preload list of every page, legal pages included.

@@ -47,12 +47,12 @@ export function AnimatedButton({
   const content = (
     <>
       <span className="relative flex h-5 items-center overflow-hidden">
-        <span className="block transition-transform duration-350 ease-out-quad group-hover:-translate-y-[150%]">
+        <span className="block transition-transform duration-[250ms] ease-out-quart group-hover:-translate-y-[150%]">
           {children}
         </span>
         <span
           aria-hidden="true"
-          className="absolute inset-0 flex translate-y-[150%] items-center transition-transform duration-350 ease-out-quad group-hover:translate-y-0"
+          className="absolute inset-0 flex translate-y-[150%] items-center transition-transform duration-[250ms] ease-out-quart group-hover:translate-y-0"
         >
           {children}
         </span>
@@ -60,7 +60,7 @@ export function AnimatedButton({
       {showIcon && (
         <ArrowRight
           aria-hidden="true"
-          className="h-4 w-4 transition-transform duration-300 ease-out-quad group-hover:translate-x-1"
+          className="h-4 w-4 transition-transform duration-[250ms] ease-out-quart group-hover:translate-x-1"
         />
       )}
     </>

@@ -25,7 +25,7 @@ export function StudioChapter() {
             ))}
           </div>
         </div>
-        <ul className="glass hidden rounded-xl py-2 sm:block sm:max-w-xl lg:justify-self-end lg:w-full lg:max-w-md shortland:hidden">
+        <ul className="glass hidden rounded-xl py-2 sm:block lg:justify-self-end lg:w-full lg:max-w-md shortland:hidden">
           {studioConfig.principles.map((p) => (
             <li key={p.title} className="px-5 py-3 lg:px-6 lg:py-4">
               <div>

@@ -190,9 +190,9 @@ export const gamesConfig: GamesConfig = {
     {
       id: "arrows",
       name: "Arrows",
-      category: "Precision arcade",
+      category: "Calm arrow puzzle",
       description:
-        "Fly a paper arrow through a sky of hazards, one thumb and one short run at a time.",
+        "A picture drawn out of arrows. Tap one whose lane is clear to send it off the board, and clear the whole picture. No timer, no rush.",
       status: "Coming to Android",
       accent: "#2F8CFF",
       image: "/images/app-arrows.webp",

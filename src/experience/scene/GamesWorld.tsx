@@ -6,18 +6,14 @@ import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import {
   BufferAttribute,
   BufferGeometry,
-  CatmullRomCurve3,
   Color,
   Float32BufferAttribute,
   Group,
   InstancedBufferAttribute,
   InstancedMesh,
-  Matrix4,
   Mesh,
   MeshPhysicalMaterial,
   Object3D,
-  Quaternion,
-  Vector3,
 } from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { damp } from 'maath/easing';
@@ -26,9 +22,9 @@ import { createGlobeDotsMaterial } from '../shaders/materials';
 import { createLetterTexture } from '../textures/ui';
 import { gamesConfig, type GameItem } from '@/config';
 import { CHOCOLATE, GOLD, PORCELAIN } from './Core';
+import { ArrowsBoard } from './ArrowsBoard';
 import { isDomControlClick, scrollToGame } from '@/lib/scroll';
 
-const ZERO = new Vector3(0, 0, 0);
 const GAMES_Z = -38;
 const GAMES_X = [-7.5, -2.5, 2.5, 7.5];
 const GAMES_Y = -1.2;
@@ -106,89 +102,6 @@ function Exhibit({ game, index, children }: { game: GameItem; index: number; chi
       <group ref={inner} position={[0, 1.15, 0]}>
         {children}
       </group>
-    </group>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Arrows: a glossy blue candy dart with a stream of sugar glyphs behind it.
-
-function dartGeometry() {
-  const g = new BufferGeometry();
-  const nose = [0, 0, 1.25];
-  const tail = [0, 0.02, -0.65];
-  const left = [-0.95, -0.06, -0.72];
-  const right = [0.95, -0.06, -0.72];
-  const keel = [0, -0.38, -0.5];
-  const verts = [
-    ...nose, ...tail, ...left,
-    ...nose, ...right, ...tail,
-    ...nose, ...keel, ...tail,
-    ...nose, ...tail, ...keel,
-  ];
-  g.setAttribute('position', new Float32BufferAttribute(verts, 3));
-  g.computeVertexNormals();
-  return g;
-}
-
-function ArrowsExhibit({ accent }: { accent: string }) {
-  const dart = useRef<Mesh>(null);
-  const glyphs = useRef<InstancedMesh>(null);
-  const COUNT = 48;
-  const geometry = useMemo(() => dartGeometry(), []);
-  const material = useMemo(
-    () => new MeshPhysicalMaterial({ color: accent, metalness: 0.05, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1.4 }),
-    [accent],
-  );
-  const glyphMaterial = useMemo(
-    () => new MeshPhysicalMaterial({ color: '#F6ECDC', metalness: 0, roughness: 0.35, clearcoat: 0.8, emissive: new Color(accent), emissiveIntensity: 0.3 }),
-    [accent],
-  );
-  const curve = useMemo(
-    () =>
-      new CatmullRomCurve3([
-        new Vector3(-2.6, -1.1, 1.2),
-        new Vector3(-1.7, -0.35, 0.7),
-        new Vector3(-0.7, 0.3, 0.3),
-        new Vector3(0.1, 0.32, 0.1),
-      ]),
-    [],
-  );
-  const seeds = useMemo(() => Array.from({ length: COUNT }, (_, i) => (i / COUNT + (i % 7) * 0.013) % 1), []);
-  const scratch = useMemo(() => ({ m: new Matrix4(), p: new Vector3(), q: new Quaternion(), s: new Vector3(), tangent: new Vector3(), up: new Vector3(0, 1, 0), look: new Matrix4() }), []);
-
-  useFrame(({ clock }) => {
-    const s = sceneState;
-    const t = s.reducedMotion ? 0 : clock.elapsedTime;
-    if (dart.current) {
-      dart.current.rotation.set(Math.sin(t * 0.8) * 0.08, 0.65, Math.sin(t * 1.1) * 0.22);
-      dart.current.position.set(0.45, 0.35 + Math.sin(t * 1.3) * 0.05, 0.1);
-    }
-    const inst = glyphs.current;
-    if (!inst) return;
-    const { m, p, q, tangent, up, look } = scratch;
-    for (let i = 0; i < COUNT; i++) {
-      const u = (seeds[i] + t * 0.22) % 1;
-      curve.getPointAt(u, p);
-      curve.getTangentAt(u, tangent);
-      p.x += Math.sin(u * 20 + i) * 0.12;
-      p.y += Math.cos(u * 17 + i * 2) * 0.1;
-      look.lookAt(tangent, ZERO, up);
-      q.setFromRotationMatrix(look);
-      const fade = smoothstep(0, 0.12, u) * (1 - smoothstep(0.85, 1, u));
-      scratch.s.setScalar(0.13 * fade + 0.001);
-      m.compose(p, q, scratch.s);
-      inst.setMatrixAt(i, m);
-    }
-    inst.instanceMatrix.needsUpdate = true;
-  });
-
-  return (
-    <group>
-      <mesh ref={dart} geometry={geometry} material={material} scale={1.15} />
-      <instancedMesh ref={glyphs} args={[undefined, undefined, COUNT]} material={glyphMaterial} frustumCulled={false}>
-        <coneGeometry args={[0.6, 1.6, 3]} />
-      </instancedMesh>
     </group>
   );
 }
@@ -432,7 +345,7 @@ export function GamesWorld() {
     <group>
       {gamesConfig.games.map((game, i) => (
         <Exhibit key={game.id} game={game} index={i}>
-          {game.id === 'arrows' && <ArrowsExhibit accent={game.accent} />}
+          {game.id === 'arrows' && <ArrowsBoard />}
           {game.id === 'block-destroy' && <BlocksExhibit accent={game.accent} />}
           {game.id === 'geo-guesser' && <GlobeExhibit accent={game.accent} index={i} />}
           {game.id === 'fjale' && <FjaleExhibit accent={game.accent} />}

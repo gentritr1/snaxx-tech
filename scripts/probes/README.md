@@ -9,6 +9,7 @@ dependency of this repo: point `PLAYWRIGHT` at any installed copy.
 | `perfprobe.cjs <url>` | Frame pacing during scroll: frames vs expected at 60 fps, p50/p95/p99, canvas size (to spot DPR drops). |
 | `vitals.cjs <desktop\|mobile> a=<url> b=<url>` | A/B, interleaved, 3 reps: FCP, LCP, CLS, long-task ms, React commits, requests, KB. `mobile` = 4x CPU, 1.6 Mbps, 150 ms RTT. |
 | `leakprobe.cjs <url> [visits]` | WebGL2 contexts, canvases and JS heap after each client-side Home -> /legal -> Home trip (forced GC, CDP queryObjects). Exits 1 if contexts or canvases grow. Re-run after adding a module-scope material/texture (add it to `ReleaseSharedResources` in Experience.tsx) and after every three.js upgrade. |
+| `revisitprobe.cjs <baseUrl> <outdir>` | Hero at scroll 0 on a first visit vs after Home → 86% → /legal → Back to home (client-side), motion on and reduced. % pixels with luma change > 25, against a fresh-visit null. Exits 1 on a stale return visit or console errors. |
 | `netprobe.cjs <url>` | Requests and bytes per first and repeat visit with each response's Cache-Control and x-vercel-cache. |
 
 Run against `npm run build && npx vite preview`, never the dev server.

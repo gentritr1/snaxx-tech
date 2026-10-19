@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import {
+  BufferGeometry,
   Color,
   CylinderGeometry,
   ExtrudeGeometry,
   Frustum,
   Group,
+  InstancedBufferAttribute,
   InstancedMesh,
   Matrix4,
   MeshStandardMaterial,
@@ -53,13 +55,38 @@ const SKINS: Skin[] = [
   { name: 'Strawberry Glazed', board: '#FFF7EA', body: '#E6AE71', rim: '#96603A', ribbon: '#FF9EBB', swirl: '#704127', sprinkles: '#6CC8F2' },
   { name: 'Candy Corn', board: '#F3EEFA', body: ['#FFD24A', '#FF8A2A', '#FFF8E8'], rim: '#8C7BB5', ribbon: null, swirl: null, sprinkles: null },
 ];
-// The game's light-theme colours (the skins above are light boards).
-const HINT = new Color('#6D4AEF'); // accent
-const BLOCKED = new Color('#E4327D'); // heart
-// The material is neutral so the hint and flash keep their hue; the skins get a
-// little warmth on the CPU instead, which lands them near their own hex values
-// under the studio light and Neutral tone mapping.
-const WARM = new Color(1.1, 1, 0.77);
+/** Khronos PBR Neutral, the composer's tone mapping (Effects.tsx), on linear RGB. */
+function neutral([r, g, b]: number[]) {
+  const x = Math.min(r, g, b);
+  const offset = x < 0.08 ? x - 6.25 * x * x : 0.04;
+  const c = [r - offset, g - offset, b - offset];
+  const peak = Math.max(...c);
+  if (peak < 0.76) return c;
+  const d = 1 - 0.76;
+  const newPeak = 1 - (d * d) / (peak + d - 0.76);
+  const k = 1 - 1 / (0.15 * (peak - newPeak) + 1);
+  return c.map((v) => (v * newPeak) / peak * (1 - k) + newPeak * k);
+}
+
+/** The linear colour that tone-maps to `hex`, so an accent lands on screen as the game's own colour. */
+function preToneMap(hex: string) {
+  const t = new Color(hex);
+  const target = [t.r, t.g, t.b];
+  let v = [...target];
+  for (let i = 0; i < 60; i++) {
+    const o = neutral(v);
+    v = v.map((x, n) => x + target[n] - o[n]);
+  }
+  return new Color(v[0], v[1], v[2]);
+}
+
+// The game's light-theme colours (the skins above are light boards), drawn
+// unlit and unfogged: the studio light, reflections and fog would wash them out.
+const HINT = preToneMap('#6D4AEF'); // accent
+const BLOCKED = preToneMap('#E4327D'); // heart
+// A small per-channel trim lands the skins on their own hex values under the
+// studio light and Neutral tone mapping (measured on screen).
+const WARM = new Color(0.95, 1.02, 1);
 
 const { rows: ROWS, cols: COLS, arrows: ARROWS, order: ORDER } = ARROWS_LEVEL;
 const BOARD = 2.1; // world units across the plaque's playing area
@@ -72,7 +99,7 @@ const PLAQUE_FACE = -R * 1.9; // z of the plaque's front face, behind the rim la
 const PIPE_IN = 1.6;
 const HOLD = 0.7;
 const GAP = 0.17;
-const HINT_LEAD = 0.15; // < GAP, so only one arrow on the board is ever taking the hint
+const HINT_LEAD = 0.12; // with the 0.05 s fade after firing, < GAP: only one arrow is ever violet
 const SPEED = 24; // cells per second once it is flying
 const ACCEL = 0.12; // seconds to reach full speed, like a flick
 const OUTRO = 0.9;
@@ -176,12 +203,37 @@ function headGeometry() {
   return g;
 }
 
-/** Instance colour: the base, eased toward the hint violet and the blocked magenta. */
-function tint(out: Color, base: Color, hint: number, flash: number) {
-  out.copy(base);
-  if (hint > 0) out.lerp(HINT, hint * 0.85);
-  if (flash > 0) out.lerp(BLOCKED, flash * 0.9);
-  return out;
+/**
+ * A per-instance accent (aAccent: rgb = pre-tone-map colour, a = amount) that
+ * replaces the lit, fogged colour: flat on faces toward the camera, a little darker
+ * toward the silhouette so the arrow keeps its round body.
+ */
+function withAccent<M extends MeshStandardMaterial>(material: M) {
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute vec4 aAccent;\nvarying vec4 vAccent;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvAccent = aAccent;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying vec4 vAccent;')
+      .replace(
+        // After the fog: the games plates sit deep in the cream fog, which would lift the accent to pastel.
+        '#include <fog_fragment>',
+        `#include <fog_fragment>
+        float accentFacing = smoothstep(0.15, 0.6, dot(normal, normalize(vViewPosition)));
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, vAccent.rgb * mix(0.72, 1.0, accentFacing), vAccent.a);`,
+      );
+  };
+  return material;
+}
+
+/** Gives a geometry its own aAccent attribute, one slot per instance. */
+function accented<G extends BufferGeometry>(geometry: G, count: number) {
+  geometry.setAttribute('aAccent', new InstancedBufferAttribute(new Float32Array(count * 4), 4));
+  return geometry;
+}
+
+function setAccent(mesh: InstancedMesh, index: number, colour: Color, amount: number) {
+  (mesh.geometry.getAttribute('aAccent') as InstancedBufferAttribute).setXYZW(index, colour.r, colour.g, colour.b, amount);
 }
 
 const SPRINKLE_TILT = [0.7, -0.5, 0.2].map((a) => new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), a));
@@ -193,21 +245,27 @@ export function ArrowsBoard() {
   const parts = useMemo(() => {
     // Material colour well below 1 tempers the bright, neutral studio light and
     // Neutral tone mapping's shoulder, so the instance colours land near their hex.
-    const pastry = new MeshStandardMaterial({ color: new Color(0.3, 0.3, 0.3), roughness: 0.55, metalness: 0, envMapIntensity: 0.7 });
+    const pastry = withAccent(new MeshStandardMaterial({ color: new Color(0.48, 0.48, 0.48), roughness: 0.55, metalness: 0, envMapIntensity: 0.7 }));
     const rimMat = new MeshStandardMaterial({ color: new Color(0.65, 0.65, 0.65), roughness: 0.7, metalness: 0, envMapIntensity: 0.5 });
-    const gloss = new MeshStandardMaterial({ color: new Color(0.85, 0.85, 0.85), roughness: 0.3, metalness: 0, envMapIntensity: 0.9 });
+    const gloss = withAccent(new MeshStandardMaterial({ color: new Color(0.85, 0.85, 0.85), roughness: 0.3, metalness: 0, envMapIntensity: 0.9 }));
     const plaque = new MeshStandardMaterial({ color: SKINS[0].board, roughness: 0.6, metalness: 0, envMapIntensity: 0.45 });
     // Segments end inside the joints, so they need no caps; joints only show their front half.
     const seg = new CylinderGeometry(R, R, 1, 12, 1, true);
     const joint = new SphereGeometry(R, 12, 5, 0, Math.PI * 2, 0, Math.PI / 2).rotateX(Math.PI / 2);
     const head = headGeometry();
-    const tail = new CylinderGeometry(0.265 * CELL, 0.265 * CELL, R * 2.1, 20).rotateX(Math.PI / 2);
-    const swirl = new TorusGeometry(0.15 * CELL, 0.035 * CELL, 6, 20);
-    const ribbon = new CylinderGeometry(R * 0.23, R * 0.23, 1, 6, 1);
-    const sprinkle = new CylinderGeometry(0.03 * CELL, 0.03 * CELL, 0.14 * CELL, 5, 1);
+    const n = tracks.length;
+    // Every mesh drawn with an accent material carries its own aAccent slots (the rim layer does not).
+    const segA = accented(seg.clone(), segCount);
+    const jointA = accented(joint.clone(), jointCount);
+    const headA = accented(head.clone(), n);
+    const capA = accented(head.clone(), n * 2);
+    const tail = accented(new CylinderGeometry(0.265 * CELL, 0.265 * CELL, R * 2.1, 20).rotateX(Math.PI / 2), n);
+    const swirl = accented(new TorusGeometry(0.15 * CELL, 0.035 * CELL, 6, 20), n);
+    const ribbon = accented(new CylinderGeometry(R * 0.23, R * 0.23, 1, 6, 1), segCount);
+    const sprinkle = accented(new CylinderGeometry(0.03 * CELL, 0.03 * CELL, 0.14 * CELL, 5, 1), segCount * 3);
     const board = new RoundedBoxGeometry(BOARD + CELL * 1.6, BOARD + CELL * 1.6, 0.07, 3, 0.05);
-    return { pastry, rimMat, gloss, plaque, seg, joint, head, tail, swirl, ribbon, sprinkle, board };
-  }, []);
+    return { pastry, rimMat, gloss, plaque, seg, joint, head, segA, jointA, headA, capA, tail, swirl, ribbon, sprinkle, board };
+  }, [tracks.length, segCount, jointCount]);
   useEffect(
     () => () => {
       Object.values(parts).forEach((p) => p.dispose());
@@ -288,7 +346,10 @@ export function ArrowsBoard() {
       // A new skin; the board is empty here (the outro), so nothing visible changes at once.
       const first = v.cycle < 0;
       v.cycle = cycle;
-      k.board.set(skin.board).multiplyScalar(0.86);
+      // 0.7 keeps the lit plaque under Bloom's 1.32 threshold: at 0.86 it glowed a warm
+      // haze over the whole board and lifted the accents to pastel (Neutral compresses
+      // near-white, so the plaque itself only moves 4-7 levels).
+      k.board.set(skin.board).multiplyScalar(0.7);
       if (first) parts.plaque.color.copy(k.board);
       if (Array.isArray(skin.body)) skin.body.forEach((hex, n) => k.base[n].set(hex).multiply(WARM));
       else k.base.forEach((col) => col.set(skin.body as string).multiply(WARM));
@@ -325,22 +386,25 @@ export function ArrowsBoard() {
       const scale = gone ? 0 : grow * leaving;
 
       // Violet hint just before it fires, easing back to the skin once it is flying.
-      const hint = smoothstep(tr.hintAt, tr.hintAt + 0.06, time) * (1 - smoothstep(tr.start, tr.start + 0.15, time));
+      const hint = smoothstep(tr.hintAt, tr.hintAt + 0.06, time) * (1 - smoothstep(tr.start, tr.start + 0.05, time));
       // The blocked tap: the tapped arrow lunges along its exit axis and eases from
-      // magenta back to its skin; the arrow in its way holds magenta, then fades.
+      // magenta back to its skin (easeOutQuad, like the game); the arrow in its way
+      // holds magenta for 40 %, then fades.
       let bump = 0;
       let flash = 0;
       const e = time - TAP;
       if (i === pick.tapped && e > 0 && e < BUMP) {
         const kk = e / BUMP;
         bump = 0.5 * Math.sin(Math.PI * kk) * Math.exp(-2 * kk) * CELL;
-        flash = 1 - kk;
+        flash = (1 - kk) * (1 - kk);
       } else if (i === pick.blocker && e > 0 && e < FLASH) {
         flash = 1 - smoothstep(0.4, 1, e / FLASH);
       }
       const [dr, dc] = DELTA[ARROWS[i].dir];
       const bx = dc * bump;
       const by = -dr * bump;
+      const amount = Math.max(hint, flash);
+      const accent = flash >= hint ? BLOCKED : HINT;
 
       for (let j = 0; j < tr.n; j++) {
         const base = k.base[bands ? Math.min(2, Math.floor((j / tr.n) * 3)) : 0];
@@ -349,7 +413,8 @@ export function ArrowsBoard() {
         a.y += by;
         m.compose(a, q.identity(), k.s.setScalar(scale));
         J.setMatrixAt(tr.jointBase + j, m);
-        J.setColorAt(tr.jointBase + j, tint(c, base, hint, flash));
+        J.setColorAt(tr.jointBase + j, base);
+        setAccent(J, tr.jointBase + j, accent, amount);
         a.z -= R * 0.45;
         m.compose(a, q, k.s.setScalar(scale * RIM));
         RJ.setMatrixAt(tr.jointBase + j, m);
@@ -365,7 +430,8 @@ export function ArrowsBoard() {
         const n = tr.segBase + j;
         m.compose(mid, q, k.s.set(scale, len, scale));
         S.setMatrixAt(n, m);
-        S.setColorAt(n, c);
+        S.setColorAt(n, base);
+        setAccent(S, n, accent, amount);
         mid.z -= R * 0.45;
         m.compose(mid, q, k.s.set(scale * RIM, len, scale * RIM));
         RS.setMatrixAt(n, m);
@@ -375,7 +441,8 @@ export function ArrowsBoard() {
           mid.z += R * 0.8;
           m.compose(mid, q, k.s.set(scale, len * 0.82, scale));
           B.setMatrixAt(n, m);
-          B.setColorAt(n, tint(c, k.ribbon, hint * 0.6, flash * 0.6));
+          B.setColorAt(n, k.ribbon);
+          setAccent(B, n, accent, amount);
           mid.z -= R * 0.8;
         } else B.setMatrixAt(n, k.zero);
         // Sprinkles: three per cell, set a little to one side of the ribbon.
@@ -390,6 +457,7 @@ export function ArrowsBoard() {
           b.z = R * 0.85;
           m.compose(b, q2.copy(q).multiply(SPRINKLE_TILT[p]), k.s.setScalar(scale));
           P.setMatrixAt(n * 3 + p, m);
+          setAccent(P, n * 3 + p, accent, amount);
         }
       }
 
@@ -406,7 +474,8 @@ export function ArrowsBoard() {
       m.compose(a, q, k.s.setScalar(scale));
       H.setMatrixAt(i, m);
       // Candy Corn's head is the outer, yellow cap; the others match the body at the head.
-      H.setColorAt(i, tint(c, k.base[0], hint, flash));
+      H.setColorAt(i, k.base[0]);
+      setAccent(H, i, accent, amount);
       for (let n = 0; n < 2; n++) {
         if (!bands || scale <= 0) {
           C.setMatrixAt(i * 2 + n, k.zero);
@@ -418,6 +487,7 @@ export function ArrowsBoard() {
         b.z += R * (0.12 + n * 0.12);
         m.compose(b, q, k.s.set(scale * f, scale * f, scale));
         C.setMatrixAt(i * 2 + n, m);
+        setAccent(C, i * 2 + n, accent, amount);
       }
       a.z -= R * 0.45;
       m.compose(a, q, k.s.set(scale * 1.15, scale * 1.15, scale));
@@ -430,17 +500,20 @@ export function ArrowsBoard() {
       const tailScale = tr.n > 1 && tailKnob ? scale : 0;
       m.compose(a, q.identity(), k.s.setScalar(tailScale));
       T.setMatrixAt(i, m);
-      T.setColorAt(i, tint(c, k.base[0], hint, flash));
+      T.setColorAt(i, k.base[0]);
+      setAccent(T, i, accent, amount);
       if (tailScale > 0) {
         a.z += R * 1.08;
         m.compose(a, q, k.s.setScalar(tailScale));
         W.setMatrixAt(i, m);
         W.setColorAt(i, k.swirl);
+        setAccent(W, i, accent, amount);
       } else W.setMatrixAt(i, k.zero);
     });
 
     for (const mesh of [S, J, H, C, T, W, B, P, RS, RJ, RH]) mesh.instanceMatrix.needsUpdate = true;
     for (const mesh of [S, J, H, C, T, W, B]) if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    for (const mesh of [S, J, H, C, T, W, B, P]) mesh.geometry.getAttribute('aAccent').needsUpdate = true;
   });
 
   // Instance colours must exist before the first frame sets them; the next frame recolours everything.
@@ -459,10 +532,10 @@ export function ArrowsBoard() {
       <mesh material={GOLD} position-z={PLAQUE_FACE - 0.06}>
         <boxGeometry args={[BOARD + CELL * 2.2, BOARD + CELL * 2.2, 0.04]} />
       </mesh>
-      <instancedMesh ref={(m) => { segs.current = m; initColours(m); }} args={[parts.seg, parts.pastry, segCount]} frustumCulled={false} />
-      <instancedMesh ref={(m) => { joints.current = m; initColours(m); }} args={[parts.joint, parts.pastry, jointCount]} frustumCulled={false} />
-      <instancedMesh ref={(m) => { heads.current = m; initColours(m); }} args={[parts.head, parts.pastry, tracks.length]} frustumCulled={false} />
-      <instancedMesh ref={(m) => { caps.current = m; initColours(m); }} args={[parts.head, parts.pastry, tracks.length * 2]} frustumCulled={false} />
+      <instancedMesh ref={(m) => { segs.current = m; initColours(m); }} args={[parts.segA, parts.pastry, segCount]} frustumCulled={false} />
+      <instancedMesh ref={(m) => { joints.current = m; initColours(m); }} args={[parts.jointA, parts.pastry, jointCount]} frustumCulled={false} />
+      <instancedMesh ref={(m) => { heads.current = m; initColours(m); }} args={[parts.headA, parts.pastry, tracks.length]} frustumCulled={false} />
+      <instancedMesh ref={(m) => { caps.current = m; initColours(m); }} args={[parts.capA, parts.pastry, tracks.length * 2]} frustumCulled={false} />
       <instancedMesh ref={(m) => { tails.current = m; initColours(m); }} args={[parts.tail, parts.pastry, tracks.length]} frustumCulled={false} />
       <instancedMesh ref={(m) => { swirls.current = m; initColours(m); }} args={[parts.swirl, parts.gloss, tracks.length]} frustumCulled={false} />
       <instancedMesh ref={(m) => { ribbons.current = m; initColours(m); }} args={[parts.ribbon, parts.gloss, segCount]} frustumCulled={false} />

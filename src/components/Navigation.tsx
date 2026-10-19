@@ -9,6 +9,7 @@ const CHAPTERS: { id: string; label: string }[] = [
   { id: 'hero', label: 'Start' },
   { id: 'core', label: 'The core' },
   { id: 'software', label: 'Software' },
+  { id: 'appcare', label: 'AppCare' },
   { id: 'games', label: 'Games' },
   { id: 'studio', label: 'Studio' },
   { id: 'contact', label: 'Contact' },

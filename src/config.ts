@@ -12,7 +12,7 @@ export const siteConfig: SiteConfig = {
   language: "en",
   title: "Snaxx Tech — a small software studio for apps and games",
   description:
-    "Snaxx Tech is a small software studio. We make Offday, a time-off app for teams, and the games Arrows, Block Destroy, Geo Guesser World 3D! and FJALË.",
+    "Snaxx Tech is a small software studio. We make Offday for teams, AppCare for app security, and the games Arrows, Block Destroy, Geo Guesser World 3D! and FJALË.",
 };
 
 // Navigation
@@ -50,7 +50,7 @@ export interface HeroConfig {
 export const heroConfig: HeroConfig = {
   headline: ["Small bites.", "Big craving."],
   intro:
-    "Snaxx Tech is a small software studio. We design, build and look after apps and games: Offday for teams, and four games for Android and the web.",
+    "Snaxx Tech is a small software studio. We design, build and look after apps and games: Offday for teams, AppCare for app security, and four games for Android and the web.",
   primaryCta: { label: "Explore the work", href: "#software" },
   secondaryCta: { label: "Play FJALË", href: "https://xn--fjal-opa.com" },
 };
@@ -140,6 +140,22 @@ export const softwareConfig: SoftwareConfig = {
       ],
     },
   ],
+};
+
+// AppCare (security scan product; the 3D loupe scene lives in AppCareLoupe.tsx)
+export const appcareConfig = {
+  name: "AppCare",
+  status: "On sale November 15",
+  accent: "#E3A24C",
+  heading: "Some flaws only show under the right light.",
+  flaws: ["Bookings readable by anyone", "Secret key in the page code", "Access rule lets everyone in"],
+  clear: "Under the same light, nothing glows.",
+  body:
+    "AppCare is a one-time security scan for apps built with Lovable, Bolt, Replit and v0. It explains every finding in plain English and writes the fix prompt to paste into your builder.",
+  terms: "$49 once per app · read-only, it never changes your app",
+  cta: "Tell me when it is on sale",
+  caption: "Illustration on an example app, not a real scan.",
+  email: "techsnaxx@gmail.com",
 };
 
 // Games
@@ -302,6 +318,7 @@ export const footerConfig: FooterConfig = {
       title: "Products",
       links: [
         { label: "Offday", href: "#software" },
+        { label: "AppCare", href: "#appcare" },
         { label: "Arrows", href: "#games" },
         { label: "Block Destroy", href: "#games" },
         { label: "Geo Guesser World 3D!", href: "#games" },

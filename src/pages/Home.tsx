@@ -5,6 +5,7 @@ import { PageOverlay } from '@/components/PageOverlay';
 import { HeroChapter } from '@/chapters/HeroChapter';
 import { StoryChapter } from '@/chapters/StoryChapter';
 import { SoftwareChapter } from '@/chapters/SoftwareChapter';
+import { AppCareChapter } from '@/chapters/AppCareChapter';
 import { PortalChapter } from '@/chapters/PortalChapter';
 import { GamesChapter } from '@/chapters/GamesChapter';
 import { StudioChapter } from '@/chapters/StudioChapter';
@@ -110,6 +111,7 @@ export default function Home() {
         <StoryChapter chapter={storyChapters[0]} height="220vh" />
         <StoryChapter chapter={storyChapters[1]} height="180vh" />
         <SoftwareChapter />
+        <AppCareChapter />
         <PortalChapter />
         <GamesChapter />
         <StudioChapter />

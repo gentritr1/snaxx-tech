@@ -5,7 +5,7 @@ import { gamesConfig } from '@/config';
 // copy is at full opacity from ~0.15 to ~0.8 of its travel; games at 0.12
 // shows the header and the first card). Landing on the section top instead
 // stops before the fade-in, on an empty screen.
-const READ_AT: Record<string, number> = { core: 0.3, inside: 0.3, software: 0.3, portal: 0.3, games: 0.12, studio: 0.3, contact: 0.3 };
+const READ_AT: Record<string, number> = { core: 0.3, inside: 0.3, software: 0.3, appcare: 0.1, portal: 0.3, games: 0.12, studio: 0.3, contact: 0.3 };
 
 /** Smooth-scroll to an in-page anchor (honours reduced motion). */
 export function scrollToHash(href: string) {

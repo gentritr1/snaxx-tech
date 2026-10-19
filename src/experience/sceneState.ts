@@ -50,6 +50,10 @@ export const sceneState = {
   gamesReveal: 0,
   /** Which exhibit has focus, as a float so adjacent exhibits can blend. */
   gamesFocus: 0,
+  /** AppCare chapter progress, 0 -> 1: the loupe's sweep, mend and wash. */
+  appcare: 0,
+  /** AppCare stage presence: drawn only while the camera is near it. */
+  appcareVis: 0,
   /** Outro calm: slows particles and dims accents. */
   calm: 0,
 
@@ -75,6 +79,29 @@ export function subscribeHover(listener: HoverListener) {
   hoverListeners.add(listener);
   return () => {
     hoverListeners.delete(listener);
+  };
+}
+
+export type FlawState = 'hidden' | 'found' | 'mended';
+export interface AppcareStatus {
+  flaws: FlawState[];
+  allClear: boolean;
+}
+type AppcareListener = (status: AppcareStatus) => void;
+const appcareListeners = new Set<AppcareListener>();
+let appcareStatus: AppcareStatus = { flaws: ['hidden', 'hidden', 'hidden'], allClear: false };
+
+/** The loupe reports which flaws it has found and mended; the DOM list mirrors it. */
+export function publishAppcare(flaws: FlawState[], allClear: boolean) {
+  appcareStatus = { flaws, allClear };
+  appcareListeners.forEach((listener) => listener(appcareStatus));
+}
+
+export function subscribeAppcare(listener: AppcareListener) {
+  appcareListeners.add(listener);
+  listener(appcareStatus);
+  return () => {
+    appcareListeners.delete(listener);
   };
 }
 

@@ -50,7 +50,7 @@ module.exports = {
         /* Confectionery Engine brand tokens — see DESIGN.md.
            A bright vanilla-cream studio: `void` is the page cream, `silver` the
            cocoa text. Text-safe on void: silver (13.5:1), mist (5.9:1 on void,
-           ~5.0:1 on the rendered 3D background), ember (4.9:1). */
+           ~6:1 on the rendered 3D background, measured), ember (4.9:1). */
         void: '#F7F0E4',
         graphite: '#EFE5D5',
         steel: '#E2D4C0',
@@ -131,7 +131,10 @@ module.exports = {
         'out-circ': 'cubic-bezier(0.075, 0.820, 0.165, 1)',
         'in-out-quad': 'cubic-bezier(0.455, 0.030, 0.515, 0.955)',
       },
+      // Named steps: arbitrary duration-[…] values are ambiguous with
+      // tailwindcss-animate's duration utility and are silently not generated.
       transitionDuration: {
+        '250': '250ms',
         '350': '350ms',
         '400': '400ms',
         '800': '800ms',

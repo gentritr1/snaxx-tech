@@ -6,7 +6,7 @@ import { simplex3 } from './noise.glsl';
  * Neutral tone mapping; these are its inverse of the brand cream #F7F0E4 and
  * of the games-world #F4E4CF, so the rendered background matches the page
  * (measured 246,240,228 top-centre). They sit above 1.0, which is why
- * Bloom's threshold is 1.6 (Effects.tsx).
+ * Bloom's threshold is 1.32 (Effects.tsx).
  */
 export const SCENE_BG = new Color().setRGB(1.3842, 1.294, 1.1473, LinearSRGBColorSpace);
 export const SCENE_BG_WORLD = new Color().setRGB(1.1642, 0.9988, 0.8039, LinearSRGBColorSpace);

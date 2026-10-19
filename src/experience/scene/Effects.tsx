@@ -12,8 +12,9 @@ export function Effects({ quality }: { quality: Quality }) {
   return (
     <EffectComposer multisampling={quality.multisampling} enableNormalPass={false}>
       {quality.bloom ? (
-        // The background is ~1.3 in linear light (see SCENE_BG); 1.6 keeps it out of the bloom.
-        <Bloom mipmapBlur intensity={0.45} luminanceThreshold={1.6} luminanceSmoothing={0.3} radius={0.6} levels={5} />
+        // The background's luminance is 1.303 in linear light (see SCENE_BG);
+        // 1.32 keeps it out of the bloom while the emissive parts still glow.
+        <Bloom mipmapBlur intensity={0.45} luminanceThreshold={1.32} luminanceSmoothing={0.3} radius={0.6} levels={5} />
       ) : (
         <></>
       )}

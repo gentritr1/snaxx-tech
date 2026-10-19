@@ -173,7 +173,7 @@ export function Navigation() {
           footerInView && 'pointer-events-none opacity-0',
         )}
         aria-label="Chapters"
-        aria-hidden={footerInView || undefined}
+        inert={footerInView || undefined}
       >
         {CHAPTERS.map((c, i) => (
           <a

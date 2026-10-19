@@ -57,7 +57,7 @@ export const GOLD = new MeshPhysicalMaterial({
 // ---------------------------------------------------------------------------
 // Centre: a glass shell around molten caramel. Dissolves during the fly-through.
 
-const GLASS = new MeshPhysicalMaterial({
+export const GLASS = new MeshPhysicalMaterial({
   color: '#FFEBCB',
   transparent: true,
   opacity: 0.3,
@@ -182,7 +182,7 @@ const RIBBONS: RibbonSpec[] = [
 // No clearcoat: on the thin ribbons' silhouette pixels the clearcoat
 // Fresnel term reaches 1 and removes the whole base layer, leaving black
 // speckles along every edge.
-const CARAMEL = new MeshStandardMaterial({
+export const CARAMEL = new MeshStandardMaterial({
   color: '#D48A2A',
   metalness: 0,
   roughness: 0.12,

@@ -82,6 +82,9 @@ export function resetSceneState() {
   Object.assign(sceneState.cam, cam);
   Object.assign(sceneState.target, target);
   Object.assign(sceneState.pointer, pointer);
+  // The AppCare list replays the cached status to new subscribers; without
+  // this a revisit announced 'Mended' before the loupe had run.
+  appcareStatus = { flaws: ['hidden', 'hidden', 'hidden'], allClear: false };
 }
 
 type HoverListener = (id: string | null) => void;

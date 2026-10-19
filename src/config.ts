@@ -32,6 +32,7 @@ export const navigationConfig: NavigationConfig = {
   logo: "Snaxx Tech",
   links: [
     { label: "Software", href: "#software" },
+    { label: "AppCare", href: "#appcare" },
     { label: "Games", href: "#games" },
     { label: "Studio", href: "#studio" },
   ],

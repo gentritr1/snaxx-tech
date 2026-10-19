@@ -547,11 +547,8 @@ const CENTRE = new Vector3(0.02, -0.08, 0);
 export function AppCareLoupe() {
   const b = useMemo(() => build(), []);
   useEffect(() => b.dispose, [b]);
-  // Portrait phones: the stand shares the screen with the copy below it.
-  const portrait = useThree((s) => s.size.width < s.size.height);
-  useEffect(() => {
-    b.root.scale.setScalar(portrait ? 0.74 : 1);
-  }, [b, portrait]);
+  const camera = useThree((s) => s.camera);
+  const size = useThree((s) => s.size);
 
   const sweepKeys = useMemo<[number, number][]>(
     () => [
@@ -568,7 +565,7 @@ export function AppCareLoupe() {
   );
   const st = useRef({ p: 0, lastKey: '', seen: false, flickerStart: -1 });
   const scratch = useMemo(
-    () => ({ local: new Vector3(), C: new Vector3(), N: new Vector3(), up: new Vector3(), right: new Vector3(), S0: new Vector3(), mend: new Vector3() }),
+    () => ({ local: new Vector3(), C: new Vector3(), N: new Vector3(), up: new Vector3(), right: new Vector3(), S0: new Vector3(), mend: new Vector3(), probe: new Vector3() }),
     [],
   );
 
@@ -602,7 +599,37 @@ export function AppCareLoupe() {
       else v.flickerStart = -1;
     }
 
-    const { local, C, N, up, right, S0, mend } = scratch;
+    const { local, C, N, up, right, S0, mend, probe } = scratch;
+
+    // Portrait phones: fit the stand (phone top to stand foot) between the nav
+    // and the top of the copy, measured from the DOM. A fixed scale clipped the
+    // copy on short phones and let the stand cover the status line.
+    const portrait = size.width < size.height;
+    if (portrait && s.appcareCopyTop > 0) {
+      const top = 68 + 14;
+      const bottom = s.appcareCopyTop - 10;
+      const screenY = (y: number) => {
+        probe.set(0, y, 0);
+        b.root.localToWorld(probe).project(camera);
+        return ((1 - probe.y) / 2) * size.height;
+      };
+      for (let i = 0; i < 2; i++) {
+        b.root.updateMatrixWorld();
+        const yTop = screenY(1.0);
+        const yBottom = screenY(-1.75);
+        const k = (bottom - top) / Math.max(1, yBottom - yTop);
+        b.root.scale.setScalar(Math.min(0.9, Math.max(0.3, b.root.scale.x * Math.min(1.25, Math.max(0.8, k)))));
+        b.root.updateMatrixWorld();
+        const mid = (screenY(1.0) + screenY(-1.75)) / 2;
+        const dist = camera.position.distanceTo(b.root.position);
+        const worldPerPx = (2 * dist * Math.tan(((camera as unknown as { fov: number }).fov * Math.PI) / 360)) / size.height;
+        b.root.position.y += (mid - (top + bottom) / 2) * worldPerPx;
+      }
+    } else if (b.root.scale.x !== 1 || b.root.position.y !== APPCARE_STAGE.y) {
+      b.root.scale.setScalar(1);
+      b.root.position.copy(APPCARE_STAGE);
+    }
+    const sc = b.root.scale.x;
     const sweep = keyed(sweepKeys, p);
     const lift = smooth(0.64, 0.74, p);
     b.path.getPoint(Math.min(sweep, 0.999), local);
@@ -622,9 +649,9 @@ export function AppCareLoupe() {
 
     // The loupe hovers over the screen, then slides off sideways along the
     // screen plane, the way a hand slides a loupe off a print.
-    const hover = mix(0.2, 0.45, lift);
+    const hover = mix(0.2, 0.45, lift) * sc;
     const world = b.loupe.parent!;
-    const pos = C.clone().addScaledVector(N, hover).addScaledVector(up, lift * 0.7).addScaledVector(right, lift * 2.4);
+    const pos = C.clone().addScaledVector(N, hover).addScaledVector(up, lift * 0.7 * sc).addScaledVector(right, lift * 2.4 * sc);
     b.loupe.position.copy(world.worldToLocal(pos));
     b.loupe.quaternion.copy(b.device.quaternion);
     b.loupe.visible = lift < 0.999;
@@ -651,7 +678,7 @@ export function AppCareLoupe() {
 
     b.spill.position.copy(world.worldToLocal(pos.clone().addScaledVector(N, 0.3)));
     b.spill.target.position.copy(world.worldToLocal(C.clone()));
-    b.spill.intensity = 1.6 * on * (1 - lift) + 1.2 * smooth(0.68, 0.76, p);
+    b.spill.intensity = (1.6 * on * (1 - lift) + 1.2 * smooth(0.68, 0.76, p)) * Math.min(1, s.appcareVis);
 
     const states: FlawState[] = b.focusT.map((t, i) => (mend.getComponent(i) > 0.5 ? 'mended' : sweep >= t - 0.006 ? 'found' : 'hidden'));
     const allClear = p > 0.88;

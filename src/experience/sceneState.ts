@@ -54,6 +54,8 @@ export const sceneState = {
   appcare: 0,
   /** AppCare stage presence: drawn only while the camera is near it. */
   appcareVis: 0,
+  /** Portrait phones: viewport y (px) where the AppCare copy starts; the stand fits above it. */
+  appcareCopyTop: 0,
   /** Outro calm: slows particles and dims accents. */
   calm: 0,
 

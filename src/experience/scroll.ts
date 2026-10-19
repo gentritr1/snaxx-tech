@@ -163,7 +163,7 @@ function buildTimeline(r: Record<ChapterId, Range>) {
 
 /** The scroll position (as timeline progress) that shows a chapter's "still". */
 function stillPoint(r: Record<ChapterId, Range>, id: ChapterId) {
-  const mid: Record<ChapterId, number> = { hero: 0.001, core: 1, inside: 0.3, software: 0.5, appcare: 0.62, portal: 0.5, games: 0.5, studio: 0.7, contact: 0.8 };
+  const mid: Record<ChapterId, number> = { hero: 0.001, core: 1, inside: 0.3, software: 0.5, appcare: 0.56, portal: 0.5, games: 0.5, studio: 0.7, contact: 0.8 };
   return r[id].start + (r[id].end - r[id].start) * mid[id];
 }
 

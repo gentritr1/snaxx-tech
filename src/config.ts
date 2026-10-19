@@ -184,7 +184,7 @@ export interface GamesConfig {
 export const gamesConfig: GamesConfig = {
   heading: "Four games, made to be replayed.",
   description:
-    "A precision arcade, a calm block puzzle, a geography game and a daily word game in Albanian. Different games, the same care for how each round feels.",
+    "A calm arrow puzzle, an offline block puzzle, a geography game and a daily word game in Albanian. Different games, the same care for how each round feels.",
   portalHeading: "Now, the games.",
   games: [
     {

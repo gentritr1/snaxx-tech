@@ -12,13 +12,17 @@ export function Effects({ quality }: { quality: Quality }) {
   return (
     <EffectComposer multisampling={quality.multisampling} enableNormalPass={false}>
       {quality.bloom ? (
-        <Bloom mipmapBlur intensity={0.45} luminanceThreshold={1} luminanceSmoothing={0.3} radius={0.6} levels={5} />
+        // The background's luminance is 1.303 in linear light (see SCENE_BG);
+        // 1.32 keeps it out of the bloom while the emissive parts still glow.
+        <Bloom mipmapBlur intensity={0.45} luminanceThreshold={1.32} luminanceSmoothing={0.3} radius={0.6} levels={5} />
       ) : (
         <></>
       )}
       <Vignette eskil={false} offset={0.1} darkness={0.22} />
       <Noise premultiply opacity={0.03} />
-      <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+      {/* Neutral, not ACES: ACES greyed the cream background to #DFDDD9 and
+          washed caramel towards pale yellow. */}
+      <ToneMapping mode={ToneMappingMode.NEUTRAL} />
     </EffectComposer>
   );
 }

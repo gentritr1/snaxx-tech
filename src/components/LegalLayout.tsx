@@ -21,7 +21,7 @@ export function LegalShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-svh bg-paper">
       <a
         href="#legal-content"
         className="fixed left-4 top-3 z-[60] -translate-y-20 rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper transition-transform focus:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6BFF] focus-visible:ring-offset-2"
@@ -117,7 +117,7 @@ export function LegalLayout({ app, kind, children }: LegalLayoutProps) {
                   to={`/${app.slug}/${siblingKind}`}
                   className={
                     i === 0
-                      ? 'pressable group inline-flex min-h-11 items-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-graphite focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6BFF] focus-visible:ring-offset-2'
+                      ? 'pressable group inline-flex min-h-11 items-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-cocoa focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6BFF] focus-visible:ring-offset-2'
                       : 'pressable group inline-flex min-h-11 items-center gap-2 rounded-lg border border-ink/10 bg-white px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-paper-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6BFF] focus-visible:ring-offset-2'
                   }
                 >

@@ -1,5 +1,15 @@
-import { Color, DoubleSide, NormalBlending, ShaderMaterial, Texture, Vector3 } from 'three';
+import { Color, DoubleSide, LinearSRGBColorSpace, NormalBlending, ShaderMaterial, Texture, Vector3 } from 'three';
 import { simplex3 } from './noise.glsl';
+
+/**
+ * Scene background and fog, in linear light. The composer applies Khronos
+ * Neutral tone mapping; these are its inverse of the brand cream #F7F0E4 and
+ * of the games-world #F4E4CF, so the rendered background matches the page
+ * (measured 246,240,228 top-centre). They sit above 1.0, which is why
+ * Bloom's threshold is 1.32 (Effects.tsx).
+ */
+export const SCENE_BG = new Color().setRGB(1.3842, 1.294, 1.1473, LinearSRGBColorSpace);
+export const SCENE_BG_WORLD = new Color().setRGB(1.1642, 0.9988, 0.8039, LinearSRGBColorSpace);
 
 const EMBER = new Color('#F2B35B');
 const EMBER_DEEP = new Color('#8A4A12');
@@ -106,7 +116,6 @@ export function createParticleMaterial() {
     uniforms: {
       uTime: { value: 0 },
       uFlow: { value: 0 },
-      uCalm: { value: 0 },
       uWorld: { value: 0 },
       uEnergy: { value: 0 },
       uPixelRatio: { value: 1 },
@@ -119,13 +128,12 @@ export function createParticleMaterial() {
       attribute float aSize;
       uniform float uTime;
       uniform float uFlow;
-      uniform float uCalm;
       uniform float uPixelRatio;
       varying float vTint;
       varying float vFade;
       void main() {
         vec3 p = position;
-        float t = uTime * (1.0 - uCalm * 0.7);
+        float t = uTime;
         p += vec3(
           sin(t * 0.21 + aSeed.x * 6.2831) * 0.35,
           cos(t * 0.17 + aSeed.y * 6.2831) * 0.28,
@@ -310,7 +318,7 @@ export function createHorizonMaterial() {
     depthWrite: false,
     uniforms: {
       uWorld: { value: 0 },
-      uTop: { value: new Color('#F7F0E4') },
+      uTop: { value: SCENE_BG.clone() },
       uGlow: { value: new Color('#F5D7B0') },
     },
     vertexShader: /* glsl */ `

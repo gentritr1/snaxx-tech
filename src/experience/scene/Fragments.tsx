@@ -76,12 +76,17 @@ export function Fragments({ count }: { count: number }) {
     if (inst.instanceColor) inst.instanceColor.needsUpdate = true;
   }, [shards, scratch]);
 
-  useFrame(({ clock }, delta) => {
+  // Orbit time accumulated per frame; calm slows the rate without jumping
+  // every sprinkle along its whole accumulated path.
+  const orbit = useRef(0);
+
+  useFrame((_, delta) => {
     const inst = mesh.current;
     const g = group.current;
     if (!inst || !g) return;
     const s = sceneState;
-    const t = s.reducedMotion ? 0 : clock.elapsedTime * (1 - s.calm * 0.6);
+    orbit.current += Math.min(delta, 0.1) * (1 - s.calm * 0.6);
+    const t = s.reducedMotion ? 0 : orbit.current;
     focus.set(s.target.x, s.target.y, s.target.z);
     damp3(g.position, focus, 0.9, Math.min(delta, 0.05));
     const { m, p, q, e } = scratch;

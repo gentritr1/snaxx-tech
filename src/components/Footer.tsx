@@ -27,12 +27,12 @@ export function Footer() {
             {footerConfig.columns.map((column) => (
               <div key={column.title}>
                 <h2 className="label text-mist">{column.title}</h2>
-                <ul className="mt-5 space-y-1">
+                <ul className="mt-5">
                   {column.links.map((link) => {
                     const external = link.href.startsWith('http');
                     const internal = link.href.startsWith('/');
                     const className =
-                      'inline-flex min-h-9 items-center gap-1 rounded-md text-sm text-ink/75 transition-colors duration-200 hover:text-ink';
+                      'inline-flex min-h-11 items-center gap-1 rounded-md text-sm text-ink/75 transition-colors duration-200 hover:text-ink';
                     return (
                       <li key={link.label}>
                         {internal ? (

@@ -39,6 +39,9 @@ export function useChapterReveal(
     if (fadeOutAt < 1) {
       tl.to(copyEl, { opacity: 0, y: -36, duration: 1 - fadeOutAt, ease: 'power2.in' }, fadeOutAt);
     }
+    // Without a fade-out the timeline would be only `fadeIn` long and the
+    // scrub would stretch the fade-in over the whole chapter.
+    if (tl.duration() < 1) tl.set({}, {}, 1);
     return () => {
       tl.scrollTrigger?.kill();
       tl.kill();

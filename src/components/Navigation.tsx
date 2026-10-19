@@ -21,6 +21,7 @@ export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [active, setActive] = useState('hero');
+  const [footerInView, setFooterInView] = useState(false);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -61,6 +62,15 @@ export function Navigation() {
       { rootMargin: '-45% 0px -45% 0px', threshold: 0 },
     );
     sections.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  // The rail would sit on top of the footer columns.
+  useEffect(() => {
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+    const observer = new IntersectionObserver(([entry]) => setFooterInView(entry.isIntersecting), { threshold: 0 });
+    observer.observe(footer);
     return () => observer.disconnect();
   }, []);
 
@@ -157,7 +167,14 @@ export function Navigation() {
       </nav>
 
       {/* Chapter rail */}
-      <nav className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 flex-col items-end gap-3 lg:flex" aria-label="Chapters">
+      <nav
+        className={cn(
+          'fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 flex-col items-end gap-3 transition-opacity duration-300 lg:flex',
+          footerInView && 'pointer-events-none opacity-0',
+        )}
+        aria-label="Chapters"
+        inert={footerInView || undefined}
+      >
         {CHAPTERS.map((c, i) => (
           <a
             key={c.id}
@@ -168,16 +185,18 @@ export function Navigation() {
           >
             <span
               className={cn(
-                'label transition-[opacity,transform] duration-300 ease-out-quart',
-                active === c.id ? 'translate-x-0 text-ink opacity-100' : 'translate-x-2 text-mist opacity-0 group-hover:translate-x-0 group-hover:opacity-100',
+                'label rounded bg-void/90 px-1.5 transition-[opacity,transform] duration-300 ease-out-quart',
+                active === c.id
+                  ? 'translate-x-0 text-ink opacity-100'
+                  : 'translate-x-2 text-mist opacity-0 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100',
               )}
             >
               {c.label}
             </span>
             <span
               className={cn(
-                'block h-px transition-[width,background-color] duration-300 ease-out-quart',
-                active === c.id ? 'w-7 bg-ember' : i < activeIndex ? 'w-4 bg-ink/50' : 'w-4 bg-ink/25 group-hover:bg-ink/60',
+                'block h-px w-7 origin-right transition-[transform,background-color] duration-300 ease-out-quart',
+                active === c.id ? 'bg-ember' : i < activeIndex ? 'scale-x-[0.571] bg-ink/50' : 'scale-x-[0.571] bg-ink/25 group-hover:bg-ink/60',
               )}
             />
           </a>
@@ -189,8 +208,8 @@ export function Navigation() {
         <div
           id="mobile-navigation"
           className={cn(
-            'fixed inset-0 z-40 bg-void/97 transition-[opacity,visibility] duration-500 ease-out-cubic lg:hidden',
-            isMenuOpen ? 'visible opacity-100' : 'pointer-events-none invisible opacity-0',
+            'fixed inset-0 z-40 bg-void transition-[opacity,visibility] ease-out-cubic lg:hidden',
+            isMenuOpen ? 'visible opacity-100 duration-300' : 'pointer-events-none invisible opacity-0 duration-200',
           )}
         >
           <div className="flex h-full flex-col items-start justify-center gap-6 px-8">
@@ -210,16 +229,19 @@ export function Navigation() {
               </a>
             ))}
             {navigationConfig.contactLabel && (
-              <AnimatedButton
-                href={navigationConfig.contactHref || '#contact'}
-                variant="primary"
-                size="lg"
+              <div
                 className={cn('mt-4 transition-[opacity,transform] duration-400 ease-out-quart', isMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0')}
                 style={{ transitionDelay: isMenuOpen ? '240ms' : '0ms' }}
-                onClick={(e) => handleNavClick(e as MouseEvent<HTMLAnchorElement>, navigationConfig.contactHref || '#contact')}
               >
-                {navigationConfig.contactLabel}
-              </AnimatedButton>
+                <AnimatedButton
+                  href={navigationConfig.contactHref || '#contact'}
+                  variant="primary"
+                  size="lg"
+                  onClick={(e) => handleNavClick(e as MouseEvent<HTMLAnchorElement>, navigationConfig.contactHref || '#contact')}
+                >
+                  {navigationConfig.contactLabel}
+                </AnimatedButton>
+              </div>
             )}
           </div>
         </div>

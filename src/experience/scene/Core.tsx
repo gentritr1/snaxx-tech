@@ -57,7 +57,7 @@ export const GOLD = new MeshPhysicalMaterial({
 // ---------------------------------------------------------------------------
 // Centre: a glass shell around molten caramel. Dissolves during the fly-through.
 
-const glassMaterial = new MeshPhysicalMaterial({
+const GLASS = new MeshPhysicalMaterial({
   color: '#FFEBCB',
   transparent: true,
   opacity: 0.3,
@@ -101,7 +101,7 @@ function Heart() {
           into an offscreen buffer every frame; a clear-coated, slightly tinted
           translucent shell reads the same against the caramel for a fraction
           of the cost. */}
-      <mesh ref={glass} material={glassMaterial}>
+      <mesh ref={glass} material={GLASS}>
         <icosahedronGeometry args={[0.95, 4]} />
       </mesh>
       <mesh ref={inner} material={plasma}>
@@ -179,12 +179,13 @@ const RIBBONS: RibbonSpec[] = [
   { turns: 0.9, radius: 2.95, height: 0.9, wobble: 0.3, thickness: 0.05, phase: 4.2, speed: 0.06, tilt: [1.0, -0.3, 0.15] },
 ];
 
-const CARAMEL = new MeshPhysicalMaterial({
+// No clearcoat: on the thin ribbons' silhouette pixels the clearcoat
+// Fresnel term reaches 1 and removes the whole base layer, leaving black
+// speckles along every edge.
+const CARAMEL = new MeshStandardMaterial({
   color: '#D48A2A',
   metalness: 0,
   roughness: 0.12,
-  clearcoat: 1,
-  clearcoatRoughness: 0.05,
   envMapIntensity: 1.5,
 });
 
@@ -206,18 +207,23 @@ function Ribbon({ spec, index }: { spec: RibbonSpec; index: number }) {
   const outer = useRef<Group>(null);
   const spin = useRef<Group>(null);
   const geometry = useMemo(() => ribbonGeometry(spec), [spec]);
+  // Angle accumulated frame by frame. elapsedTime x a scroll-driven rate
+  // jumped the whole angle (up to ~70 deg in a frame) when the rate changed.
+  const phase = useRef(0);
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock }, delta) => {
     const s = sceneState;
     const t = clock.elapsedTime;
+    const rs = s.ringSpread + s.introRingSpread;
+    phase.current += Math.min(delta, 0.1) * spec.speed * (0.5 + s.energy * 0.8 + rs * 0.5);
     if (spin.current) {
-      spin.current.rotation.y = s.reducedMotion ? 0 : t * spec.speed * (0.5 + s.energy * 0.8 + s.ringSpread * 0.5);
+      spin.current.rotation.y = s.reducedMotion ? 0 : phase.current;
     }
     if (outer.current) {
       const p = s.reducedMotion ? 0 : t * 0.04 * (index + 1);
       outer.current.rotation.set(spec.tilt[0] + Math.sin(p) * 0.12, spec.tilt[1], spec.tilt[2] + Math.cos(p * 0.8) * 0.1);
-      const spread = 1 + s.ringSpread * (0.25 + index * 0.18);
-      outer.current.scale.set(spread, 1 + s.ringSpread * 0.6, spread);
+      const spread = 1 + rs * (0.25 + index * 0.18);
+      outer.current.scale.set(spread, 1 + rs * 0.6, spread);
       outer.current.visible = s.cam.z > -4 || s.formation < 1.8;
     }
   });
@@ -397,6 +403,8 @@ function Plates({ count }: { count: number }) {
   }, []);
 
   const previous = useMemo(() => new Float32Array(count * 3), [count]);
+  // Accumulated like the ribbons: energy changes must not jump the angle.
+  const shellPhase = useRef(0);
   const glow = useMemo(() => new Float32Array(count), [count]);
   const scratch = useMemo(
     () => ({
@@ -432,11 +440,12 @@ function Plates({ count }: { count: number }) {
     const s = sceneState;
     const t = clock.elapsedTime;
     const dt = Math.max(delta, 1e-3);
-    const f = Math.max(0, Math.min(FORMATIONS - 1.0001, s.formation));
+    const f = Math.max(0, Math.min(FORMATIONS - 1.0001, s.formation + s.introFormation));
     const fi = Math.floor(f);
     const ft = f - fi;
     const { pA, pB, qA, qB, qY, p, q, m } = scratch;
-    const spinShell = s.reducedMotion ? 0 : t * 0.045 * (0.4 + s.energy);
+    shellPhase.current += Math.min(delta, 0.1) * 0.045 * (0.4 + s.energy);
+    const spinShell = s.reducedMotion ? 0 : shellPhase.current;
     const spinExploded = s.reducedMotion ? 0 : t * 0.025;
     const glowAttr = geometry.getAttribute('aGlow') as InstancedBufferAttribute;
 

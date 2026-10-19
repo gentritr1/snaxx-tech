@@ -26,7 +26,7 @@ export function Chapter({ id, height, align = 'left', fadeIn, fadeOutAt, classNa
     <section id={id} ref={section} className={cn('relative', className)} style={{ height, ...style }}>
       <div className="chapter-stage">
         {stage}
-        <div className="container-large w-full px-6 lg:px-12">
+        <div className="container-large w-full px-6 lg:pl-12 lg:pr-32">
           <div
             ref={copy}
             className={cn(

@@ -6,7 +6,7 @@ colors:
   graphite: "#EFE5D5"
   steel: "#E2D4C0"
   steel-light: "#D3C1A8"
-  mist: "#7A6753"
+  mist: "#6B5846"
   silver: "#2B1D12"
   white: "#FFFFFF"
   ember: "#9E5E14"

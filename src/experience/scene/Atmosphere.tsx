@@ -6,11 +6,11 @@ import { useFrame } from '@react-three/fiber';
 import { Environment, Lightformer } from '@react-three/drei';
 import { Color, DirectionalLight, Fog, PointLight, Vector3 } from 'three';
 import { clamp01, sceneState, smoothstep } from '../sceneState';
-import { createGridMaterial, createHorizonMaterial } from '../shaders/materials';
+import { SCENE_BG, SCENE_BG_WORLD, createGridMaterial, createHorizonMaterial } from '../shaders/materials';
 import { gamesConfig } from '@/config';
 
-const FOG_STUDIO = new Color('#F7F0E4');
-const FOG_WORLD = new Color('#F4E4CF');
+const FOG_STUDIO = SCENE_BG;
+const FOG_WORLD = SCENE_BG_WORLD;
 
 // Where the single roaming "accent" light sits for each scene moment.
 const HOLO_LIGHT = new Vector3(0, 0.6, -11.5);
@@ -60,7 +60,7 @@ export function Atmosphere() {
     if (core.current) {
       const fade = 1 - smoothstep(0.5, 1, s.flow);
       // Sealed shell leaks little light; the exploded core glows fully.
-      const open = 0.35 + 0.65 * clamp01(s.formation);
+      const open = 0.35 + 0.65 * clamp01(s.formation + s.introFormation);
       core.current.intensity = s.energy * 5.5 * open * fade * (0.9 + Math.sin(t * 1.4) * 0.1);
     }
     if (accent.current) {
@@ -100,8 +100,8 @@ export function Atmosphere() {
 
   return (
     <>
-      <color attach="background" args={['#F7F0E4']} />
-      <fog ref={fog} attach="fog" args={['#F7F0E4', 24, 64]} />
+      <primitive attach="background" object={SCENE_BG} />
+      <fog ref={fog} attach="fog" args={[SCENE_BG.clone(), 24, 64]} />
       <ambientLight intensity={0.55} />
       <hemisphereLight args={['#FFFFFF', '#E6D3B8', 0.9]} />
       <directionalLight ref={key} position={[6, 9, 7]} intensity={2.6} color="#FFF4E6" />

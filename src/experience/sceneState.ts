@@ -31,6 +31,13 @@ export const sceneState = {
   formation: 0,
   /** Gyroscopic rings expand and separate, 0 → 1. */
   ringSpread: 0,
+  /**
+   * The awakening's own offsets, added to formation and ringSpread. The intro
+   * used to tween those two directly and won every frame against the scroll
+   * timeline, so scrolling during the first 2.4 s made the shell pop.
+   */
+  introFormation: 0,
+  introRingSpread: 0,
   /** Particles stream past the camera during the fly-through. */
   flow: 0,
   /** Environment blend: 0 studio void → 1 digital world. */

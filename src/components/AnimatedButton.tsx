@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
+import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
 
@@ -14,7 +14,9 @@ interface AnimatedButtonProps {
   external?: boolean;
 }
 
-/** Studio button: the label rolls on hover, the arrow nudges. */
+/** Studio button: the label rolls on hover, the arrow nudges. Hover is CSS
+ *  (group-hover), which Tailwind only applies on devices that can hover, so a
+ *  tap on a phone no longer leaves the label rolled. */
 export function AnimatedButton({
   children,
   onClick,
@@ -26,11 +28,9 @@ export function AnimatedButton({
   style,
   external,
 }: AnimatedButtonProps) {
-  const [isHovered, setIsHovered] = useState(false);
-
   const baseStyles = cn(
-    'pressable relative inline-flex min-h-11 items-center justify-center gap-2 overflow-hidden rounded-lg font-geist text-sm font-medium tracking-[-0.01em]',
-    'transition-[background-color,border-color,color,box-shadow] duration-300 ease-out-quad focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember focus-visible:ring-offset-2 focus-visible:ring-offset-void',
+    'pressable group relative inline-flex min-h-11 items-center justify-center gap-2 overflow-hidden rounded-lg font-geist text-sm font-medium tracking-[-0.01em]',
+    'transition-[background-color,border-color,color,box-shadow] duration-300 ease-out-quad focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6BFF] focus-visible:ring-offset-2 focus-visible:ring-offset-void',
     {
       'bg-ink text-cream hover:bg-cocoa': variant === 'primary',
       'glass text-ink hover:border-ink/30': variant === 'secondary',
@@ -47,12 +47,12 @@ export function AnimatedButton({
   const content = (
     <>
       <span className="relative flex h-5 items-center overflow-hidden">
-        <span className={cn('block transition-transform duration-350 ease-out-quad', isHovered ? '-translate-y-[150%]' : 'translate-y-0')}>
+        <span className="block transition-transform duration-250 ease-out-quart group-hover:-translate-y-[150%]">
           {children}
         </span>
         <span
           aria-hidden="true"
-          className={cn('absolute inset-0 flex items-center transition-transform duration-350 ease-out-quad', isHovered ? 'translate-y-0' : 'translate-y-[150%]')}
+          className="absolute inset-0 flex translate-y-[150%] items-center transition-transform duration-250 ease-out-quart group-hover:translate-y-0"
         >
           {children}
         </span>
@@ -60,7 +60,7 @@ export function AnimatedButton({
       {showIcon && (
         <ArrowRight
           aria-hidden="true"
-          className={cn('h-4 w-4 transition-transform duration-300 ease-out-quad', isHovered ? 'translate-x-1' : 'translate-x-0')}
+          className="h-4 w-4 transition-transform duration-250 ease-out-quart group-hover:translate-x-1"
         />
       )}
     </>
@@ -75,8 +75,6 @@ export function AnimatedButton({
         onClick={onClick}
         target={external ? '_blank' : undefined}
         rel={external ? 'noopener noreferrer' : undefined}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
         {content}
       </a>
@@ -89,8 +87,6 @@ export function AnimatedButton({
       onClick={onClick}
       className={baseStyles}
       style={style}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       {content}
     </button>

@@ -1,12 +1,24 @@
 import { sceneState } from '@/experience/sceneState';
 import { gamesConfig } from '@/config';
 
+// Where in a chapter's scroll travel its copy is fully in (every chapter's
+// copy is at full opacity from ~0.15 to ~0.8 of its travel; games at 0.12
+// shows the header and the first card). Landing on the section top instead
+// stops before the fade-in, on an empty screen.
+const READ_AT: Record<string, number> = { core: 0.3, inside: 0.3, software: 0.3, portal: 0.3, games: 0.12, studio: 0.3, contact: 0.3 };
+
 /** Smooth-scroll to an in-page anchor (honours reduced motion). */
 export function scrollToHash(href: string) {
   const element = document.querySelector<HTMLElement>(href);
   if (!element) return false;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  element.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
+  const at = READ_AT[element.id];
+  if (at === undefined || reducedMotion) {
+    element.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
+    return true;
+  }
+  const top = element.offsetTop + Math.max(0, element.offsetHeight - window.innerHeight) * at;
+  window.scrollTo({ top, behavior: 'smooth' });
   return true;
 }
 

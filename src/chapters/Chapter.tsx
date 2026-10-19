@@ -14,10 +14,12 @@ interface ChapterProps {
   /** Rendered inside the stage but outside the fading copy (e.g. persistent labels). */
   stage?: ReactNode;
   style?: CSSProperties;
+  /** Phones: sit the copy on the bottom of the screen (the 3D subject above it). */
+  anchorBottomOnPhone?: boolean;
 }
 
 /** A scroll chapter: tall section, sticky viewport-high stage, fading copy. */
-export function Chapter({ id, height, align = 'left', fadeIn, fadeOutAt, className, children, stage, style }: ChapterProps) {
+export function Chapter({ id, height, align = 'left', fadeIn, fadeOutAt, className, children, stage, style, anchorBottomOnPhone }: ChapterProps) {
   const section = useRef<HTMLElement>(null);
   const copy = useRef<HTMLDivElement>(null);
   useChapterReveal(section, copy, { fadeIn, fadeOutAt });
@@ -26,7 +28,7 @@ export function Chapter({ id, height, align = 'left', fadeIn, fadeOutAt, classNa
     <section id={id} ref={section} className={cn('relative', className)} style={{ height, ...style }}>
       <div className="chapter-stage">
         {stage}
-        <div className="container-large w-full px-6 lg:pl-12 lg:pr-32">
+        <div className={cn('container-large w-full px-6 lg:pl-12 lg:pr-32', anchorBottomOnPhone && 'self-end pb-6 lg:self-auto lg:pb-0 shortland:self-auto shortland:pb-0')}>
           <div
             ref={copy}
             className={cn(

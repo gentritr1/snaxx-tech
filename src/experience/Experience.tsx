@@ -10,6 +10,7 @@ import { Core } from './scene/Core';
 import { Fragments } from './scene/Fragments';
 import { Particles } from './scene/Particles';
 import { SoftwareHolo } from './scene/SoftwareHolo';
+import { AppCareLoupe } from './scene/AppCareLoupe';
 import { Portal } from './scene/Portal';
 import { GamesWorld } from './scene/GamesWorld';
 import { Effects } from './scene/Effects';
@@ -167,6 +168,7 @@ export default function Experience({ eventSource, onReady }: ExperienceProps) {
           <Fragments count={quality.fragments} />
           <Particles count={quality.particles} />
           <SoftwareHolo />
+          <AppCareLoupe />
           <Portal />
           <GamesWorld />
           <Effects quality={quality} />

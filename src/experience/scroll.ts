@@ -4,7 +4,7 @@ import { sceneState } from './sceneState';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export const CHAPTER_IDS = ['hero', 'core', 'inside', 'software', 'portal', 'games', 'studio', 'contact'] as const;
+export const CHAPTER_IDS = ['hero', 'core', 'inside', 'software', 'appcare', 'portal', 'games', 'studio', 'contact'] as const;
 export type ChapterId = (typeof CHAPTER_IDS)[number];
 
 interface Range {
@@ -60,6 +60,10 @@ function buildTimeline(r: Record<ChapterId, Range>) {
     { p: at('inside', 0.72), cam: [0, 0, -2.6], target: [0, 0, -9], fov: 60, ease: 'power1.inOut' },
     { p: at('software', 0.18), cam: [-0.5, 0.35, -9.8], target: [0, 0.1, -14], fov: 40 },
     { p: at('software', 0.82), cam: [0.75, 0.05, -9.4], target: [0, 0.1, -14], fov: 38, ease: 'none' },
+    // AppCare: turn to the stand right of the panels, a slow push while the loupe works.
+    { p: at('appcare', 0.08), cam: [9.3, 0.35, -10.6], target: [10, -0.2, -15.2], fov: 38 },
+    { p: at('appcare', 0.62), cam: [9.65, 0.25, -11.0], target: [10, -0.2, -15.2], fov: 36, ease: 'none' },
+    { p: at('appcare', 0.92), cam: [9.65, 0.25, -11.0], target: [10, -0.2, -15.2], fov: 36, ease: 'none' },
     { p: at('portal', 0.55), cam: [0, 0, -17.6], target: [0, 0, -22], fov: 48 },
     { p: at('portal', 1), cam: [0, 0, -24.6], target: [0, 0, -34], fov: 60, ease: 'power1.inOut' },
     { p: at('games', 0.12), cam: [-7.5, 0.5, -31.6], target: [-7.5, -0.1, -38], fov: 42 },
@@ -91,7 +95,7 @@ function buildTimeline(r: Record<ChapterId, Range>) {
   // Plates: shell → exploded → frame → ring → sky
   seg('formation', 0, 1, at('core', 0.15), at('core', 0.85), 'power3.inOut');
   seg('formation', 1, 2, at('inside', 0.5), at('software', 0.34), 'power2.inOut');
-  seg('formation', 2, 3, at('software', 0.82), at('portal', 0.5), 'power2.inOut');
+  seg('formation', 2, 3, at('appcare', 0.85), at('portal', 0.5), 'power2.inOut');
   seg('formation', 3, 4, at('portal', 0.72), at('games', 0.16), 'power2.in');
 
   seg('ringSpread', 0, 1, at('core', 0.1), at('core', 0.9));
@@ -112,7 +116,12 @@ function buildTimeline(r: Record<ChapterId, Range>) {
 
   // Holographic interfaces assemble, then disassemble into the portal
   seg('holo', 0, 1, at('software', 0.08), at('software', 0.44), 'power2.out');
-  seg('holo', 1, 0, at('software', 0.8), at('portal', 0.16), 'power2.in');
+  seg('holo', 1, 0, at('software', 0.8), at('appcare', 0.1), 'power2.in');
+
+  // AppCare: the stand appears as the camera turns to it, the loupe runs on the chapter's scroll.
+  seg('appcareVis', 0, 1, at('software', 0.7), at('appcare', 0), 'none');
+  seg('appcare', 0, 1, at('appcare', 0), at('appcare', 1), 'none');
+  seg('appcareVis', 1, 0, at('appcare', 1), at('portal', 0.35), 'none');
 
   seg('portal', 0, 1, at('portal', 0.1), at('portal', 0.62));
   seg('portal', 1, 0, at('games', 0.08), at('games', 0.4));
@@ -132,6 +141,9 @@ function buildTimeline(r: Record<ChapterId, Range>) {
     [at('inside', 0.3), 0, 0],
     [at('software', 0.18), 1.7, -1.4],
     [at('software', 0.82), 1.7, -1.4],
+    // AppCare: stand on the right of the copy (landscape), above it (portrait).
+    [at('appcare', 0.08), -0.9, -1.15],
+    [at('appcare', 0.92), -0.9, -1.15],
     [at('portal', 0.5), 0, 0],
     [at('games', 0.12), -1.5, -0.45],
     [at('games', 0.88), -1.5, -0.45],
@@ -151,7 +163,7 @@ function buildTimeline(r: Record<ChapterId, Range>) {
 
 /** The scroll position (as timeline progress) that shows a chapter's "still". */
 function stillPoint(r: Record<ChapterId, Range>, id: ChapterId) {
-  const mid: Record<ChapterId, number> = { hero: 0.001, core: 1, inside: 0.3, software: 0.5, portal: 0.5, games: 0.5, studio: 0.7, contact: 0.8 };
+  const mid: Record<ChapterId, number> = { hero: 0.001, core: 1, inside: 0.3, software: 0.5, appcare: 0.56, portal: 0.5, games: 0.5, studio: 0.7, contact: 0.8 };
   return r[id].start + (r[id].end - r[id].start) * mid[id];
 }
 

@@ -86,10 +86,14 @@ function ReleaseSharedResources() {
   const gl = useThree((s) => s.gl);
   useEffect(
     () => () => {
-      // three does not export the LUT; it sits in the uniforms of any lit material.
-      const props = gl.properties.get(PORCELAIN) as { uniforms?: { dfgLUT?: { value: Texture | null } } };
-      const lut = props.uniforms?.dfgLUT?.value;
-      [PORCELAIN, CHOCOLATE, GOLD, GLASS, CARAMEL, DOUGH].forEach((m) => m.dispose());
+      // three (r186) does not export the LUT; it sits in the uniforms of any
+      // lit material that has rendered, so look through all of them.
+      const shared = [PORCELAIN, CHOCOLATE, GOLD, GLASS, CARAMEL, DOUGH];
+      const lut = shared
+        .map((m) => (gl.properties.get(m) as { uniforms?: { dfgLUT?: { value: Texture | null } } }).uniforms?.dfgLUT?.value)
+        .find(Boolean);
+      if (import.meta.env.DEV && !lut) console.warn('dfgLUT not found: recheck ReleaseSharedResources after a three upgrade (run scripts/probes/leakprobe.cjs)');
+      shared.forEach((m) => m.dispose());
       lut?.dispose();
     },
     [gl],

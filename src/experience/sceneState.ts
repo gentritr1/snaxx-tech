@@ -68,6 +68,25 @@ export const sceneState = {
 
 export type SceneState = typeof sceneState;
 
+const initialState = structuredClone(sceneState);
+
+/**
+ * Back to first-visit values. The object outlives the home page, so without
+ * this a return visit opened in the last visit's scroll state (camera inside
+ * the core, shell exploded). Nested records are copied in place because the
+ * scroll timeline tweens them by reference.
+ */
+export function resetSceneState() {
+  const { cam, target, pointer, ...flat } = structuredClone(initialState);
+  Object.assign(sceneState, flat);
+  Object.assign(sceneState.cam, cam);
+  Object.assign(sceneState.target, target);
+  Object.assign(sceneState.pointer, pointer);
+  // The AppCare list replays the cached status to new subscribers; without
+  // this a revisit announced 'Mended' before the loupe had run.
+  appcareStatus = { flaws: ['hidden', 'hidden', 'hidden'], allClear: false };
+}
+
 type HoverListener = (id: string | null) => void;
 const hoverListeners = new Set<HoverListener>();
 

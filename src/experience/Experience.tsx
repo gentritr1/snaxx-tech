@@ -1,17 +1,17 @@
 import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { PerformanceMonitor } from '@react-three/drei';
-import { WebGLRenderTarget, type Object3D } from 'three';
+import { WebGLRenderTarget, type Object3D, type Texture } from 'three';
 import { QUALITY, detectTier, prefersReducedMotion, webglAvailable } from './quality';
 import { sceneState } from './sceneState';
 import { CameraRig } from './scene/CameraRig';
 import { Atmosphere } from './scene/Atmosphere';
-import { Core } from './scene/Core';
+import { CARAMEL, CHOCOLATE, Core, GLASS, GOLD, PORCELAIN } from './scene/Core';
 import { Fragments } from './scene/Fragments';
 import { Particles } from './scene/Particles';
 import { SoftwareHolo } from './scene/SoftwareHolo';
 import { AppCareLoupe } from './scene/AppCareLoupe';
-import { Portal } from './scene/Portal';
+import { DOUGH, Portal } from './scene/Portal';
 import { GamesWorld } from './scene/GamesWorld';
 import { Effects } from './scene/Effects';
 
@@ -70,6 +70,34 @@ function PrecompileScene({ onDone }: { onDone: () => void }) {
       alive = false;
     };
   }, [gl, scene, camera, onDone]);
+  return null;
+}
+
+/**
+ * three registers a 'dispose' listener per renderer on every material and
+ * texture it renders, and WebGLRenderer.dispose() never removes them. The
+ * module-scope materials and three's own DFG LUT texture outlive the stage,
+ * so each Home -> /legal -> Home trip kept the old renderer and its WebGL
+ * context alive (heap snapshot: GLASS._listeners.dispose[i] -> closure -> gl,
+ * 4 contexts after 4 visits). Dispatching 'dispose' on unmount lets each
+ * renderer drop its listener; the next renderer uploads them again.
+ */
+function ReleaseSharedResources() {
+  const gl = useThree((s) => s.gl);
+  useEffect(
+    () => () => {
+      // three (r186) does not export the LUT; it sits in the uniforms of any
+      // lit material that has rendered, so look through all of them.
+      const shared = [PORCELAIN, CHOCOLATE, GOLD, GLASS, CARAMEL, DOUGH];
+      const lut = shared
+        .map((m) => (gl.properties.get(m) as { uniforms?: { dfgLUT?: { value: Texture | null } } }).uniforms?.dfgLUT?.value)
+        .find(Boolean);
+      if (import.meta.env.DEV && !lut) console.warn('dfgLUT not found: recheck ReleaseSharedResources after a three upgrade (run scripts/probes/leakprobe.cjs)');
+      shared.forEach((m) => m.dispose());
+      lut?.dispose();
+    },
+    [gl],
+  );
   return null;
 }
 
@@ -161,6 +189,7 @@ export default function Experience({ eventSource, onReady }: ExperienceProps) {
             fallback ~12 s after load and was dropped to the minimum ratio. */}
         <PerformanceMonitor onDecline={() => setDpr((d) => Math.max(quality.dpr[0], d - 0.25))} />
         <FrameProbe onFrame={markFrame} />
+        <ReleaseSharedResources />
         <Suspense fallback={null}>
           <CameraRig />
           <Atmosphere />

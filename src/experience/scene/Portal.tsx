@@ -14,7 +14,7 @@ const SPRINKLES = 140;
 const SPRINKLE_COLORS = ['#F2B35B', '#2F8CFF', '#FF7A29', '#14B8A6', '#58D6A6', '#E85D75', '#7C4DFF'];
 
 /** Soft shortbread dough. */
-const DOUGH = new MeshPhysicalMaterial({ color: '#E8B974', roughness: 0.62, metalness: 0, clearcoat: 0.08, envMapIntensity: 0.9 });
+export const DOUGH = new MeshPhysicalMaterial({ color: '#E8B974', roughness: 0.62, metalness: 0, clearcoat: 0.08, envMapIntensity: 0.9 });
 
 /** Chocolate glaze: covers the front face of the ring with a dripping edge. */
 function createGlazeMaterial() {

@@ -241,8 +241,8 @@ export function playAwakening(reducedMotion: boolean) {
   const tl = gsap.timeline();
   tl.fromTo(sceneState, { energy: 0 }, { energy: 1, duration: 2.6, ease: 'power2.inOut' }, 0.2);
   tl.fromTo(sceneState, { intro: 0 }, { intro: 1, duration: 3.4, ease: 'power3.out' }, 0.3);
-  tl.fromTo(sceneState, { formation: 0.5 }, { formation: 0, duration: 2.4, ease: 'power3.out' }, 0);
-  tl.fromTo(sceneState, { ringSpread: 0.3 }, { ringSpread: 0, duration: 2.2, ease: 'power3.out' }, 0.1);
+  tl.fromTo(sceneState, { introFormation: 0.5 }, { introFormation: 0, duration: 2.4, ease: 'power3.out' }, 0);
+  tl.fromTo(sceneState, { introRingSpread: 0.3 }, { introRingSpread: 0, duration: 2.2, ease: 'power3.out' }, 0.1);
   return () => {
     tl.kill();
   };

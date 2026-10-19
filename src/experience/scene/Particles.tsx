@@ -1,7 +1,7 @@
 /* Renderer-owned mutable objects (materials, uniforms, cameras) are mutated
    inside useFrame on purpose; they never enter React state. */
 /* eslint-disable react-hooks/immutability */
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { BufferAttribute, BufferGeometry } from 'three';
 import { mulberry32, sceneState } from '../sceneState';
@@ -32,12 +32,16 @@ export function Particles({ count }: { count: number }) {
     return g;
   }, [count]);
 
-  useFrame(({ clock }) => {
+  // Calm slows the drift by slowing this clock, not by scaling elapsed time
+  // in the shader (which jumped every particle when calm changed).
+  const drift = useRef(0);
+
+  useFrame((_, delta) => {
     const s = sceneState;
     const u = material.uniforms;
-    u.uTime.value = s.reducedMotion ? 0 : clock.elapsedTime;
+    drift.current += Math.min(delta, 0.1) * (1 - s.calm * 0.7);
+    u.uTime.value = s.reducedMotion ? 0 : drift.current;
     u.uFlow.value = s.flow;
-    u.uCalm.value = s.calm;
     u.uWorld.value = s.world;
     u.uEnergy.value = Math.min(1, s.energy);
     u.uPixelRatio.value = pixelRatio;

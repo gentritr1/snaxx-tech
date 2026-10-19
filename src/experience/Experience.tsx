@@ -1,7 +1,7 @@
 import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { PerformanceMonitor } from '@react-three/drei';
-import { CubeCamera, WebGLCubeRenderTarget, type Object3D } from 'three';
+import { WebGLRenderTarget, type Object3D } from 'three';
 import { QUALITY, detectTier, prefersReducedMotion, webglAvailable } from './quality';
 import { sceneState } from './sceneState';
 import { CameraRig } from './scene/CameraRig';
@@ -15,29 +15,60 @@ import { GamesWorld } from './scene/GamesWorld';
 import { Effects } from './scene/Effects';
 
 /**
- * Compiles every program during the boot curtain, hidden groups included.
- * drei's <Preload all /> compiles for the canvas (tone-mapped, sRGB), but the
- * scene renders into the composer's linear target, so those 21 programs were
- * never used and the real ones still compiled later. Rendering once into a
- * linear cube target compiles exactly the variants the composer uses
- * (measured: 49 -> 28 programs, worst boot frame ~300 -> ~230 ms).
+ * Compiles every program during the boot curtain without blocking the main
+ * thread, then renders once off-screen so the first real frames don't stall.
+ * Compiles into a linear target because the scene renders into the
+ * composer's linear target (drei's <Preload all /> compiled the canvas's
+ * tone-mapped sRGB variants, 21 of which were never used). The stage reports
+ * ready only after this, so the curtain lifts on a warm scene.
+ *
+ * Measured (3+3 interleaved runs): boot long task 254-275 -> 110-119 ms on
+ * desktop, 609-643 -> 410-416 ms on the 4x CPU phone profile; the warm render
+ * is what keeps 33 ms frames off the first reveal of the games world.
  */
-function PrecompileScene() {
+function PrecompileScene({ onDone }: { onDone: () => void }) {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
+  const camera = useThree((s) => s.camera);
   useLayoutEffect(() => {
-    const hidden: Object3D[] = [];
-    scene.traverse((o) => {
-      if (!o.visible) {
-        hidden.push(o);
-        o.visible = true;
+    let alive = true;
+    const target = new WebGLRenderTarget(1, 1);
+    const offscreen = <T,>(fn: () => T) => {
+      const previous = gl.getRenderTarget();
+      gl.setRenderTarget(target);
+      try {
+        return fn();
+      } finally {
+        gl.setRenderTarget(previous);
       }
-    });
-    const target = new WebGLCubeRenderTarget(128);
-    new CubeCamera(0.01, 1000, target).update(gl, scene);
-    target.dispose();
-    hidden.forEach((o) => (o.visible = false));
-  }, [gl, scene]);
+    };
+    offscreen(() => gl.compileAsync(scene, camera))
+      .then(() => {
+        if (!alive) return;
+        const shown: Object3D[] = [];
+        const culled: Object3D[] = [];
+        scene.traverse((o) => {
+          if (!o.visible) {
+            o.visible = true;
+            shown.push(o);
+          }
+          if (o.frustumCulled) {
+            o.frustumCulled = false;
+            culled.push(o);
+          }
+        });
+        offscreen(() => gl.render(scene, camera));
+        shown.forEach((o) => (o.visible = false));
+        culled.forEach((o) => (o.frustumCulled = true));
+      })
+      .finally(() => {
+        target.dispose();
+        if (alive) onDone();
+      });
+    return () => {
+      alive = false;
+    };
+  }, [gl, scene, camera, onDone]);
   return null;
 }
 
@@ -121,7 +152,6 @@ export default function Experience({ eventSource, onReady }: ExperienceProps) {
             event.preventDefault();
             setLost(true);
           });
-          onReady();
         }}
       >
         {/* Step down only, on sustained low frame rates. drei counts every
@@ -140,7 +170,7 @@ export default function Experience({ eventSource, onReady }: ExperienceProps) {
           <Portal />
           <GamesWorld />
           <Effects quality={quality} />
-          <PrecompileScene />
+          <PrecompileScene onDone={onReady} />
         </Suspense>
       </Canvas>
     </div>

@@ -60,7 +60,7 @@ export function Atmosphere() {
     if (core.current) {
       const fade = 1 - smoothstep(0.5, 1, s.flow);
       // Sealed shell leaks little light; the exploded core glows fully.
-      const open = 0.35 + 0.65 * clamp01(s.formation);
+      const open = 0.35 + 0.65 * clamp01(s.formation + s.introFormation);
       core.current.intensity = s.energy * 5.5 * open * fade * (0.9 + Math.sin(t * 1.4) * 0.1);
     }
     if (accent.current) {

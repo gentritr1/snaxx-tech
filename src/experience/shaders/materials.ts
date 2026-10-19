@@ -116,7 +116,6 @@ export function createParticleMaterial() {
     uniforms: {
       uTime: { value: 0 },
       uFlow: { value: 0 },
-      uCalm: { value: 0 },
       uWorld: { value: 0 },
       uEnergy: { value: 0 },
       uPixelRatio: { value: 1 },
@@ -129,13 +128,12 @@ export function createParticleMaterial() {
       attribute float aSize;
       uniform float uTime;
       uniform float uFlow;
-      uniform float uCalm;
       uniform float uPixelRatio;
       varying float vTint;
       varying float vFade;
       void main() {
         vec3 p = position;
-        float t = uTime * (1.0 - uCalm * 0.7);
+        float t = uTime;
         p += vec3(
           sin(t * 0.21 + aSeed.x * 6.2831) * 0.35,
           cos(t * 0.17 + aSeed.y * 6.2831) * 0.28,

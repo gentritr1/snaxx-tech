@@ -37,10 +37,11 @@ OPEN_GAP = 1.35  # each half's travel along the axis
 # (name, rest radius, loose radius, final radius, tilt Euler in the local frame)
 RIBBONS = [
     # Rings sit nearly across the opening axis, tipped toward the camera so they read as diagonal bands.
-    ("Ribbon_A", 1.12, 1.66, 0.86, (math.radians(24), math.radians(-6), 0)),
-    ("Ribbon_B", 1.22, 1.80, 0.97, (math.radians(-20), math.radians(14), 0)),
+    # Rest radii hug the shell (inner faces at 1.03 and 1.105); the two bands never share a radius.
+    ("Ribbon_A", 1.065, 1.66, 0.86, (math.radians(24), math.radians(-6), 0)),
+    ("Ribbon_B", 1.14, 1.80, 0.97, (math.radians(-20), math.radians(14), 0)),
 ]
-RIBBON_WIDTH, RIBBON_THICK = 0.30, 0.06
+RIBBON_WIDTH, RIBBON_THICK = 0.36, 0.07
 if "--control" in ARGS:  # negative control for the intersection check: ribbons never loosen
     RIBBONS = [(n, r0, r0, rf, tilt) for n, r0, _, rf, tilt in RIBBONS]
 WINDOW_LON = -100  # centre (deg) of the window panels left of the camera axis
@@ -80,16 +81,22 @@ def material_library():
     """Shared snack material family. Values are linear; the site mirrors them in three.js."""
     lib = {
         # Satin dark chocolate: warm, not black; light coat so bevels catch a highlight.
-        "Chocolate": principled("Chocolate", **{"Base Color": (0.030, 0.011, 0.005, 1), "Roughness": 0.32,
-                                                 "Coat Weight": 0.35, "Coat Roughness": 0.18}),
-        # Glossy honey caramel, partly translucent.
-        "Caramel": principled("Caramel", **{"Base Color": (0.78, 0.36, 0.07, 1), "Roughness": 0.14,
-                                             "Transmission Weight": 0.12, "IOR": 1.45,
-                                             "Subsurface Weight": 0.45, "Subsurface Radius": (0.8, 0.35, 0.1)}),
+        "Chocolate": principled("Chocolate", **{"Base Color": (0.045, 0.016, 0.007, 1), "Roughness": 0.3,
+                                                 "Coat Weight": 0.4, "Coat Roughness": 0.15}),
+        # Glossy honey caramel (01B): saturated and mid-dark in the base so Neutral tone mapping
+        # keeps it honey rather than washing it to peach; the coat carries the wet highlight.
+        # Target on screen (measured from 01B): hue ~22 deg, saturation ~0.76, value ~0.73.
+        "Caramel": principled("Caramel", **{"Base Color": (0.22, 0.045, 0.004, 1), "Roughness": 0.12,
+                                             "Coat Weight": 1.0, "Coat Roughness": 0.05}),
         # Clear amber glass core with a low inner glow.
-        "Amber": principled("Amber", **{"Base Color": (1.0, 0.47, 0.07, 1), "Roughness": 0.06,
-                                         "Transmission Weight": 1.0, "IOR": 1.5,
-                                         "Emission Color": (1.0, 0.42, 0.05, 1), "Emission Strength": 1.6}),
+        # Target on screen (01B): hue ~24 deg, saturation ~0.98, value ~0.69. Bright emission
+        # turns white under Neutral tone mapping, so the glow stays low and deep orange.
+        # Opaque: transmission let the inner glow light clip it to pink-white (254,200,191).
+        # The glassy read comes from the coat's reflections over a deep, faintly glowing body.
+        # Base hue sits ~10 deg yellower than the target: bright orange drifts red under Neutral.
+        "Amber": principled("Amber", **{"Base Color": (0.26, 0.055, 0.0, 1), "Roughness": 0.08,
+                                         "Coat Weight": 0.6, "Coat Roughness": 0.02, "Coat IOR": 1.6,
+                                         "Emission Color": (1.0, 0.3, 0.0, 1), "Emission Strength": 0.12}),
         # Warm porcelain (stands, exhibit bases).
         "Porcelain": principled("Porcelain", **{"Base Color": (0.80, 0.73, 0.62, 1), "Roughness": 0.22,
                                                  "Coat Weight": 1.0, "Coat Roughness": 0.08}),
@@ -195,19 +202,33 @@ def build_half(label, zsign, parent, c, mat):
 
 
 def ribbon_mesh(name, radius):
-    """A band of honey caramel: rounded profile (width along the ring axis) swept round a circle."""
-    # Stadium profile (radial, axial): two half-circles joined by the flat faces.
-    w, cr = RIBBON_WIDTH / 2, RIBBON_THICK / 2
-    arc = [-math.pi / 2 + math.pi * k / 7 for k in range(8)]
-    prof = [(cr * math.cos(a), (w - cr) + cr * math.sin(a)) for a in arc]
-    prof += [(-x, -z) for x, z in prof]
-    segs = 128
+    """A broad band of honey caramel that follows the sphere: a slice of a spherical
+    shell (every point between radius -/+ half the thickness), with rounded edges."""
+    t = RIBBON_THICK / 2
+    beta = math.asin(RIBBON_WIDTH / 2 / radius)
+    arc = 12
+    prof = []  # (radial, axial) in the ring's own frame, a closed loop
+    for k in range(arc + 1):  # outer face, one edge to the other
+        phi = -beta + 2 * beta * k / arc
+        prof.append(((radius + t) * math.cos(phi), (radius + t) * math.sin(phi)))
+    for phi, sign in ((beta, 1), (-beta, -1)):  # rounded edge, then the inner face back
+        n = (math.cos(phi), math.sin(phi))
+        tan = (-math.sin(phi) * sign, math.cos(phi) * sign)
+        c = (radius * n[0], radius * n[1])
+        for k in range(1, 6):  # outer -> inner on the first edge, inner -> outer on the second
+            th = math.pi * k / 6 if sign > 0 else math.pi * (6 - k) / 6
+            prof.append((c[0] + t * (math.cos(th) * n[0] + math.sin(th) * tan[0]),
+                         c[1] + t * (math.cos(th) * n[1] + math.sin(th) * tan[1])))
+        if sign > 0:
+            for k in range(arc + 1):
+                phi2 = beta - 2 * beta * k / arc
+                prof.append(((radius - t) * math.cos(phi2), (radius - t) * math.sin(phi2)))
+    segs = 160
     bm = bmesh.new()
     rings = []
     for s in range(segs):
         a = 2 * math.pi * s / segs
-        ring = [bm.verts.new(((radius + dx) * math.cos(a), (radius + dx) * math.sin(a), dz)) for dx, dz in prof]
-        rings.append(ring)
+        rings.append([bm.verts.new((rr * math.cos(a), rr * math.sin(a), z)) for rr, z in prof])
     n = len(prof)
     for s in range(segs):
         r0, r1 = rings[s], rings[(s + 1) % segs]
@@ -241,6 +262,13 @@ def build_hero(lib):
     core.parent = root
     core.data.materials.append(lib["Amber"])
     core.data.shade_smooth()
+
+    # The core lights the shell from inside: inner faces, cut edges and grooves glow amber.
+    # No shadow, so it passes the core; outward faces point away from it and stay unlit.
+    glow = bpy.data.lights.new("Core_Glow", "POINT")
+    glow.energy, glow.color, glow.shadow_soft_size = 60, (1.0, 0.45, 0.1), 0.3
+    glow.use_shadow = False
+    link(bpy.data.objects.new("Core_Glow", glow), c).parent = root
 
     ribbons = []
     for name, r0, _, _, tilt in RIBBONS:
@@ -336,8 +364,20 @@ def stage(scene, lib):
     world.use_nodes = True
     bg = next(n for n in world.node_tree.nodes if n.type == "BACKGROUND")
     bg.inputs["Color"].default_value = (0.93, 0.87, 0.77, 1)  # site cream #F7F0E4 in linear
-    # The site's cream (#F7F0E4) sits near linear 1.3 under Neutral tone mapping; no floor, the bonbon levitates.
-    bg.inputs["Strength"].default_value = 1.4
+    # The site's cream (#F7F0E4) sits near linear 1.3 under Neutral tone mapping; no floor, the bonbon
+    # levitates. As in three.js (scene.background vs environment), what the camera sees and what lights
+    # the objects are separate: lit at full backdrop strength, every colour washed toward cream.
+    nodes, links = world.node_tree.nodes, world.node_tree.links
+    out = next(n for n in nodes if n.type == "OUTPUT_WORLD")
+    bg.inputs["Strength"].default_value = 0.55  # lighting
+    seen = nodes.new("ShaderNodeBackground")
+    seen.inputs["Color"].default_value = bg.inputs["Color"].default_value
+    seen.inputs["Strength"].default_value = 1.4  # backdrop
+    path, mix = nodes.new("ShaderNodeLightPath"), nodes.new("ShaderNodeMixShader")
+    links.new(path.outputs["Is Camera Ray"], mix.inputs["Fac"])
+    links.new(bg.outputs["Background"], mix.inputs[1])
+    links.new(seen.outputs["Background"], mix.inputs[2])
+    links.new(mix.outputs["Shader"], out.inputs["Surface"])
     c = coll("Stage")
 
     # One light direction for the whole site: soft key from upper left, front.
@@ -353,19 +393,28 @@ def stage(scene, lib):
     area("Fill", (5.5, -4.0, 0.5), 300, 6, (1, 0.93, 0.85))
     area("Rim", (2.5, 6.0, 3.5), 900, 3)
 
-    def cam(name, loc, target, angle, fit, res):
+    def cam(name, loc, target, angles, fit, res):
+        """`angles`: (rest, open) field of view in degrees; held to t 0.3, widened by t 0.75."""
         data = bpy.data.cameras.new(name)
-        data.sensor_fit, data.angle = fit, math.radians(angle)
+        data.sensor_fit = fit
         ob = link(bpy.data.objects.new(name, data), c)
         ob.location = loc
         ob.rotation_euler = (Vector(target) - Vector(loc)).to_track_quat("-Z", "Y").to_euler()
         ob["resolution"] = res
+        for t, a in ((0, angles[0]), (0.30, angles[0]), (0.75, angles[1])):
+            # `angle` follows the sensor width whatever the fit; set the fitted axis explicitly.
+            if fit == "VERTICAL":
+                data.angle_y = math.radians(a)
+            else:
+                data.angle_x = math.radians(a)
+            data.keyframe_insert("lens", frame=1 + round(t * FRAMES))
         return ob
 
-    # Desktop: subject on the right, a protected copy column on the left.
-    desk = cam("Cam_Desktop", (-2.0, -11.5, 0.9), (-2.0, 0, 0), 23, "VERTICAL", (1600, 900))
+    # Desktop (01B): the closed bonbon fills ~60% of the height, centred at ~2/3 across;
+    # the copy column on the left stays clear. The shot widens as the halves part.
+    desk = cam("Cam_Desktop", (-1.0, -11.5, 0.6), (-1.0, 0, 0), (16, 24), "VERTICAL", (1600, 900))
     # Phone: subject in the top half, copy below it (its own composition, not a crop).
-    phone = cam("Cam_Phone", (0, -12.5, -1.5), (0, 0, -2.3), 26, "HORIZONTAL", (780, 1688))
+    phone = cam("Cam_Phone", (0, -12.5, -1.3), (0, 0, -1.3), (13.5, 16.5), "HORIZONTAL", (780, 1688))
     return desk, phone
 
 
@@ -401,6 +450,43 @@ def render_sheet(scene, desk, phone):
         bpy.ops.render.render(write_still=True)
         print("RENDERED", scene.render.filepath)
     scene.frame_set(1)
+    contact_sheet(out)
+
+
+def contact_sheet(out):
+    """Desktop rest/25/50/75/open in reading order, then phone rest + open, on the site cream."""
+    import numpy as np
+
+    def load(name):
+        img = bpy.data.images.load(os.path.join(out, name + ".png"))
+        px = np.array(img.pixels[:], dtype=np.float32).reshape(img.size[1], img.size[0], 4)
+        return px  # rows run bottom-up
+
+    def fit(px, h):  # nearest-neighbour resize to height h
+        ys = (np.arange(h) * px.shape[0] / h).astype(int)
+        w = int(px.shape[1] * h / px.shape[0])
+        xs = (np.arange(w) * px.shape[1] / w).astype(int)
+        return px[ys][:, xs]
+
+    cw, ch = 800, 450
+    sheet = np.ones((ch * 2, cw * 3, 4), dtype=np.float32) * np.array([0.97, 0.94, 0.89, 1.0], dtype=np.float32)
+    cells = ["desktop_000", "desktop_025", "desktop_050", "desktop_075", "desktop_100"]
+    for i, name in enumerate(cells):
+        px = fit(load(name), ch)
+        row, col = divmod(i, 3)
+        y0 = (1 - row) * ch  # top row first, in a bottom-up buffer
+        sheet[y0:y0 + ch, col * cw:col * cw + px.shape[1]] = px
+    x = 2 * cw + 120
+    for name in ("phone_000", "phone_100"):
+        px = fit(load(name), ch)
+        sheet[0:ch, x:x + px.shape[1]] = px
+        x += px.shape[1] + 40
+    img = bpy.data.images.new("contact_sheet", cw * 3, ch * 2)
+    img.pixels[:] = sheet.ravel()
+    img.filepath_raw = os.path.join(out, "contact_sheet.png")
+    img.file_format = "PNG"
+    img.save()
+    print("SHEET", img.filepath_raw)
 
 
 def export_glb(root):

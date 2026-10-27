@@ -127,8 +127,8 @@ def panel_mesh(name, lat0, lat1, lon0, lon1, zsign, full_ring=False):
     g = GROOVE / 2
     la0 = math.radians(lat0) + (0 if lat0 == 0 else g / R_OUT)
     la1 = math.radians(lat1) - (0 if lat1 == 90 else g / R_OUT)
-    nlat = max(3, round((lat1 - lat0) / 4))
-    nlon = max(3, round((lon1 - lon0) / 4))
+    nlat = max(3, round((lat1 - lat0) / 5))  # ~5 deg grid: smooth at web sizes, half the vertices of 4 deg
+    nlon = max(3, round((lon1 - lon0) / 5))
     bm = bmesh.new()
     grid = {}
     for layer, r in ((0, R_OUT), (1, R_IN)):
@@ -171,7 +171,7 @@ def panel_mesh(name, lat0, lat1, lon0, lon1, zsign, full_ring=False):
 
 def bevel(obj, width=0.014):
     mod = obj.modifiers.new("Bevel", "BEVEL")
-    mod.width, mod.segments, mod.limit_method = width, 3, "ANGLE"
+    mod.width, mod.segments, mod.limit_method = width, 2, "ANGLE"
     mod.angle_limit = math.radians(35)
     mod.harden_normals = True
     return mod
@@ -206,7 +206,7 @@ def ribbon_mesh(name, radius):
     shell (every point between radius -/+ half the thickness), with rounded edges."""
     t = RIBBON_THICK / 2
     beta = math.asin(RIBBON_WIDTH / 2 / radius)
-    arc = 12
+    arc = 8
     prof = []  # (radial, axial) in the ring's own frame, a closed loop
     for k in range(arc + 1):  # outer face, one edge to the other
         phi = -beta + 2 * beta * k / arc
@@ -215,15 +215,15 @@ def ribbon_mesh(name, radius):
         n = (math.cos(phi), math.sin(phi))
         tan = (-math.sin(phi) * sign, math.cos(phi) * sign)
         c = (radius * n[0], radius * n[1])
-        for k in range(1, 6):  # outer -> inner on the first edge, inner -> outer on the second
-            th = math.pi * k / 6 if sign > 0 else math.pi * (6 - k) / 6
+        for k in range(1, 4):  # outer -> inner on the first edge, inner -> outer on the second
+            th = math.pi * k / 4 if sign > 0 else math.pi * (4 - k) / 4
             prof.append((c[0] + t * (math.cos(th) * n[0] + math.sin(th) * tan[0]),
                          c[1] + t * (math.cos(th) * n[1] + math.sin(th) * tan[1])))
         if sign > 0:
             for k in range(arc + 1):
                 phi2 = beta - 2 * beta * k / arc
                 prof.append(((radius - t) * math.cos(phi2), (radius - t) * math.sin(phi2)))
-    segs = 160
+    segs = 128
     bm = bmesh.new()
     rings = []
     for s in range(segs):
@@ -253,7 +253,7 @@ def build_hero(lib):
         h.parent = root
     panels = build_half("Shell_Top", 1, top, c, lib["Chocolate"]) + build_half("Shell_Bottom", -1, bottom, c, lib["Chocolate"])
 
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=64, ring_count=32, radius=CORE_R)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=CORE_R)
     core = bpy.context.active_object
     core.name = "Core"
     for col in core.users_collection:

@@ -619,8 +619,8 @@ export function AppCareLoupe() {
         b.root.localToWorld(probe).project(camera);
         return ((1 - probe.y) / 2) * size.height;
       };
-      b.root.scale.setScalar(0.7); // a typical phone fit; three steps reach any fit in 0.3-0.9
-      for (let i = 0; i < 3; i++) {
+      b.root.scale.setScalar(0.7); // a typical phone fit; four steps (x0.8..x1.25 each) reach 0.3-0.9
+      for (let i = 0; i < 4; i++) {
         b.root.updateMatrixWorld();
         const yTop = screenY(1.0);
         const yBottom = screenY(-1.75);

@@ -192,19 +192,20 @@ export function createChoreography(root: HTMLElement, reducedMotion: boolean): C
       });
     } else {
       // Reduced motion: no camera flight, one still composition per chapter.
+      const still = (p: number) => {
+        sceneState.progress = p;
+        let current: ChapterId = 'hero';
+        for (const id of CHAPTER_IDS) if (p >= ranges[id].start - 0.001) current = id;
+        tl.progress(stillPoint(ranges, current));
+      };
       trigger = ScrollTrigger.create({
         trigger: root,
         start: 'top top',
         end: 'bottom bottom',
-        onUpdate: (self) => {
-          const p = self.progress;
-          sceneState.progress = p;
-          let current: ChapterId = 'hero';
-          for (const id of CHAPTER_IDS) if (p >= ranges[id].start - 0.001) current = id;
-          tl.progress(stillPoint(ranges, current));
-        },
+        onUpdate: (self) => still(self.progress),
       });
-      tl.progress(stillPoint(ranges, 'hero'));
+      // From where the page is now: the visitor can switch to reduced motion mid-page.
+      still(trigger.progress);
     }
   };
 

@@ -40,7 +40,7 @@ export function AppCareChapter() {
   return (
     <Chapter id="appcare" height="320vh" align="left" fadeIn={0.05} fadeOutAt={0.95} anchorBottomOnPhone>
       {/* Phones: the copy sits on the bottom of the screen and the stand fits the space above it. */}
-      <div ref={copyRef} className="copy-scrim w-full max-w-md lg:max-w-xl shortland:pt-16" style={{ '--accent': appcareConfig.accent } as CSSProperties}>
+      <div ref={copyRef} className="copy-scrim w-full max-w-md lg:max-w-xl shortland:max-w-xl shortland:pt-16" style={{ '--accent': appcareConfig.accent } as CSSProperties}>
         <p className="label product-accent flex items-center gap-2.5 text-ink">
           <span className="product-dot" aria-hidden="true" />
           {appcareConfig.name}
@@ -67,14 +67,16 @@ export function AppCareChapter() {
           {appcareConfig.clear}
         </p>
         </div>
-        {/* Phones and short screens get the one-line version, so what AppCare does is never hidden. */}
-        <p className="mt-9 text-sm leading-relaxed text-ink/80 sm:hidden shortland:mt-7 shortland:block">{appcareConfig.summary}</p>
+        {/* Portrait phones get the one-line version, so what AppCare does is never hidden. Short
+            screens (landscape phones, 320x568) have no room for it: the price line and the
+            disclaimer below come first. */}
+        <p className="mt-9 text-sm leading-relaxed text-ink/80 sm:hidden [@media(max-height:600px)]:hidden">{appcareConfig.summary}</p>
         <p className="mt-5 hidden text-sm leading-relaxed text-ink/80 sm:block shortland:hidden">{appcareConfig.body}</p>
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 sm:mt-10 shortland:mt-3">
           <AnimatedButton href={`mailto:${appcareConfig.email}?subject=${encodeURIComponent('Tell me when AppCare is on sale')}`} variant="primary" size="md">
             {appcareConfig.cta}
           </AnimatedButton>
-          <span className="text-[0.8125rem] text-mist sm:text-sm">{appcareConfig.terms}</span>
+          <span className="text-[0.8125rem] text-mist sm:text-sm shortland:text-[0.8125rem]">{appcareConfig.terms}</span>
         </div>
         <p className="mt-3 text-[0.8125rem] text-mist">{appcareConfig.caption}</p>
       </div>

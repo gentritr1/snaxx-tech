@@ -46,7 +46,10 @@ export function useChapterReveal(
     // Faded copy stays in the tab order (keyboard users can reach every
     // chapter); when focus lands in it, bring the chapter to where it reads.
     // The scroll waits a frame: the browser's own focus scroll runs after this event and would win.
-    const onFocus = () => {
+    // Keyboard focus only (:focus-visible): a touch tap focuses and clicks in the same task, and
+    // this scroll then cancelled the click's own (a tap on a half-faded CTA went nowhere).
+    const onFocus = (e: FocusEvent) => {
+      if (!(e.target instanceof Element) || !e.target.matches(':focus-visible')) return;
       if (Number(getComputedStyle(copyEl).opacity) > 0.9) return;
       requestAnimationFrame(() =>
         window.scrollTo({ top: readTop(sectionEl, (fadeIn + Math.min(fadeOutAt, 1)) / 2), behavior: 'instant' }),

@@ -151,7 +151,7 @@ export const appcareConfig = {
   heading: "Some flaws only show under the right light.",
   flaws: ["Bookings readable by anyone", "Secret key in the page code", "Access rule lets everyone in"],
   clear: "Under the same light, nothing glows.",
-  summary: "A one-time security scan for apps made with AI builders. It explains each finding and writes the fix.",
+  summary: "A one-time security scan for apps made with AI builders. It explains each finding and writes the fix prompt.",
   body:
     "AppCare is a one-time security scan for apps built with Lovable, Bolt, Replit and v0. It explains every finding in plain English and writes the fix prompt to paste into your builder.",
   terms: "$49 once per app · read-only, it never changes your app",

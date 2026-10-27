@@ -81,17 +81,24 @@ export default function Bonbon() {
 
   // The loader caches the parsed model for the page's life; drop it (and free
   // its GPU buffers) on unmount, or every Home -> legal -> Home trip would keep
-  // the old renderer alive through its dispose listeners.
-  useEffect(
-    () => () => {
-      gltf.scene.traverse((o) => {
-        if (o instanceof Mesh) o.geometry.dispose();
-      });
-      Object.values(materials).forEach((m) => m.dispose());
-      useLoader.clear(GLTFLoader, heroUrl);
-    },
-    [gltf, materials],
-  );
+  // the old renderer alive through its dispose listeners. Deferred a tick and
+  // skipped if the component is back: React StrictMode (dev) replays this cleanup
+  // on a component that stays mounted, and the model was refetched 4 times.
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      window.setTimeout(() => {
+        if (mounted.current) return;
+        gltf.scene.traverse((o) => {
+          if (o instanceof Mesh) o.geometry.dispose();
+        });
+        Object.values(materials).forEach((m) => m.dispose());
+        useLoader.clear(GLTFLoader, heroUrl);
+      }, 0);
+    };
+  }, [gltf, materials]);
 
   useFrame((_, delta) => {
     const s = sceneState;

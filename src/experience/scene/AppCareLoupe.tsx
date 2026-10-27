@@ -605,6 +605,12 @@ export function AppCareLoupe() {
     // and the top of the copy, measured from the DOM. A fixed scale clipped the
     // copy on short phones and let the stand cover the status line.
     const portrait = size.width < size.height;
+    // Solved fresh every frame from the stand's home pose, so the result depends only
+    // on the current camera and layout. It used to carry each frame's correction into
+    // the next: one frame mid camera-turn (from the software panels) threw the stand to
+    // y 28.8, and after a quick scroll it stayed there, leaving AppCare without a stand.
+    b.root.scale.setScalar(1);
+    b.root.position.copy(APPCARE_STAGE);
     if (portrait && s.appcareCopyTop > 0) {
       const top = 68 + 14;
       const bottom = s.appcareCopyTop - 10;
@@ -613,7 +619,8 @@ export function AppCareLoupe() {
         b.root.localToWorld(probe).project(camera);
         return ((1 - probe.y) / 2) * size.height;
       };
-      for (let i = 0; i < 2; i++) {
+      b.root.scale.setScalar(0.7); // a typical phone fit; three steps reach any fit in 0.3-0.9
+      for (let i = 0; i < 3; i++) {
         b.root.updateMatrixWorld();
         const yTop = screenY(1.0);
         const yBottom = screenY(-1.75);
@@ -625,9 +632,6 @@ export function AppCareLoupe() {
         const worldPerPx = (2 * dist * Math.tan(((camera as unknown as { fov: number }).fov * Math.PI) / 360)) / size.height;
         b.root.position.y += (mid - (top + bottom) / 2) * worldPerPx;
       }
-    } else if (b.root.scale.x !== 1 || b.root.position.y !== APPCARE_STAGE.y) {
-      b.root.scale.setScalar(1);
-      b.root.position.copy(APPCARE_STAGE);
     }
     const sc = b.root.scale.x;
     const sweep = keyed(sweepKeys, p);

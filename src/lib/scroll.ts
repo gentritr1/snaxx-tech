@@ -13,7 +13,8 @@ export function scrollToHash(href: string, instant = false) {
   const behavior: ScrollBehavior = instant ? 'instant' : reducedMotion ? 'auto' : 'smooth';
   const game = gamesConfig.games.findIndex((g) => `#${g.id}` === href);
   if (game >= 0) return scrollToGame(game, behavior);
-  const element = document.querySelector<HTMLElement>(href);
+  // By id, not querySelector: a deep-link hash like #/ is not a valid selector and would throw.
+  const element = href.length > 1 ? document.getElementById(href.slice(1)) : null;
   if (!element) return false;
   const at = READ_AT[element.id];
   if (at === undefined || reducedMotion) {

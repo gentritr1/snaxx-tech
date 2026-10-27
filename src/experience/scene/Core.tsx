@@ -1,7 +1,7 @@
 /* Renderer-owned mutable objects (materials, uniforms, cameras) are mutated
    inside useFrame on purpose; they never enter React state. */
 /* eslint-disable react-hooks/immutability */
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { lazy, useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import {
   BufferAttribute,
@@ -23,6 +23,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { clamp01, lerp, mulberry32, sceneState, smoothstep } from '../sceneState';
 import { createFilamentMaterial, createPlasmaMaterial } from '../shaders/materials';
 import type { Quality } from '../quality';
+import { HERO_BONBON } from '../flags';
 
 const EMBER = new Color('#F2B35B');
 
@@ -372,7 +373,8 @@ function buildPlateLayout(n: number): PlateLayout {
   return { positions, quaternions, scales, stagger, seeds };
 }
 
-function Plates({ count }: { count: number }) {
+/** `afterHero`: the Blender hero owns the shell, and the plates are its chips (see `appear`). */
+function Plates({ count, afterHero = false }: { count: number; afterHero?: boolean }) {
   const mesh = useRef<InstancedMesh>(null);
   const layout = useMemo(() => buildPlateLayout(count), [count]);
   const geometry = useMemo(() => {
@@ -448,6 +450,11 @@ function Plates({ count }: { count: number }) {
     const spinShell = s.reducedMotion ? 0 : shellPhase.current;
     const spinExploded = s.reducedMotion ? 0 : t * 0.025;
     const glowAttr = geometry.getAttribute('aGlow') as InstancedBufferAttribute;
+    // With the Blender hero: none while the shell is closed or opening; they burst out as the
+    // camera passes through the core (flow), so the dive leads straight into the frame they form.
+    const appear = !afterHero ? 1 : f < 0.999 ? 0 : Math.max(smoothstep(0.3, 0.9, s.flow), smoothstep(1, 1.3, f));
+    inst.visible = appear > 0;
+    if (!inst.visible) return;
 
     for (let i = 0; i < count; i++) {
       const stagger = layout.stagger[i];
@@ -489,7 +496,7 @@ function Plates({ count }: { count: number }) {
       glow[i] = lerp(glow[i], target, Math.min(1, dt * 6));
       glowAttr.setX(i, glow[i]);
 
-      scratch.s.fromArray(layout.scales, i * 3);
+      scratch.s.fromArray(layout.scales, i * 3).multiplyScalar(appear);
       m.compose(p, q, scratch.s);
       inst.setMatrixAt(i, m);
     }
@@ -506,13 +513,22 @@ const up = new Vector3(0, 1, 0);
 
 // ---------------------------------------------------------------------------
 
+// Flag-gated, and code-split: with the flag off, neither the model nor the loader downloads.
+const Bonbon = HERO_BONBON ? lazy(() => import('./Bonbon')) : null;
+
 export function Core({ quality }: { quality: Quality }) {
   return (
     <group>
-      <Heart />
-      <Filaments />
-      <Drizzle />
-      <Plates count={quality.plates} />
+      {Bonbon ? (
+        <Bonbon />
+      ) : (
+        <>
+          <Heart />
+          <Filaments />
+          <Drizzle />
+        </>
+      )}
+      <Plates count={quality.plates} afterHero={Bonbon !== null} />
     </group>
   );
 }

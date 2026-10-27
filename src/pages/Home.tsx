@@ -15,7 +15,9 @@ import { usePageMeta } from '@/hooks/usePageMeta';
 import { HOME_META } from '@/seo';
 import { createChoreography, playAwakening, type Choreography } from '@/experience/scroll';
 import { prefersReducedMotion } from '@/experience/quality';
-import { sceneState } from '@/experience/sceneState';
+import { resetSceneState, sceneState } from '@/experience/sceneState';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { scrollToHash } from '@/lib/scroll';
 
 // The 3D stage is the heaviest code on the site; legal pages never load it.
 const Experience = lazy(() => import('@/experience/Experience'));
@@ -26,6 +28,7 @@ export default function Home() {
   const [showOverlay, setShowOverlay] = useState(true);
   const [awake, setAwake] = useState(false);
   const choreography = useRef<Choreography | null>(null);
+  const reduced = useReducedMotion();
 
   usePageMeta(HOME_META);
   useEffect(() => {
@@ -61,17 +64,48 @@ export default function Home() {
     };
   }, [showOverlay]);
 
-  // Scroll choreography binds to the chapter sections as soon as they exist.
+  // First-visit scene values on every mount (a return visit must not open
+  // in the last visit's state), but not when only the motion setting changes.
+  useLayoutEffect(() => resetSceneState(), []);
+
+  // Scroll choreography binds to the chapter sections as soon as they exist,
+  // and rebinds when the visitor switches reduced motion on or off.
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    choreography.current = createChoreography(root, prefersReducedMotion());
+    choreography.current = createChoreography(root, reduced);
     document.fonts?.ready.then(() => choreography.current?.refresh());
     return () => {
       choreography.current?.kill();
       choreography.current = null;
     };
+  }, [reduced]);
+
+  // Deep links (/#arrows, /#appcare …): the browser's own anchor jump lands on
+  // the section top (80 px short with scroll-padding), before the copy fades
+  // in. Once the stage is ready, move to the chapter's reading point instead,
+  // unless the visitor has already scrolled: a late jump would yank them away.
+  const deepLinked = useRef(false);
+  const visitorMoved = useRef(false);
+  useEffect(() => {
+    const moved = () => {
+      visitorMoved.current = true;
+    };
+    const events = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const;
+    events.forEach((e) => window.addEventListener(e, moved, { passive: true, once: true }));
+    return () => events.forEach((e) => window.removeEventListener(e, moved));
   }, []);
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!sceneReady || deepLinked.current || !hash || hash === '#main-content') return;
+    deepLinked.current = true;
+    if (visitorMoved.current) return;
+    const id = requestAnimationFrame(() => {
+      choreography.current?.refresh();
+      scrollToHash(hash, true);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [sceneReady]);
 
   useEffect(() => {
     if (sceneReady) choreography.current?.refresh();
@@ -106,10 +140,11 @@ export default function Home() {
       </Suspense>
       <PageOverlay isVisible={showOverlay} />
       <Navigation />
-      <main id="main-content" data-route-focus tabIndex={-1} className="relative z-10 focus:outline-none">
+      {/* Keyed on the motion setting: the chapters capture it when they bind their scroll animations. */}
+      <main key={reduced ? 'calm' : 'full'} id="main-content" data-route-focus tabIndex={-1} className="relative z-10 focus:outline-none">
         <HeroChapter awake={awake} />
-        <StoryChapter chapter={storyChapters[0]} height="220vh" />
-        <StoryChapter chapter={storyChapters[1]} height="180vh" />
+        <StoryChapter chapter={storyChapters[0]} height="180vh" />
+        <StoryChapter chapter={storyChapters[1]} height="160vh" />
         <SoftwareChapter />
         <AppCareChapter />
         <PortalChapter />

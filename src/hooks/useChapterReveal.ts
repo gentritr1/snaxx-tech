@@ -1,6 +1,7 @@
 import { useEffect, type RefObject } from 'react';
 import { gsap, ScrollTrigger } from '@/experience/scroll';
 import { prefersReducedMotion } from '@/experience/quality';
+import { readTop } from '@/lib/scroll';
 
 interface Options {
   /** Fraction of the section's scroll distance over which the copy fades in. 0 = already visible. */
@@ -42,7 +43,18 @@ export function useChapterReveal(
     // Without a fade-out the timeline would be only `fadeIn` long and the
     // scrub would stretch the fade-in over the whole chapter.
     if (tl.duration() < 1) tl.set({}, {}, 1);
+    // Faded copy stays in the tab order (keyboard users can reach every
+    // chapter); when focus lands in it, bring the chapter to where it reads.
+    // The scroll waits a frame: the browser's own focus scroll runs after this event and would win.
+    const onFocus = () => {
+      if (Number(getComputedStyle(copyEl).opacity) > 0.9) return;
+      requestAnimationFrame(() =>
+        window.scrollTo({ top: readTop(sectionEl, (fadeIn + Math.min(fadeOutAt, 1)) / 2), behavior: 'instant' }),
+      );
+    };
+    copyEl.addEventListener('focusin', onFocus);
     return () => {
+      copyEl.removeEventListener('focusin', onFocus);
       tl.scrollTrigger?.kill();
       tl.kill();
     };

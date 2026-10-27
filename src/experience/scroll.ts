@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { resetSceneState, sceneState } from './sceneState';
+import { sceneState } from './sceneState';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -173,7 +173,6 @@ export interface Choreography {
 }
 
 export function createChoreography(root: HTMLElement, reducedMotion: boolean): Choreography {
-  resetSceneState();
   let ranges = measure(root);
   let tl = buildTimeline(ranges);
   let trigger: ScrollTrigger | undefined;

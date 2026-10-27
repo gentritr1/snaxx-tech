@@ -5,7 +5,7 @@ import { Chapter } from './Chapter';
 
 export function ContactChapter() {
   return (
-    <Chapter id="contact" height="150vh" align="center" fadeIn={0.18} fadeOutAt={1}>
+    <Chapter id="contact" height="130vh" align="center" fadeIn={0.18} fadeOutAt={1}>
       <div className="copy-scrim max-w-2xl">
         <h2 className="font-display type-headline text-ink">{contactConfig.heading}</h2>
         <p className="type-lead mx-auto mt-5 max-w-lg">{contactConfig.description}</p>

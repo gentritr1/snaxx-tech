@@ -64,7 +64,7 @@ export function SoftwareChapter() {
   const hover = useHoverSync();
   const [primary, ...rest] = softwareConfig.products;
   return (
-    <Chapter id="software" height="280vh" align="right" fadeIn={0.14} fadeOutAt={0.84}>
+    <Chapter id="software" height="220vh" align="right" fadeIn={0.14} fadeOutAt={0.84}>
       <div className="w-full max-w-md pt-16 sm:pt-20 lg:pt-0 shortland:pt-0">
         <h2 className="font-display type-headline text-ink">{softwareConfig.heading}</h2>
         <p className="type-lead mt-4 hidden sm:block [@media(max-height:820px)]:hidden">{softwareConfig.description}</p>

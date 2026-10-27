@@ -1,4 +1,4 @@
-import { sceneState } from '@/experience/sceneState';
+import { prefersReducedMotion } from '@/experience/quality';
 import { gamesConfig } from '@/config';
 
 // Where in a chapter's scroll travel its copy is fully in (every chapter's
@@ -7,28 +7,40 @@ import { gamesConfig } from '@/config';
 // stops before the fade-in, on an empty screen.
 const READ_AT: Record<string, number> = { core: 0.3, inside: 0.3, software: 0.3, appcare: 0.1, portal: 0.3, games: 0.12, studio: 0.3, contact: 0.3 };
 
-/** Smooth-scroll to an in-page anchor (honours reduced motion). */
-export function scrollToHash(href: string) {
+/** Scroll to an in-page anchor or a game id like `#arrows` (smooth unless reduced motion or `instant`). */
+export function scrollToHash(href: string, instant = false) {
+  const reducedMotion = prefersReducedMotion();
+  const behavior: ScrollBehavior = instant ? 'instant' : reducedMotion ? 'auto' : 'smooth';
+  const game = gamesConfig.games.findIndex((g) => `#${g.id}` === href);
+  if (game >= 0) return scrollToGame(game, behavior);
   const element = document.querySelector<HTMLElement>(href);
   if (!element) return false;
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const at = READ_AT[element.id];
   if (at === undefined || reducedMotion) {
-    element.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
+    element.scrollIntoView({ behavior });
     return true;
   }
-  const top = element.offsetTop + Math.max(0, element.offsetHeight - window.innerHeight) * at;
-  window.scrollTo({ top, behavior: 'smooth' });
+  window.scrollTo({ top: readTop(element, at), behavior });
   return true;
 }
 
+/** Page offset at which `fraction` of a tall section's scroll travel has passed. */
+export function readTop(element: HTMLElement, fraction: number) {
+  return element.offsetTop + Math.max(0, element.offsetHeight - window.innerHeight) * fraction;
+}
+
 /** Scroll the page so the games chapter shows exhibit `index`. */
-export function scrollToGame(index: number) {
+export function scrollToGame(index: number, behavior: ScrollBehavior = prefersReducedMotion() ? 'auto' : 'smooth') {
   const section = document.getElementById('games');
-  if (!section) return;
-  const travel = section.offsetHeight - window.innerHeight;
-  const top = section.offsetTop + travel * ((index + 0.5) / gamesConfig.games.length);
-  window.scrollTo({ top, behavior: sceneState.reducedMotion ? 'auto' : 'smooth' });
+  if (!section) return false;
+  // Reduced motion lays the cards out in flow: go to the card itself.
+  const card = document.getElementById(`game-${gamesConfig.games[index].id}-title`);
+  if (prefersReducedMotion() && card) {
+    card.scrollIntoView({ behavior, block: 'center' });
+    return true;
+  }
+  window.scrollTo({ top: readTop(section, (index + 0.5) / gamesConfig.games.length), behavior });
+  return true;
 }
 
 /**

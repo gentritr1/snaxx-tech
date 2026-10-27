@@ -82,7 +82,7 @@ export function GamesChapter() {
   }, [reduced]);
 
   return (
-    <section id="games" ref={section} className="relative" style={reduced ? undefined : { height: '420vh' }}>
+    <section id="games" ref={section} className="relative" style={reduced ? undefined : { height: '360vh' }}>
       <div className={cn('chapter-stage', reduced && 'chapter-flow')}>
         <div className={cn('container-large w-full px-6 lg:pl-12 lg:pr-32', !reduced && 'relative h-full')}>
           <div

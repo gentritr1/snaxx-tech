@@ -14,7 +14,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 
 export function StudioChapter() {
   return (
-    <Chapter id="studio" height="220vh" align="left" fadeIn={0.16} fadeOutAt={0.84}>
+    <Chapter id="studio" height="160vh" align="left" fadeIn={0.16} fadeOutAt={0.84}>
       <div className="grid w-full items-center gap-10 pt-20 lg:grid-cols-2 lg:gap-16 lg:pt-0 shortland:pt-16">
         <div className="copy-scrim max-w-lg">
           <h2 className="font-display type-headline text-ink">{studioConfig.heading}</h2>

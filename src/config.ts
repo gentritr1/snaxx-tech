@@ -151,10 +151,11 @@ export const appcareConfig = {
   heading: "Some flaws only show under the right light.",
   flaws: ["Bookings readable by anyone", "Secret key in the page code", "Access rule lets everyone in"],
   clear: "Under the same light, nothing glows.",
+  summary: "A one-time security scan for apps made with AI builders. It explains each finding and writes the fix.",
   body:
     "AppCare is a one-time security scan for apps built with Lovable, Bolt, Replit and v0. It explains every finding in plain English and writes the fix prompt to paste into your builder.",
   terms: "$49 once per app · read-only, it never changes your app",
-  cta: "Tell me when it is on sale",
+  cta: "Email us to hear at launch",
   caption: "Illustration on an example app, not a real scan.",
   email: "techsnaxx@gmail.com",
 };
@@ -260,7 +261,7 @@ export const studioConfig: StudioConfig = {
   description:
     "We are a small, independent team. The people who design a product also build it, ship it and answer its support email years later.",
   stats: [
-    { value: "5", label: "Products, live or on the way" },
+    { value: "6", label: "Products, live or on the way" },
     { value: "2", label: "Platforms: Android & web" },
     { value: "100%", label: "Independent" },
   ],
@@ -320,9 +321,9 @@ export const footerConfig: FooterConfig = {
       links: [
         { label: "Offday", href: "#software" },
         { label: "AppCare", href: "#appcare" },
-        { label: "Arrows", href: "#games" },
-        { label: "Block Destroy", href: "#games" },
-        { label: "Geo Guesser World 3D!", href: "#games" },
+        { label: "Arrows", href: "#arrows" },
+        { label: "Block Destroy", href: "#block-destroy" },
+        { label: "Geo Guesser World 3D!", href: "#geo-guesser" },
         { label: "FJALË", href: "https://xn--fjal-opa.com" },
       ],
     },

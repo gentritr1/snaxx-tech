@@ -38,7 +38,7 @@ export function AppCareChapter() {
   }, []);
 
   return (
-    <Chapter id="appcare" height="380vh" align="left" fadeIn={0.05} fadeOutAt={0.95} anchorBottomOnPhone>
+    <Chapter id="appcare" height="320vh" align="left" fadeIn={0.05} fadeOutAt={0.95} anchorBottomOnPhone>
       {/* Phones: the copy sits on the bottom of the screen and the stand fits the space above it. */}
       <div ref={copyRef} className="copy-scrim w-full max-w-md lg:max-w-xl shortland:pt-16" style={{ '--accent': appcareConfig.accent } as CSSProperties}>
         <p className="label product-accent flex items-center gap-2.5 text-ink">
@@ -67,12 +67,14 @@ export function AppCareChapter() {
           {appcareConfig.clear}
         </p>
         </div>
+        {/* Phones and short screens get the one-line version, so what AppCare does is never hidden. */}
+        <p className="mt-9 text-sm leading-relaxed text-ink/80 sm:hidden shortland:mt-7 shortland:block">{appcareConfig.summary}</p>
         <p className="mt-5 hidden text-sm leading-relaxed text-ink/80 sm:block shortland:hidden">{appcareConfig.body}</p>
-        <div className="mt-10 flex flex-wrap items-center gap-x-4 gap-y-3 shortland:mt-7">
-          <AnimatedButton href={`mailto:${appcareConfig.email}?subject=AppCare`} variant="primary" size="md">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 sm:mt-10 shortland:mt-3">
+          <AnimatedButton href={`mailto:${appcareConfig.email}?subject=${encodeURIComponent('Tell me when AppCare is on sale')}`} variant="primary" size="md">
             {appcareConfig.cta}
           </AnimatedButton>
-          <span className="text-sm text-mist shortland:hidden [@media(max-height:760px)]:hidden">{appcareConfig.terms}</span>
+          <span className="text-[0.8125rem] text-mist sm:text-sm">{appcareConfig.terms}</span>
         </div>
         <p className="mt-3 text-[0.8125rem] text-mist">{appcareConfig.caption}</p>
       </div>

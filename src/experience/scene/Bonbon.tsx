@@ -15,18 +15,26 @@ import { clamp01, sceneState, smoothstep } from '../sceneState';
 /** Unit-radius asset to the plate shell it replaces (r 1.58). */
 const SCALE = 1.6;
 
-// Same linear values as the Blender material library, so the two stay one family.
+// Linear values. They start from the Blender material library and are tuned on
+// screen to reference 01B, measured in context (art/blender/hero/measure_masked.py,
+// core chapter at 50%): caramel hue 21.4 / sat 0.78 / value 0.73 against
+// 21.6 / 0.76 / 0.73, core 24.2 / 0.98 / 0.72 against 24.2 / 0.98 / 0.69. The site's
+// white light panels washed both out: a full clear coat on the caramel (sat 0.71),
+// and white mirror reflections across the core (sat capped near 0.91 however dark
+// its body), so the core's reflection is weaker and amber-tinted. Emission unchanged.
 const linear = (r: number, g: number, b: number) => new Color().setRGB(r, g, b);
 
 function createMaterials() {
   return {
     Chocolate: new MeshPhysicalMaterial({ color: linear(0.045, 0.016, 0.007), roughness: 0.3, clearcoat: 0.4, clearcoatRoughness: 0.15 }),
-    Caramel: new MeshPhysicalMaterial({ color: linear(0.22, 0.045, 0.004), roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.05 }),
+    Caramel: new MeshPhysicalMaterial({ color: linear(0.22, 0.045, 0.004), roughness: 0.12, clearcoat: 0.5, clearcoatRoughness: 0.05 }),
     Amber: new MeshPhysicalMaterial({
-      color: linear(0.26, 0.055, 0),
+      color: linear(0.18, 0.02, 0),
       roughness: 0.08,
-      clearcoat: 0.6,
+      clearcoat: 0.4,
       clearcoatRoughness: 0.02,
+      specularIntensity: 0.3,
+      specularColor: linear(1, 0.45, 0.1),
       emissive: linear(1, 0.3, 0),
       emissiveIntensity: 0.12,
     }),

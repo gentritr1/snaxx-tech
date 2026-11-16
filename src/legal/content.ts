@@ -663,25 +663,26 @@ const BLOCK_DESTROY_PROFILE: LegalProfile = {
   privacyEmail: PRIVACY_EMAIL,
 };
 
-// Geo Guesser World 3D! (com.snaxxtech.geoguesser) — the outlier of the
-// catalogue: it is online-only, persists nothing at all (scores live in memory
-// for the length of a session), and requests non-personalized ads rather than
-// showing a UMP consent form. It also streams panoramas, map tiles, and its
-// mapping libraries from third parties, each of which sees the device IP.
+// Geo Guesser World 3D! (com.snaxxtech.geoguesser) — online-only. It keeps a small
+// player record on the device (read from the 1.5.0 source: best score, walkthrough
+// seen, games finished, last rating prompt), requests non-personalized ads rather
+// than showing a UMP consent form, and streams panoramas and map tiles from third
+// parties, each of which sees the device IP.
 const GEO_GUESSER_PROFILE: LegalProfile = {
-  localData: null,
+  localData:
+    "your best score, whether you have seen the walkthrough, how many games you have finished, and when the App last asked you to rate it",
   supportsPlayGames: false,
   isGame: true,
   adProvider: "admob",
   consentModel: "non-personalized",
   adPlacements:
-    "Ads appear in three places: a full-screen ad after the fifth and final round, shown before your score summary; a banner on that summary screen; and a banner inside the guess drawer. No ad interrupts you while you are exploring a panorama.",
+    "Ads appear in four places: a banner at the bottom of the home screen; a banner inside the guess drawer; a full-screen ad after the fifth and final round, shown before your score summary; and a banner on that summary screen. No ad interrupts you while you are exploring a panorama.",
   prohibitAdInterference: true,
   noBackend: true,
   noDeviceLocation: true,
   generalAudience: true,
   contentAttribution:
-    "Street-level imagery comes from Mapillary, and map tiles come from CARTO, built from data by OpenStreetMap contributors.",
+    "Street-level imagery comes from Mapillary, and map tiles come from OpenFreeMap, built from data by OpenStreetMap contributors.",
   contentServices: [
     {
       name: "Mapillary (Meta)",
@@ -691,15 +692,15 @@ const GEO_GUESSER_PROFILE: LegalProfile = {
       policyDescription: "How Mapillary handles information from apps and sites that request its imagery.",
     },
     {
-      name: "CARTO",
+      name: "OpenFreeMap",
       purpose: "Supplies the map tiles for the guessing map, built from OpenStreetMap data.",
-      policyLabel: "CARTO privacy policy",
-      policyHref: "https://carto.com/privacy/",
-      policyDescription: "How CARTO handles information when its basemap tiles are requested.",
+      policyLabel: "OpenFreeMap",
+      policyHref: "https://openfreemap.org/",
+      policyDescription: "The OpenFreeMap project, which serves the map tiles and styles the App requests.",
     },
     {
       name: "unpkg (Cloudflare)",
-      purpose: "Delivers the Leaflet and mapillary-js mapping libraries the App loads at runtime.",
+      purpose: "Delivers the MapLibre GL and mapillary-js mapping libraries the App loads at runtime.",
       policyLabel: "Cloudflare privacy policy",
       policyHref: "https://www.cloudflare.com/privacypolicy/",
       policyDescription: "How Cloudflare, which serves the unpkg CDN, handles information from requests it answers.",
